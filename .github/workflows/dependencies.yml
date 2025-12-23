@@ -57,7 +57,7 @@ jobs:
           fi
 
       - name: Upload audit results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: dependency-audit-results
           path: |
@@ -136,7 +136,7 @@ jobs:
 
       - name: Upload outdated report
         if: steps.outdated.outputs.has_outdated == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: outdated-dependencies
           path: |

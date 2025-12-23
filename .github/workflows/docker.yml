@@ -133,7 +133,7 @@ jobs:
 
       - name: Upload SBOM
         if: github.event_name != 'pull_request' && matrix.stage == 'production'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sbom-${{ matrix.stage }}
           path: ./sbom-${{ matrix.stage }}.spdx.json
