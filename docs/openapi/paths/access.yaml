@@ -29,36 +29,13 @@
             $ref: '../components/schemas/access.yaml#/CheckAccessRequest'
           examples:
             simple:
-              summary: Simple check (LIST)
-              value:
-                service: "storage"
-                resource_name: "files"
-                operation: "LIST"
+              $ref: '../examples/access_responses.json#/check_access_request_simple'
             with_project:
-              summary: With specific project
-              value:
-                service: "diagram"
-                resource_name: "diagrams"
-                operation: "CREATE"
-                context:
-                  project_id: "550e8400-e29b-41d4-a716-446655440000"
+              $ref: '../examples/access_responses.json#/check_access_request_with_project'
             with_target_company:
-              summary: With target company (hierarchy)
-              value:
-                service: "identity"
-                resource_name: "users"
-                operation: "READ"
-                context:
-                  target_company_id: "650e8400-e29b-41d4-a716-446655440000"
+              $ref: '../examples/access_responses.json#/check_access_request_with_target_company'
             with_resource:
-              summary: With specific resource
-              value:
-                service: "storage"
-                resource_name: "files"
-                operation: "DELETE"
-                context:
-                  resource_id: "750e8400-e29b-41d4-a716-446655440000"
-                  project_id: "550e8400-e29b-41d4-a716-446655440000"
+              $ref: '../examples/access_responses.json#/check_access_request_with_resource'
     responses:
       '200':
         description: Verification result (granted or denied)
@@ -68,31 +45,19 @@
               $ref: '../components/schemas/access.yaml#/CheckAccessResponse'
             examples:
               granted:
-                summary: Access granted
-                value:
-                  access_granted: true
-                  reason: "granted"
-                  message: "User has permission storage:files:DELETE"
-                  access_type: "direct"
-                  matched_role:
-                    role_id: "850e8400-e29b-41d4-a716-446655440000"
-                    role_name: "project_manager"
-                    scope_type: "direct"
-                    project_id: "550e8400-e29b-41d4-a716-446655440000"
-                  cache_hit: true
+                $ref: '../examples/access_responses.json#/check_access_response_granted'
               denied:
-                summary: Access denied
-                value:
-                  access_granted: false
-                  reason: "no_permission"
-                  message: "User does not have permission storage:files:DELETE"
-                  cache_hit: false
+                $ref: '../examples/access_responses.json#/check_access_response_denied'
       '400':
         $ref: '../components/responses/BadRequest.yaml'
       '401':
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
 
 /batch-check-access:
   post:
@@ -122,21 +87,9 @@
         application/json:
           schema:
             $ref: '../components/schemas/access.yaml#/BatchCheckAccessRequest'
-          example:
-            checks:
-              - service: "diagram"
-                resource_name: "diagrams"
-                operation: "CREATE"
-                context:
-                  project_id: "550e8400-e29b-41d4-a716-446655440000"
-              - service: "diagram"
-                resource_name: "diagrams"
-                operation: "DELETE"
-                context:
-                  project_id: "550e8400-e29b-41d4-a716-446655440000"
-              - service: "storage"
-                resource_name: "files"
-                operation: "CREATE"
+          examples:
+            default:
+              $ref: '../examples/access_responses.json#/batch_check_access_request'
     responses:
       '200':
         description: Check results
@@ -144,26 +97,69 @@
           application/json:
             schema:
               $ref: '../components/schemas/access.yaml#/BatchCheckAccessResponse'
-            example:
-              results:
-                - access_granted: true
-                  reason: "granted"
-                  message: "User has permission diagram:diagrams:CREATE"
-                  cache_hit: true
-                - access_granted: false
-                  reason: "no_permission"
-                  message: "User does not have permission diagram:diagrams:DELETE"
-                  cache_hit: true
-                - access_granted: true
-                  reason: "granted"
-                  message: "User has permission storage:files:CREATE"
-                  cache_hit: true
-              processing_time_ms: 12
+            examples:
+              default:
+                $ref: '../examples/access_responses.json#/batch_check_access_response'
       '400':
-        description: Invalid request (too many checks, > 50)
+        $ref: '../components/responses/BadRequest.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/users/{user_id}/permissions:
+  get:
+    operationId: getUserPermissions
+    summary: Get all user permissions
+    description: |
+      Lists all roles, policies, and permissions for a user.
+      Useful for debugging or profile display.
+
+      **Project Filtering**:
+      - Without project_id: company-wide permissions only
+      - With project_id: company-wide + specific project permissions
+    tags:
+      - Access Control
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: User ID
+        example: "12345678-90ab-cdef-1234-567890abcdef"
+      - name: project_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+        description: Filter by project (optional)
+        example: "550e8400-e29b-41d4-a716-446655440000"
+    responses:
+      '200':
+        description: User permissions
         content:
           application/json:
             schema:
-              $ref: '../components/schemas/Error.yaml'
+              $ref: '../components/schemas/access.yaml#/UserPermissionsResponse'
+            examples:
+              default:
+                $ref: '../examples/access_responses.json#/user_permissions_response'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
       '401':
         $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
