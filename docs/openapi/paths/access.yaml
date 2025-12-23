@@ -93,3 +93,77 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
+
+/batch-check-access:
+  post:
+    operationId: batchCheckAccess
+    summary: Check multiple accesses in batch
+    description: |
+      Checks up to 50 accesses simultaneously (UI optimization).
+      Typically used to show/hide action buttons.
+
+      **UI Example**:
+      ```javascript
+      const checks = [
+        {service: "diagram", resource_name: "diagrams", operation: "CREATE"},
+        {service: "diagram", resource_name: "diagrams", operation: "DELETE"},
+        {service: "storage", resource_name: "files", operation: "UPLOAD"}
+      ];
+      const results = await guardianClient.batchCheckAccess(checks);
+      // Show/hide buttons based on results
+      ```
+    tags:
+      - Access Control
+    security:
+      - JWTAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/access.yaml#/BatchCheckAccessRequest'
+          example:
+            checks:
+              - service: "diagram"
+                resource_name: "diagrams"
+                operation: "CREATE"
+                context:
+                  project_id: "550e8400-e29b-41d4-a716-446655440000"
+              - service: "diagram"
+                resource_name: "diagrams"
+                operation: "DELETE"
+                context:
+                  project_id: "550e8400-e29b-41d4-a716-446655440000"
+              - service: "storage"
+                resource_name: "files"
+                operation: "CREATE"
+    responses:
+      '200':
+        description: Check results
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/access.yaml#/BatchCheckAccessResponse'
+            example:
+              results:
+                - access_granted: true
+                  reason: "granted"
+                  message: "User has permission diagram:diagrams:CREATE"
+                  cache_hit: true
+                - access_granted: false
+                  reason: "no_permission"
+                  message: "User does not have permission diagram:diagrams:DELETE"
+                  cache_hit: true
+                - access_granted: true
+                  reason: "granted"
+                  message: "User has permission storage:files:CREATE"
+                  cache_hit: true
+              processing_time_ms: 12
+      '400':
+        description: Invalid request (too many checks, > 50)
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/Error.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'

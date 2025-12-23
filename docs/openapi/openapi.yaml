@@ -49,6 +49,8 @@ paths:
   # Access Control endpoints
   /check-access:
     $ref: './paths/access.yaml#/~1check-access'
+  /batch-check-access:
+    $ref: './paths/access.yaml#/~1batch-check-access'
 
   # Dummy CRUD endpoints
   /dummies:
