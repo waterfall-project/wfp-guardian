@@ -11,4 +11,4 @@
 This module defines the service name used throughout the application.
 """
 
-SERVICE_NAME = "template"
+SERVICE_NAME = "guardian"

@@ -18,6 +18,7 @@ from app.resources.version import (
     _read_commit,
     _read_version,
 )
+from app.service import SERVICE_NAME
 
 
 class TestVersionEndpoint:
@@ -53,7 +54,7 @@ class TestVersionEndpoint:
         response = authenticated_client.get(api_url("version"))
         data = response.get_json()
 
-        assert data["service"] == "template"
+        assert data["service"] == SERVICE_NAME
 
     def test_version_endpoint_python_version_format(
         self, authenticated_client, api_url
