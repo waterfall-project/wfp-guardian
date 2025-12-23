@@ -1,0 +1,33 @@
+{
+  "bootstrap_request": {
+    "value": {
+      "company_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "user_id": "f1e2d3c4-b5a6-9807-dcba-fe0987654321"
+    }
+  },
+  "bootstrap_response": {
+    "value": {
+      "success": true,
+      "company_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "user_id": "f1e2d3c4-b5a6-9807-dcba-fe0987654321",
+      "roles_created": 4,
+      "policies_created": 4,
+      "permissions_assigned": 47,
+      "message": "Guardian RBAC initialized successfully for first company"
+    }
+  },
+  "init_roles_response": {
+    "value": {
+      "success": true,
+      "company_id": "b2c3d4e5-f6a7-8901-bcde-f23456789012",
+      "roles_created": 4,
+      "policies_created": 4,
+      "roles": [
+        "company_admin",
+        "project_manager",
+        "member",
+        "viewer"
+      ]
+    }
+  }
+}

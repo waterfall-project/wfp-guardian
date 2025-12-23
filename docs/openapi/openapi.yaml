@@ -90,6 +90,22 @@ paths:
   /roles/{role_id}/users:
     $ref: './paths/user_roles.yaml#/~1roles~1{role_id}~1users'
 
+  # Audit endpoints
+  /access-logs:
+    $ref: './paths/audit.yaml#/~1access-logs'
+  /access-logs/{log_id}:
+    $ref: './paths/audit.yaml#/~1access-logs~1{log_id}'
+  /access-logs/statistics:
+    $ref: './paths/audit.yaml#/~1access-logs~1statistics'
+  /access-logs/export:
+    $ref: './paths/audit.yaml#/~1access-logs~1export'
+
+  # Bootstrap endpoints
+  /bootstrap:
+    $ref: './paths/bootstrap.yaml#/~1bootstrap'
+  /companies/{company_id}/init-roles:
+    $ref: './paths/bootstrap.yaml#/~1companies~1{company_id}~1init-roles'
+
   # Dummy CRUD endpoints
   /dummies:
     $ref: './paths/dummies.yaml#/~1dummies'

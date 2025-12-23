@@ -1,0 +1,245 @@
+AccessLog:
+  type: object
+  required:
+    - id
+    - user_id
+    - company_id
+    - service
+    - resource_name
+    - operation
+    - access_granted
+    - created_at
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    user_id:
+      type: string
+      format: uuid
+      description: Utilisateur ayant effectué la requête
+      example: "12345678-90ab-cdef-1234-567890abcdef"
+    company_id:
+      type: string
+      format: uuid
+      description: Company de l'utilisateur
+      example: "98765432-10ab-cdef-1234-567890abcdef"
+    project_id:
+      type: string
+      format: uuid
+      nullable: true
+      description: Projet du contexte (si applicable)
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    service:
+      type: string
+      description: Service demandeur
+      example: "storage"
+    resource_name:
+      type: string
+      description: Type de ressource
+      example: "files"
+    resource_id:
+      type: string
+      nullable: true
+      description: ID de la ressource spécifique (si applicable)
+      example: "file-12345-uuid"
+    operation:
+      type: string
+      description: Opération demandée
+      example: "DELETE"
+      enum:
+        - LIST
+        - CREATE
+        - READ
+        - UPDATE
+        - DELETE
+        - APPROVE
+        - EXPORT
+        - IMPORT
+    access_granted:
+      type: boolean
+      description: Accès accordé (true) ou refusé (false)
+      example: true
+    reason:
+      type: string
+      nullable: true
+      description: Raison du résultat (surtout si refus)
+      example: "no_permission"
+      enum:
+        - permission_granted
+        - no_permission
+        - user_not_found
+        - role_not_found
+        - resource_not_found
+        - insufficient_privileges
+        - access_denied
+    ip_address:
+      type: string
+      nullable: true
+      description: Adresse IP de la requête
+      example: "192.168.1.100"
+    user_agent:
+      type: string
+      nullable: true
+      description: User-Agent de la requête
+      example: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
+    context:
+      type: object
+      nullable: true
+      description: Contexte supplémentaire de la requête
+      example:
+        target_company_id: "child-company-uuid"
+        file_size: 2048576
+    created_at:
+      type: string
+      format: date-time
+      description: Date/heure de la tentative d'accès
+      example: "2025-01-20T14:35:22Z"
+
+AccessLogFilter:
+  type: object
+  properties:
+    user_id:
+      type: string
+      format: uuid
+      description: Filtrer par utilisateur
+      example: "12345678-90ab-cdef-1234-567890abcdef"
+    company_id:
+      type: string
+      format: uuid
+      description: Filtrer par company
+      example: "98765432-10ab-cdef-1234-567890abcdef"
+    project_id:
+      type: string
+      format: uuid
+      description: Filtrer par projet
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    service:
+      type: string
+      description: Filtrer par service
+      example: "storage"
+    resource_name:
+      type: string
+      description: Filtrer par type de ressource
+      example: "files"
+    operation:
+      type: string
+      description: Filtrer par opération
+      example: "DELETE"
+      enum:
+        - LIST
+        - CREATE
+        - READ
+        - UPDATE
+        - DELETE
+        - APPROVE
+        - EXPORT
+        - IMPORT
+    access_granted:
+      type: boolean
+      description: |
+        Filtrer par résultat:
+        - true = accès accordés uniquement
+        - false = refus uniquement
+        - null/absent = tous
+      example: false
+    from_date:
+      type: string
+      format: date-time
+      description: Date de début
+      example: "2025-01-01T00:00:00Z"
+    to_date:
+      type: string
+      format: date-time
+      description: Date de fin
+      example: "2025-01-31T23:59:59Z"
+    page:
+      type: integer
+      minimum: 1
+      default: 1
+      description: Numéro de page
+      example: 1
+    page_size:
+      type: integer
+      minimum: 1
+      maximum: 100
+      default: 50
+      description: Nombre d'éléments par page
+      example: 50
+
+AuditStatistics:
+  type: object
+  description: Statistiques d'audit agrégées
+  properties:
+    total_requests:
+      type: integer
+      description: Nombre total de requêtes
+      example: 15234
+    granted_requests:
+      type: integer
+      description: Nombre d'accès accordés
+      example: 14890
+    denied_requests:
+      type: integer
+      description: Nombre d'accès refusés
+      example: 344
+    success_rate:
+      type: number
+      format: float
+      description: Taux de succès (%)
+      example: 97.74
+    by_service:
+      type: array
+      description: Agrégation par service
+      items:
+        type: object
+        properties:
+          service:
+            type: string
+            example: "storage"
+          count:
+            type: integer
+            example: 8523
+          granted:
+            type: integer
+            example: 8401
+          denied:
+            type: integer
+            example: 122
+    by_operation:
+      type: array
+      description: Agrégation par opération
+      items:
+        type: object
+        properties:
+          operation:
+            type: string
+            example: "READ"
+          count:
+            type: integer
+            example: 9234
+          granted:
+            type: integer
+            example: 9190
+          denied:
+            type: integer
+            example: 44
+    top_users:
+      type: array
+      description: Top 10 utilisateurs par nombre de requêtes
+      items:
+        type: object
+        properties:
+          user_id:
+            type: string
+            format: uuid
+            example: "12345678-90ab-cdef-1234-567890abcdef"
+          count:
+            type: integer
+            example: 456
+          granted:
+            type: integer
+            example: 450
+          denied:
+            type: integer
+            example: 6
