@@ -267,5 +267,7 @@
                 # HELP flask_exporter_info Information about the Prometheus Flask exporter
                 # TYPE flask_exporter_info gauge
                 flask_exporter_info{version="0.23.2"} 1.0
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'

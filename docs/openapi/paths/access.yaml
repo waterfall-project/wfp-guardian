@@ -1,0 +1,87 @@
+/check-access:
+  post:
+    operationId: checkAccess
+    summary: Vérifier l'accès d'un utilisateur
+    description: |
+      Endpoint le plus critique du système (appelé des milliers de fois/jour).
+      Vérifie si un utilisateur a la permission d'effectuer une opération sur une ressource.
+
+      **Performance**:
+      - Cache hit: < 5ms
+      - Cache miss: < 30ms
+      - TTL: 5 minutes (permissions), 1 heure (hiérarchie)
+
+      **Utilisation par décorateur**:
+      ```python
+      @check_access("storage", "files", "DELETE", context_builder=lambda file_id: {"resource_id": file_id})
+      async def delete_file(file_id: str):
+          # Code métier si accès accordé
+      ```
+    tags:
+      - Access Control
+    security:
+      - JWTAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/access.yaml#/CheckAccessRequest'
+          examples:
+            simple:
+              summary: Vérification simple (LIST)
+              value:
+                service: "storage"
+                resource_name: "files"
+                operation: "LIST"
+            with_project:
+              summary: Avec projet spécifique
+              value:
+                service: "diagram"
+                resource_name: "diagrams"
+                operation: "CREATE"
+                context:
+                  project_id: "proj-12345678-90ab-cdef-1234-567890abcdef"
+            with_target_company:
+              summary: Avec company cible (hiérarchie)
+              value:
+                service: "identity"
+                resource_name: "users"
+                operation: "READ"
+                context:
+                  target_company_id: "98765432-10ab-cdef-9999-567890abcdef"
+            with_resource:
+              summary: Avec ressource spécifique
+              value:
+                service: "storage"
+                resource_name: "files"
+                operation: "DELETE"
+                context:
+                  resource_id: "file-12345678-90ab-cdef-1234-567890abcdef"
+                  project_id: "proj-12345678-90ab-cdef-1234-567890abcdef"
+    responses:
+      '200':
+        description: Résultat de la vérification (accordé ou refusé)
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/access.yaml#/CheckAccessResponse'
+            examples:
+              granted:
+                summary: Accès accordé
+                value:
+                  access_granted: true
+                  reason: "permission_granted"
+                  cache_hit: true
+              denied:
+                summary: Accès refusé
+                value:
+                  access_granted: false
+                  reason: "no_permission"
+                  cache_hit: false
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'

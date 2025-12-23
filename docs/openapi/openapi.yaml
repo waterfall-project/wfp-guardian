@@ -46,6 +46,10 @@ paths:
   /metrics:
     $ref: './paths/system.yaml#/~1metrics'
 
+  # Access Control endpoints
+  /check-access:
+    $ref: './paths/access.yaml#/~1check-access'
+
   # Dummy CRUD endpoints
   /dummies:
     $ref: './paths/dummies.yaml#/~1dummies'

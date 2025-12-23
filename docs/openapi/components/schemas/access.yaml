@@ -1,0 +1,45 @@
+CheckAccessRequest:
+  type: object
+  required:
+    - service
+    - resource_name
+    - operation
+  properties:
+    service:
+      type: string
+      description: Service identifier (e.g., 'storage', 'identity')
+      example: storage
+    resource_name:
+      type: string
+      description: Resource type identifier
+      example: files
+    operation:
+      type: string
+      description: Operation to perform
+      enum: [CREATE, READ, UPDATE, DELETE, LIST]
+      example: READ
+    context:
+      type: object
+      description: Additional context for ABAC/RBAC checks
+      additionalProperties: true
+      example:
+        project_id: "proj-123"
+        resource_id: "file-456"
+
+CheckAccessResponse:
+  type: object
+  required:
+    - access_granted
+  properties:
+    access_granted:
+      type: boolean
+      description: Whether the access is granted
+      example: true
+    reason:
+      type: string
+      description: Explanation if access is denied
+      example: "User does not have READ permission on resource files"
+    cache_hit:
+      type: boolean
+      description: Whether the result came from cache
+      example: true

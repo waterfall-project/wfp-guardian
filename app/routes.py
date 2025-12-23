@@ -16,6 +16,7 @@ from pathlib import Path
 
 from flask_restful import Api
 
+from app.resources.check_access import CheckAccessResource
 from app.resources.config import ConfigResource
 from app.resources.dummy_res import DummyListResource, DummyResource
 from app.resources.health import HealthResource
@@ -68,5 +69,8 @@ def register_routes(app):
     # Dummy CRUD endpoints
     api.add_resource(DummyListResource, f"/{api_version}/dummies")
     api.add_resource(DummyResource, f"/{api_version}/dummies/<string:dummy_id>")
+
+    # Access Control endpoint
+    api.add_resource(CheckAccessResource, f"/{api_version}/check-access")
 
     logger.info("Routes registered successfully.")

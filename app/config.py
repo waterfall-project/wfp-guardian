@@ -58,7 +58,6 @@ from app.utils.constants import (
     ERROR_DATABASE_CONFIG_INCOMPLETE,
     ERROR_DATABASE_TYPE_INVALID,
     ERROR_DATABASE_URL_NOT_SET,
-    ERROR_GUARDIAN_URL_REQUIRED,
     ERROR_IDENTITY_URL_REQUIRED,
     ERROR_JWT_ALGORITHM_NOT_SET,
     ERROR_JWT_SECRET_NOT_SET,
@@ -92,7 +91,6 @@ class Config:
     JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM")
 
     # External Services Configuration
-    GUARDIAN_SERVICE_URL = os.environ.get("GUARDIAN_SERVICE_URL")
     IDENTITY_SERVICE_URL = os.environ.get("IDENTITY_SERVICE_URL")
     EXTERNAL_SERVICES_TIMEOUT = float(
         os.environ.get("EXTERNAL_SERVICES_TIMEOUT", DEFAULT_EXTERNAL_SERVICES_TIMEOUT)
@@ -224,10 +222,6 @@ class Config:
         if env_use_identity is not None:
             cls.USE_IDENTITY_SERVICE = env_use_identity.lower() in BOOLEAN_TRUE_VALUES  # type: ignore[attr-defined]
 
-        env_use_guardian = os.environ.get("USE_GUARDIAN_SERVICE")
-        if env_use_guardian is not None:
-            cls.USE_GUARDIAN_SERVICE = env_use_guardian.lower() in BOOLEAN_TRUE_VALUES  # type: ignore[attr-defined]
-
     @classmethod
     def _validate_database_type(cls):
         """Validate DATABASE_TYPE configuration."""
@@ -297,10 +291,6 @@ class Config:
         if cls.USE_IDENTITY_SERVICE and not cls.IDENTITY_SERVICE_URL:  # type: ignore[attr-defined]
             raise ValueError(ERROR_IDENTITY_URL_REQUIRED)
 
-        # Validate GUARDIAN_SERVICE_URL if Guardian is enabled
-        if cls.USE_GUARDIAN_SERVICE and not cls.GUARDIAN_SERVICE_URL:  # type: ignore[attr-defined]
-            raise ValueError(ERROR_GUARDIAN_URL_REQUIRED)
-
     @classmethod
     def _validate_redis(cls):
         """Validate Redis configuration."""
@@ -329,7 +319,6 @@ class Config:
         logger.debug(
             f"Validating {cls.__name__}: "
             f"USE_IDENTITY_SERVICE={cls.USE_IDENTITY_SERVICE}, "  # type: ignore[attr-defined]
-            f"USE_GUARDIAN_SERVICE={cls.USE_GUARDIAN_SERVICE}, "  # type: ignore[attr-defined]
             f"USE_REDIS_CACHE={cls.USE_REDIS_CACHE}, "
             f"CORS_ENABLED={cls.CORS_ENABLED}, "
             f"RATE_LIMIT_ENABLED={cls.RATE_LIMIT_ENABLED}, "
@@ -433,7 +422,6 @@ class DevelopmentConfig(Config):
 
     # External services disabled by default in development
     USE_IDENTITY_SERVICE = False
-    USE_GUARDIAN_SERVICE = False
 
     DEBUG = True
     LOG_LEVEL = "DEBUG"
@@ -445,7 +433,6 @@ class TestingConfig(Config):
 
     # External services disabled by default in testing
     USE_IDENTITY_SERVICE = False
-    USE_GUARDIAN_SERVICE = False
 
     # Rate limiting disabled in testing to avoid interference with tests
     RATE_LIMIT_ENABLED = False
@@ -460,7 +447,6 @@ class IntegrationConfig(Config):
 
     # External services enabled in integration testing
     USE_IDENTITY_SERVICE = True
-    USE_GUARDIAN_SERVICE = True
 
     # Rate limiting disabled in integration tests
     RATE_LIMIT_ENABLED = False
@@ -475,7 +461,6 @@ class StagingConfig(Config):
 
     # External services enabled by default in staging
     USE_IDENTITY_SERVICE = True
-    USE_GUARDIAN_SERVICE = True
     REQUIRES_DATABASE_URL = True
 
     DEBUG = True
@@ -487,7 +472,6 @@ class ProductionConfig(Config):
 
     # External services enabled by default in production
     USE_IDENTITY_SERVICE = True
-    USE_GUARDIAN_SERVICE = True
     REQUIRES_DATABASE_URL = True
 
     DEBUG = False
