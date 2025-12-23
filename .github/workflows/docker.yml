@@ -57,7 +57,7 @@ jobs:
             type=sha,prefix={{branch}}-
 
       - name: Build Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           target: ${{ matrix.stage }}
@@ -110,7 +110,7 @@ jobs:
 
       - name: Build and push Docker image
         if: github.event_name != 'pull_request'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           target: ${{ matrix.stage }}
@@ -213,7 +213,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build production image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           target: production
