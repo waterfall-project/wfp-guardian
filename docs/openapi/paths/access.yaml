@@ -1,21 +1,21 @@
 /check-access:
   post:
     operationId: checkAccess
-    summary: Vérifier l'accès d'un utilisateur
+    summary: Check user access
     description: |
-      Endpoint le plus critique du système (appelé des milliers de fois/jour).
-      Vérifie si un utilisateur a la permission d'effectuer une opération sur une ressource.
+      Most critical endpoint of the system (called thousands of times/day).
+      Checks if a user has permission to perform an operation on a resource.
 
       **Performance**:
       - Cache hit: < 5ms
       - Cache miss: < 30ms
-      - TTL: 5 minutes (permissions), 1 heure (hiérarchie)
+      - TTL: 5 minutes (permissions), 1 hour (hierarchy)
 
-      **Utilisation par décorateur**:
+      **Decorator Usage**:
       ```python
       @check_access("storage", "files", "DELETE", context_builder=lambda file_id: {"resource_id": file_id})
       async def delete_file(file_id: str):
-          # Code métier si accès accordé
+          # Business logic if access granted
       ```
     tags:
       - Access Control
@@ -29,55 +29,63 @@
             $ref: '../components/schemas/access.yaml#/CheckAccessRequest'
           examples:
             simple:
-              summary: Vérification simple (LIST)
+              summary: Simple check (LIST)
               value:
                 service: "storage"
                 resource_name: "files"
                 operation: "LIST"
             with_project:
-              summary: Avec projet spécifique
+              summary: With specific project
               value:
                 service: "diagram"
                 resource_name: "diagrams"
                 operation: "CREATE"
                 context:
-                  project_id: "proj-12345678-90ab-cdef-1234-567890abcdef"
+                  project_id: "550e8400-e29b-41d4-a716-446655440000"
             with_target_company:
-              summary: Avec company cible (hiérarchie)
+              summary: With target company (hierarchy)
               value:
                 service: "identity"
                 resource_name: "users"
                 operation: "READ"
                 context:
-                  target_company_id: "98765432-10ab-cdef-9999-567890abcdef"
+                  target_company_id: "650e8400-e29b-41d4-a716-446655440000"
             with_resource:
-              summary: Avec ressource spécifique
+              summary: With specific resource
               value:
                 service: "storage"
                 resource_name: "files"
                 operation: "DELETE"
                 context:
-                  resource_id: "file-12345678-90ab-cdef-1234-567890abcdef"
-                  project_id: "proj-12345678-90ab-cdef-1234-567890abcdef"
+                  resource_id: "750e8400-e29b-41d4-a716-446655440000"
+                  project_id: "550e8400-e29b-41d4-a716-446655440000"
     responses:
       '200':
-        description: Résultat de la vérification (accordé ou refusé)
+        description: Verification result (granted or denied)
         content:
           application/json:
             schema:
               $ref: '../components/schemas/access.yaml#/CheckAccessResponse'
             examples:
               granted:
-                summary: Accès accordé
+                summary: Access granted
                 value:
                   access_granted: true
-                  reason: "permission_granted"
+                  reason: "granted"
+                  message: "User has permission storage:files:DELETE"
+                  access_type: "direct"
+                  matched_role:
+                    role_id: "850e8400-e29b-41d4-a716-446655440000"
+                    role_name: "project_manager"
+                    scope_type: "direct"
+                    project_id: "550e8400-e29b-41d4-a716-446655440000"
                   cache_hit: true
               denied:
-                summary: Accès refusé
+                summary: Access denied
                 value:
                   access_granted: false
                   reason: "no_permission"
+                  message: "User does not have permission storage:files:DELETE"
                   cache_hit: false
       '400':
         $ref: '../components/responses/BadRequest.yaml'
