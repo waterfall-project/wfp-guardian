@@ -1,0 +1,21 @@
+description: Conflict - Resource already exists or integrity constraint violation
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Integrity constraint violation
+        error:
+          type: string
+          description: Detailed error message from database
+    examples:
+      duplicate_key:
+        value:
+          message: Integrity constraint violation
+          error: duplicate key value violates unique constraint
+      foreign_key:
+        value:
+          message: Integrity constraint violation
+          error: violates foreign key constraint

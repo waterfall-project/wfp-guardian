@@ -1,0 +1,24 @@
+# Prometheus Configuration for Docker Compose Stack
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          app: 'prometheus'
+
+  # Flask application metrics
+  - job_name: 'wfp-flask-template'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/v0/metrics'
+    static_configs:
+      - targets: ['flask-app:5000']
+        labels:
+          environment: 'development'
+          app: 'wfp-flask-template'

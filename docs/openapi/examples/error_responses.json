@@ -1,0 +1,95 @@
+{
+  "bad_request": {
+    "summary": "Bad request - Invalid parameters",
+    "value": {
+      "message": "Bad request",
+      "path": "/v0/dummies",
+      "method": "GET",
+      "request_id": "req-abc123xyz"
+    }
+  },
+  "unauthorized": {
+    "summary": "Unauthorized - Missing or invalid token",
+    "value": {
+      "message": "Unauthorized",
+      "path": "/v0/version",
+      "method": "GET",
+      "request_id": "req-abc123xyz"
+    }
+  },
+  "forbidden": {
+    "summary": "Forbidden - Insufficient permissions",
+    "value": {
+      "message": "Forbidden",
+      "path": "/v0/configuration",
+      "method": "GET",
+      "request_id": "req-abc123xyz"
+    }
+  },
+  "not_found": {
+    "summary": "Not found - Resource does not exist",
+    "value": {
+      "message": "Resource not found",
+      "path": "/v0/dummies/123e4567-e89b-12d3-a456-426614174000",
+      "method": "GET",
+      "request_id": "req-abc123xyz"
+    }
+  },
+  "conflict": {
+    "summary": "Conflict - Integrity constraint violation",
+    "value": {
+      "message": "Conflict",
+      "path": "/v0/dummies",
+      "method": "POST",
+      "request_id": "req-abc123xyz"
+    }
+  },
+  "unsupported_media_type": {
+    "summary": "Unsupported media type",
+    "value": {
+      "message": "Unsupported media type",
+      "path": "/v0/dummies",
+      "method": "POST",
+      "request_id": "req-abc123xyz",
+      "exception": "Content-Type must be application/json"
+    }
+  },
+  "unprocessable_entity": {
+    "summary": "Unprocessable entity - Validation error",
+    "value": {
+      "message": "Unprocessable entity",
+      "path": "/v0/dummies",
+      "method": "POST",
+      "request_id": "req-abc123xyz"
+    }
+  },
+  "rate_limited": {
+    "summary": "Too many requests - Rate limit exceeded",
+    "value": {
+      "message": "Too Many Requests",
+      "path": "/v0/health",
+      "method": "GET",
+      "request_id": "req-abc123xyz"
+    }
+  },
+  "internal_server_error": {
+    "summary": "Internal server error",
+    "value": {
+      "message": "Internal server error",
+      "path": "/v0/dummies",
+      "method": "POST",
+      "request_id": "req-abc123xyz"
+    }
+  },
+  "service_unavailable": {
+    "summary": "Service unavailable - Not ready",
+    "value": {
+      "status": "not_ready",
+      "checks": {
+        "database": "error",
+        "redis": "ok"
+      },
+      "timestamp": "2025-12-22T10:30:00Z"
+    }
+  }
+}

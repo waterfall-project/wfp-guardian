@@ -1,0 +1,41 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+    description: Unique identifier for the dummy
+    readOnly: true
+    example: 123e4567-e89b-12d3-a456-426614174000
+  name:
+    type: string
+    maxLength: 50
+    description: Name of the dummy
+    example: Example Dummy
+  description:
+    type: string
+    maxLength: 200
+    nullable: true
+    description: Optional description of the dummy
+    example: This is an example dummy for testing
+  extra_metadata:
+    type: object
+    nullable: true
+    description: Optional JSON metadata for flexible data storage
+    additionalProperties: true
+    example:
+      category: test
+      priority: high
+  created_at:
+    type: string
+    format: date-time
+    description: Timestamp when the dummy was created
+    readOnly: true
+    example: 2025-12-22T10:30:00Z
+  updated_at:
+    type: string
+    format: date-time
+    description: Timestamp when the dummy was last updated
+    readOnly: true
+    example: 2025-12-22T10:35:00Z
+required:
+  - name

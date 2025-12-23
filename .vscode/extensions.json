@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "charliermarsh.ruff",
+        "matangover.mypy",
+        "editorconfig.editorconfig",
+        "ms-python.vscode-pylance"
+    ]
+}

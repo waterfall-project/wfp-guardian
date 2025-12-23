@@ -1,0 +1,22 @@
+description: Internal server error
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/Error.yaml'
+    examples:
+      database_error:
+        value:
+          error: database_error
+          message: Database connection failed
+      redis_error:
+        value:
+          error: redis_error
+          message: Redis cache unavailable
+      identity_service_error:
+        value:
+          error: identity_service_error
+          message: Identity service unavailable
+      internal_error:
+        value:
+          error: internal_error
+          message: An unexpected error occurred

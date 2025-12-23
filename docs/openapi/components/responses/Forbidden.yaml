@@ -1,0 +1,9 @@
+description: Access denied - Insufficient permissions
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Forbidden - Insufficient permissions

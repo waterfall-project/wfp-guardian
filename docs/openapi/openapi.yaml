@@ -1,0 +1,72 @@
+openapi: 3.0.3
+info:
+  title: Template Service API
+  version: 0.0.1
+  description: |
+    **Waterfall Template API** - Service template for Waterfall.
+
+    RESTful service for ...
+
+    **Integrations**:
+    - Identity: User management
+    - Redis: Distributed cache
+    - Guardian: RBAC authorization
+
+  contact:
+    name: Waterfall Team
+    email: contact@waterfall-project.pro
+  license:
+    name: AGPL-3.0 + Proprietary
+    url: https://www.gnu.org/licenses/agpl-3.0.html
+
+servers:
+  - url: http://localhost:8000/v0
+    description: Local development server
+  - url: http://template:8000/v0
+    description: Docker Compose
+  - url: https://template.waterfall.example.com/v0
+    description: Production
+
+tags:
+  - name: System
+    description: Health checks, monitoring, configuration
+  - name: Dummies
+    description: CRUD operations for dummy entities (example/template)
+
+paths:
+  # System endpoints
+  /health:
+    $ref: './paths/system.yaml#/~1health'
+  /ready:
+    $ref: './paths/system.yaml#/~1ready'
+  /version:
+    $ref: './paths/system.yaml#/~1version'
+  /configuration:
+    $ref: './paths/system.yaml#/~1configuration'
+  /metrics:
+    $ref: './paths/system.yaml#/~1metrics'
+
+  # Dummy CRUD endpoints
+  /dummies:
+    $ref: './paths/dummies.yaml#/~1dummies'
+  /dummies/{dummyId}:
+    $ref: './paths/dummies.yaml#/~1dummies~1{dummyId}'
+
+components:
+  securitySchemes:
+    JWTAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token passed via HTTP-only cookies containing company_id and user_id
+
+        **JWT Claims**:
+        - `user_id` (UUID): Unique user identifier
+        - `company_id` (UUID): Company identifier (multi-tenant)
+        - `email` (string): User email
+        - `exp` (timestamp): Token expiration date
+        - `iat` (timestamp): Token issued at date
+
+security:
+  - JWTAuth: []

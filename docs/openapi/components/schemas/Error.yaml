@@ -1,0 +1,20 @@
+type: object
+properties:
+  error:
+    type: string
+    description: Code d'erreur machine-readable
+    example: invalid_credentials
+  message:
+    type: string
+    description: Message d'erreur human-readable
+    example: Invalid email or password
+  details:
+    type: object
+    description: Détails supplémentaires (optionnel)
+    additionalProperties: true
+    example:
+      field: email
+      reason: format_invalid
+required:
+  - error
+  - message

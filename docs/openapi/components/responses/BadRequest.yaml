@@ -1,0 +1,9 @@
+description: Bad request - Invalid input or missing required parameters
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Bad request

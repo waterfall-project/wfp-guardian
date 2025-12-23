@@ -1,0 +1,22 @@
+description: Unauthorized - Invalid, expired, or blacklisted token
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/Error.yaml'
+    examples:
+      invalid_token:
+        value:
+          error: invalid_token
+          message: JWT token is invalid or malformed
+      expired_token:
+        value:
+          error: expired_token
+          message: JWT token has expired
+      blacklisted_token:
+        value:
+          error: blacklisted_token
+          message: Token has been revoked
+      invalid_credentials:
+        value:
+          error: invalid_credentials
+          message: Invalid email or password

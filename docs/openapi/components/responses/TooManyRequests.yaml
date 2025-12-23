@@ -1,0 +1,29 @@
+description: Too many requests - Rate limit exceeded
+headers:
+  X-RateLimit-Limit:
+    description: Number of allowed requests per window
+    schema:
+      type: integer
+      example: 100
+  X-RateLimit-Remaining:
+    description: Number of remaining requests
+    schema:
+      type: integer
+      example: 0
+  X-RateLimit-Reset:
+    description: Window reset timestamp
+    schema:
+      type: integer
+      example: 1702201860
+  Retry-After:
+    description: Number of seconds before retry
+    schema:
+      type: integer
+      example: 42
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/Error.yaml'
+    example:
+      error: rate_limit_exceeded
+      message: Too many requests. Please try again in 42 seconds.

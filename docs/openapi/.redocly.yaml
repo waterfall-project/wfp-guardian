@@ -1,0 +1,13 @@
+apis:
+  template@v0:
+    root: openapi.yaml
+
+lint:
+  extends:
+    - recommended
+  rules:
+    no-server-example.com: off
+    no-server-variables-empty-enum: warn
+
+  decorators:
+    remove-unused-components: on

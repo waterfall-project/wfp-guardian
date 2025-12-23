@@ -1,0 +1,25 @@
+description: Unprocessable Entity - Validation error
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Validation error
+        errors:
+          type: object
+          description: Field-specific validation errors
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    examples:
+      validation_error:
+        value:
+          message: Validation error
+          errors:
+            name:
+              - Field is required
+            description:
+              - String must be at most 200 characters
