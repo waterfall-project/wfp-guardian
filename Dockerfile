@@ -1,7 +1,7 @@
 ###############################
 # Builder stage (compile deps) #
 ###############################
-FROM python:3.13.7-slim AS builder
+FROM python:3.14.2-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -90,7 +90,7 @@ CMD ["pytest"]
 ###############################
 # Production runtime          #
 ###############################
-FROM python:3.13.7-slim AS production
+FROM python:3.14.2-slim AS production
 
 # Build arguments for metadata
 ARG BUILD_COMMIT=unknown
