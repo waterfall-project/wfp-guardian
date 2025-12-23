@@ -1,0 +1,121 @@
+UserRole:
+  type: object
+  required:
+    - id
+    - user_id
+    - role_id
+    - company_id
+    - is_active
+    - granted_at
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    user_id:
+      type: string
+      format: uuid
+      description: User ID
+      example: "12345678-90ab-cdef-1234-567890abcdef"
+    role_id:
+      type: string
+      format: uuid
+      description: Assigned Role ID
+      example: "850e8400-e29b-41d4-a716-446655440000"
+    company_id:
+      type: string
+      format: uuid
+      description: Company Scope
+      example: "650e8400-e29b-41d4-a716-446655440000"
+    project_id:
+      type: string
+      format: uuid
+      nullable: true
+      description: |
+        Project Scope (if applicable).
+        - NULL = company-wide (all projects)
+        - UUID = specific project only
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    scope_type:
+      type: string
+      enum: [direct, hierarchical]
+      description: |
+        Company scope type:
+        - direct: Access only exact company_id
+        - hierarchical: Access company_id + children (via parent_id)
+      example: "direct"
+    granted_by:
+      type: string
+      format: uuid
+      nullable: true
+      description: User who granted the role
+      example: "12345678-90ab-cdef-1234-567890abcdef"
+    granted_at:
+      type: string
+      format: date-time
+      description: Grant date
+      example: "2025-01-15T10:30:00Z"
+    expires_at:
+      type: string
+      format: date-time
+      nullable: true
+      description: Expiration date (optional)
+      example: "2025-12-31T23:59:59Z"
+    is_active:
+      type: boolean
+      default: true
+      example: true
+
+UserRoleCreate:
+  type: object
+  required:
+    - user_id
+    - role_id
+    - scope_type
+  properties:
+    user_id:
+      type: string
+      format: uuid
+      example: "12345678-90ab-cdef-1234-567890abcdef"
+    role_id:
+      type: string
+      format: uuid
+      example: "850e8400-e29b-41d4-a716-446655440000"
+    project_id:
+      type: string
+      format: uuid
+      nullable: true
+      description: Project (NULL = company-wide)
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    scope_type:
+      type: string
+      enum: [direct, hierarchical]
+      default: direct
+      example: "direct"
+    expires_at:
+      type: string
+      format: date-time
+      nullable: true
+      description: Expiration (optional)
+      example: "2025-12-31T23:59:59Z"
+
+UserRoleUpdate:
+  type: object
+  properties:
+    project_id:
+      type: string
+      format: uuid
+      nullable: true
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    scope_type:
+      type: string
+      enum: [direct, hierarchical]
+      example: "hierarchical"
+    expires_at:
+      type: string
+      format: date-time
+      nullable: true
+      example: "2026-01-31T23:59:59Z"
+    is_active:
+      type: boolean
+      example: true

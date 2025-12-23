@@ -8,14 +8,26 @@ content:
         value:
           error: invalid_token
           message: JWT token is invalid or malformed
+          details:
+            path: "/v0/resource"
+            method: "GET"
+            request_id: "req-abc123xyz"
       expired_token:
         value:
           error: expired_token
           message: JWT token has expired
+          details:
+            path: "/v0/resource"
+            method: "GET"
+            request_id: "req-abc123xyz"
       blacklisted_token:
         value:
           error: blacklisted_token
           message: Token has been revoked
+          details:
+            path: "/v0/resource"
+            method: "GET"
+            request_id: "req-abc123xyz"
       invalid_credentials:
         value:
           error: invalid_credentials

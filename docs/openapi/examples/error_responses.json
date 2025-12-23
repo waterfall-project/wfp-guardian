@@ -2,94 +2,105 @@
   "bad_request": {
     "summary": "Bad request - Invalid parameters",
     "value": {
+      "error": "bad_request",
       "message": "Bad request",
-      "path": "/v0/dummies",
-      "method": "GET",
-      "request_id": "req-abc123xyz"
+      "details": {
+        "path": "/v0/dummies",
+        "method": "POST",
+        "request_id": "req-abc123xyz",
+        "field": "service",
+        "reason": "required"
+      }
     }
   },
   "unauthorized": {
     "summary": "Unauthorized - Missing or invalid token",
     "value": {
+      "error": "invalid_token",
       "message": "Unauthorized",
-      "path": "/v0/version",
-      "method": "GET",
-      "request_id": "req-abc123xyz"
+      "details": {
+        "path": "/v0/version",
+        "method": "GET",
+        "request_id": "req-abc123xyz"
+      }
     }
   },
   "forbidden": {
     "summary": "Forbidden - Insufficient permissions",
     "value": {
+      "error": "forbidden",
       "message": "Forbidden",
-      "path": "/v0/configuration",
-      "method": "GET",
-      "request_id": "req-abc123xyz"
+      "details": {
+        "path": "/v0/configuration",
+        "method": "GET",
+        "request_id": "req-abc123xyz"
+      }
     }
   },
   "not_found": {
     "summary": "Not found - Resource does not exist",
     "value": {
+      "error": "not_found",
       "message": "Resource not found",
-      "path": "/v0/dummies/123e4567-e89b-12d3-a456-426614174000",
-      "method": "GET",
-      "request_id": "req-abc123xyz"
+      "details": {
+        "path": "/v0/dummies/123",
+        "method": "GET",
+        "request_id": "req-abc123xyz"
+      }
     }
   },
   "conflict": {
     "summary": "Conflict - Integrity constraint violation",
     "value": {
+      "error": "conflict",
       "message": "Conflict",
-      "path": "/v0/dummies",
-      "method": "POST",
-      "request_id": "req-abc123xyz"
-    }
-  },
-  "unsupported_media_type": {
-    "summary": "Unsupported media type",
-    "value": {
-      "message": "Unsupported media type",
-      "path": "/v0/dummies",
-      "method": "POST",
-      "request_id": "req-abc123xyz",
-      "exception": "Content-Type must be application/json"
+      "details": {
+        "path": "/v0/dummies",
+        "method": "POST",
+        "request_id": "req-abc123xyz",
+        "reason": "duplicate key value violates unique constraint"
+      }
     }
   },
   "unprocessable_entity": {
-    "summary": "Unprocessable entity - Validation error",
+    "summary": "Unprocessable Entity - Validation error",
     "value": {
+      "error": "validation_error",
       "message": "Unprocessable entity",
-      "path": "/v0/dummies",
-      "method": "POST",
-      "request_id": "req-abc123xyz"
+      "details": {
+        "path": "/v0/dummies",
+        "method": "POST",
+        "request_id": "req-abc123xyz",
+        "email": ["Invalid email format"],
+        "age": ["Must be greater than 18"]
+      }
     }
   },
-  "rate_limited": {
+  "too_many_requests": {
     "summary": "Too many requests - Rate limit exceeded",
     "value": {
-      "message": "Too Many Requests",
-      "path": "/v0/health",
-      "method": "GET",
-      "request_id": "req-abc123xyz"
+      "error": "rate_limit_exceeded",
+      "message": "Rate limit exceeded. Please try again later.",
+      "details": {
+        "path": "/v0/check-access",
+        "method": "POST",
+        "request_id": "req-abc123xyz",
+        "limit": 100,
+        "remaining": 0,
+        "reset": 1702201860
+      }
     }
   },
-  "internal_server_error": {
+  "server_error": {
     "summary": "Internal server error",
     "value": {
+      "error": "internal_error",
       "message": "Internal server error",
-      "path": "/v0/dummies",
-      "method": "POST",
-      "request_id": "req-abc123xyz"
-    }
-  },
-  "service_unavailable": {
-    "summary": "Service unavailable - Not ready",
-    "value": {
-      "status": "not_ready",
-      "checks": {
-        "database": "error",
-        "redis": "ok"
-      },
-      "timestamp": "2025-12-22T10:30:00Z"
+      "details": {
+        "path": "/v0/fail",
+        "method": "GET",
+        "request_id": "req-abc123xyz"
+      }
     }
   }
 }

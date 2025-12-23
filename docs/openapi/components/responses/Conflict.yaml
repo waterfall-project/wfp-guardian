@@ -2,20 +2,23 @@ description: Conflict - Resource already exists or integrity constraint violatio
 content:
   application/json:
     schema:
-      type: object
-      properties:
-        message:
-          type: string
-          example: Integrity constraint violation
-        error:
-          type: string
-          description: Detailed error message from database
+      $ref: '../schemas/Error.yaml'
     examples:
       duplicate_key:
         value:
+          error: conflict
           message: Integrity constraint violation
-          error: duplicate key value violates unique constraint
+          details:
+            path: "/v0/resource"
+            method: "POST"
+            request_id: "req-abc123xyz"
+            reason: duplicate key value violates unique constraint
       foreign_key:
         value:
+          error: conflict
           message: Integrity constraint violation
-          error: violates foreign key constraint
+          details:
+            path: "/v0/resource"
+            method: "POST"
+            request_id: "req-abc123xyz"
+            reason: foreign key constraint violation

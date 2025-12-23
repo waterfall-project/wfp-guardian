@@ -149,3 +149,77 @@ BatchCheckAccessResponse:
       type: integer
       description: Total processing time (ms)
       example: 15
+
+UserPermissionsResponse:
+  type: object
+  required:
+    - user_id
+    - company_id
+    - roles
+    - permissions
+  properties:
+    user_id:
+      type: string
+      format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    company_id:
+      type: string
+      format: uuid
+      example: "650e8400-e29b-41d4-a716-446655440000"
+    project_id:
+      type: string
+      format: uuid
+      nullable: true
+      description: Project filter (if provided)
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    roles:
+      type: array
+      description: User roles
+      items:
+        type: object
+        properties:
+          role_id:
+            type: string
+            format: uuid
+          role_name:
+            type: string
+            example: "project_manager"
+          display_name:
+            type: string
+            example: "Project Manager"
+          project_id:
+            type: string
+            format: uuid
+            nullable: true
+          scope_type:
+            type: string
+            enum: [direct, hierarchical]
+            example: "direct"
+          is_active:
+            type: boolean
+            example: true
+    permissions:
+      type: array
+      description: All permissions (deduplicated)
+      items:
+        type: string
+        example: "storage:files:DELETE"
+    policies:
+      type: array
+      description: All policies (deduplicated)
+      items:
+        type: object
+        properties:
+          policy_id:
+            type: string
+            format: uuid
+          policy_name:
+            type: string
+            example: "File Management"
+          permissions_count:
+            type: integer
+            example: 5
+    processing_time_ms:
+      type: integer
+      description: Total processing time (ms)
+      example: 15

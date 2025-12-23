@@ -1,0 +1,154 @@
+/permissions:
+  get:
+    operationId: listPermissions
+    summary: List all permissions
+    description: |
+      List all available permissions in the system.
+      Permissions are read-only (seeded at application startup).
+
+      **Permission Format**: `service:resource:operation`
+      Example: `storage:files:DELETE`
+    tags:
+      - Permissions
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: service
+        in: query
+        schema:
+          type: string
+        description: Filter by service
+        example: "storage"
+      - name: resource_name
+        in: query
+        schema:
+          type: string
+        description: Filter by resource type
+        example: "files"
+      - name: operation
+        in: query
+        schema:
+          type: string
+          enum:
+            - LIST
+            - CREATE
+            - READ
+            - UPDATE
+            - DELETE
+            - APPROVE
+            - EXPORT
+            - IMPORT
+        description: Filter by operation
+        example: "DELETE"
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+        description: Page number
+      - name: page_size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        description: Items per page
+    responses:
+      '200':
+        description: List of permissions
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/PaginatedResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas/permissions.yaml#/Permission'
+            examples:
+              default:
+                $ref: '../examples/permissions_responses.json#/permission_list'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/permissions/{permission_id}:
+  get:
+    operationId: getPermission
+    summary: Get a permission by ID
+    description: Details of a permission
+    tags:
+      - Permissions
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: permission_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Permission ID
+    responses:
+      '200':
+        description: Permission found
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/permissions.yaml#/Permission'
+            examples:
+              default:
+                $ref: '../examples/permissions_responses.json#/permission_single'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/permissions/by-service:
+  get:
+    operationId: listPermissionsByService
+    summary: List permissions grouped by service
+    description: |
+      List all permissions, grouped by service.
+      Useful for building permission selection interfaces.
+    tags:
+      - Permissions
+    security:
+      - JWTAuth: []
+    responses:
+      '200':
+        description: Permissions grouped by service
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '../components/schemas/permissions.yaml#/Permission'
+            examples:
+              default:
+                $ref: '../examples/permissions_responses.json#/permissions_by_service'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'

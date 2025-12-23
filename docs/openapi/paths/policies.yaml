@@ -1,0 +1,332 @@
+/policies:
+  get:
+    operationId: listPolicies
+    summary: List all policies
+    description: |
+      List all policies for the company (automatically filtered by company_id from JWT).
+      With pagination.
+    tags:
+      - Policies
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+        description: Page number
+      - name: page_size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        description: Items per page
+      - name: is_active
+        in: query
+        schema:
+          type: boolean
+        description: Filter by active status
+    responses:
+      '200':
+        description: List of policies
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/PaginatedResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas/policies.yaml#/Policy'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  post:
+    operationId: createPolicy
+    summary: Create a new policy
+    description: |
+      Creates a new policy in the company (company_id extracted from JWT).
+      Reserved for admins.
+    tags:
+      - Policies
+    security:
+      - JWTAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/policies.yaml#/PolicyCreate'
+          examples:
+            budget_approval:
+              $ref: '../examples/policies_responses.json#/policy_create_budget'
+            file_management:
+              $ref: '../examples/policies_responses.json#/policy_create_files'
+    responses:
+      '201':
+        description: Policy created
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/policies.yaml#/Policy'
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/policies/{policy_id}:
+  get:
+    operationId: getPolicy
+    summary: Get a policy by ID
+    description: Full details of a policy
+    tags:
+      - Policies
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: policy_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Policy ID
+    responses:
+      '200':
+        description: Policy found
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/policies.yaml#/Policy'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  patch:
+    operationId: updatePolicy
+    summary: Update a policy
+    description: |
+      Modifies policy properties (display_name, description, priority, is_active).
+      The technical `name` cannot be modified.
+    tags:
+      - Policies
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: policy_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Policy ID
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/policies.yaml#/PolicyUpdate'
+          examples:
+            default:
+              $ref: '../examples/policies_responses.json#/policy_update'
+    responses:
+      '200':
+        description: Policy updated
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/policies.yaml#/Policy'
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  delete:
+    operationId: deletePolicy
+    summary: Delete a policy
+    description: |
+      Deletes a policy. Fails if RolePolicies still exist.
+      Recommendation: disable (is_active=false) instead of deleting.
+    tags:
+      - Policies
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: policy_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Policy ID
+    responses:
+      '204':
+        description: Policy deleted
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/policies/{policy_id}/permissions:
+  get:
+    operationId: listPolicyPermissions
+    summary: List policy permissions
+    description: All permissions linked to this policy (via PolicyPermission)
+    tags:
+      - Policies
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: policy_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Policy ID
+    responses:
+      '200':
+        description: List of policy permissions
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../components/schemas/permissions.yaml#/Permission'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  post:
+    operationId: attachPermissionToPolicy
+    summary: Attach a permission to a policy
+    description: |
+      Creates a PolicyPermission link between the policy and a permission.
+      Idempotent (no error if link already exists).
+    tags:
+      - Policies
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: policy_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Policy ID
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - permission_id
+            properties:
+              permission_id:
+                type: string
+                format: uuid
+                description: ID of the permission to attach
+          examples:
+            default:
+              $ref: '../examples/policies_responses.json#/attach_permission_to_policy'
+    responses:
+      '201':
+        description: Permission attached
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common.yaml#/SuccessResponse'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/policies/{policy_id}/permissions/{permission_id}:
+  delete:
+    operationId: removePermissionFromPolicy
+    summary: Remove a permission from a policy
+    description: Removes the PolicyPermission link
+    tags:
+      - Policies
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: policy_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Policy ID
+      - name: permission_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Permission ID
+    responses:
+      '204':
+        description: Permission removed from policy
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'

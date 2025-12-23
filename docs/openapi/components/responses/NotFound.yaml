@@ -1,0 +1,14 @@
+description: Resource not found
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/Error.yaml'
+    examples:
+      not_found:
+        value:
+          error: not_found
+          message: The requested resource was not found
+          details:
+            path: "/v0/resource/123"
+            method: "GET"
+            request_id: "req-abc123xyz"

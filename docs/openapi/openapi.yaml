@@ -24,7 +24,7 @@ servers:
     description: Local development server
   - url: http://guardian:8000/v0
     description: Docker Compose
-  - url: https://guardian.waterfall.example.com/v0
+  - url: https://guardian.waterfall-project.pro
     description: Production
 
 tags:
@@ -51,6 +51,44 @@ paths:
     $ref: './paths/access.yaml#/~1check-access'
   /batch-check-access:
     $ref: './paths/access.yaml#/~1batch-check-access'
+  /users/{user_id}/permissions:
+    $ref: './paths/access.yaml#/~1users~1{user_id}~1permissions'
+
+  # Role Management endpoints
+  /roles:
+    $ref: './paths/roles.yaml#/~1roles'
+  /roles/{role_id}:
+    $ref: './paths/roles.yaml#/~1roles~1{role_id}'
+  /roles/{role_id}/policies:
+    $ref: './paths/roles.yaml#/~1roles~1{role_id}~1policies'
+  /roles/{role_id}/policies/{policy_id}:
+    $ref: './paths/roles.yaml#/~1roles~1{role_id}~1policies~1{policy_id}'
+
+  # Policy Management endpoints
+  /policies:
+    $ref: './paths/policies.yaml#/~1policies'
+  /policies/{policy_id}:
+    $ref: './paths/policies.yaml#/~1policies~1{policy_id}'
+  /policies/{policy_id}/permissions:
+    $ref: './paths/policies.yaml#/~1policies~1{policy_id}~1permissions'
+  /policies/{policy_id}/permissions/{permission_id}:
+    $ref: './paths/policies.yaml#/~1policies~1{policy_id}~1permissions~1{permission_id}'
+
+  # Permission Management endpoints
+  /permissions:
+    $ref: './paths/permissions.yaml#/~1permissions'
+  /permissions/by-service:
+    $ref: './paths/permissions.yaml#/~1permissions~1by-service'
+  /permissions/{permission_id}:
+    $ref: './paths/permissions.yaml#/~1permissions~1{permission_id}'
+
+  # User Role Management endpoints
+  /users/{user_id}/roles:
+    $ref: './paths/user_roles.yaml#/~1users~1{user_id}~1roles'
+  /users/{user_id}/roles/{user_role_id}:
+    $ref: './paths/user_roles.yaml#/~1users~1{user_id}~1roles~1{user_role_id}'
+  /roles/{role_id}/users:
+    $ref: './paths/user_roles.yaml#/~1roles~1{role_id}~1users'
 
   # Dummy CRUD endpoints
   /dummies:

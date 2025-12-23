@@ -1,0 +1,97 @@
+{
+  "permission_list": {
+    "summary": "List of permissions",
+    "value": {
+      "data": [
+        {
+          "id": "150e8400-e29b-41d4-a716-446655440001",
+          "name": "storage:files:LIST",
+          "service": "storage",
+          "resource_name": "files",
+          "operation": "LIST",
+          "description": "List files",
+          "created_at": "2025-01-01T00:00:00Z",
+          "updated_at": "2025-01-01T00:00:00Z"
+        },
+        {
+          "id": "150e8400-e29b-41d4-a716-446655440002",
+          "name": "storage:files:CREATE",
+          "service": "storage",
+          "resource_name": "files",
+          "operation": "CREATE",
+          "description": "Create/upload files",
+          "created_at": "2025-01-01T00:00:00Z",
+          "updated_at": "2025-01-01T00:00:00Z"
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 50,
+        "total_items": 127,
+        "total_pages": 3
+      }
+    }
+  },
+  "permission_single": {
+    "summary": "Single permission",
+    "value": {
+      "id": "12345678-90ab-cdef-1234-567890abcdef",
+      "name": "diagram:diagrams:DELETE",
+      "service": "diagram",
+      "resource_name": "diagrams",
+      "operation": "DELETE",
+      "description": "Delete diagrams",
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  "permissions_by_service": {
+    "summary": "Permissions grouped by service",
+    "value": {
+      "storage": [
+        {
+          "id": "150e8400-e29b-41d4-a716-446655440001",
+          "name": "storage:files:LIST",
+          "service": "storage",
+          "resource_name": "files",
+          "operation": "LIST",
+          "description": "List files",
+          "created_at": "2025-01-01T00:00:00Z",
+          "updated_at": "2025-01-01T00:00:00Z"
+        },
+        {
+          "id": "150e8400-e29b-41d4-a716-446655440002",
+          "name": "storage:files:CREATE",
+          "service": "storage",
+          "resource_name": "files",
+          "operation": "CREATE",
+          "description": "Create/upload files",
+          "created_at": "2025-01-01T00:00:00Z",
+          "updated_at": "2025-01-01T00:00:00Z"
+        }
+      ],
+      "diagram": [
+        {
+          "id": "150e8400-e29b-41d4-a716-446655440003",
+          "name": "diagram:diagrams:CREATE",
+          "service": "diagram",
+          "resource_name": "diagrams",
+          "operation": "CREATE",
+          "description": "Create diagrams",
+          "created_at": "2025-01-01T00:00:00Z",
+          "updated_at": "2025-01-01T00:00:00Z"
+        },
+        {
+          "id": "150e8400-e29b-41d4-a716-446655440004",
+          "name": "diagram:diagrams:DELETE",
+          "service": "diagram",
+          "resource_name": "diagrams",
+          "operation": "DELETE",
+          "description": "Delete diagrams",
+          "created_at": "2025-01-01T00:00:00Z",
+          "updated_at": "2025-01-01T00:00:00Z"
+        }
+      ]
+    }
+  }
+}

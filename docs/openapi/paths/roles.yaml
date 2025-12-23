@@ -1,0 +1,330 @@
+/roles:
+  get:
+    operationId: listRoles
+    summary: List all roles
+    description: |
+      List all roles for the company (automatically filtered by company_id from JWT).
+      With pagination.
+    tags:
+      - Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+        description: Page number
+      - name: page_size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        description: Items per page
+      - name: is_active
+        in: query
+        schema:
+          type: boolean
+        description: Filter by active status
+    responses:
+      '200':
+        description: List of roles
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/PaginatedResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas/roles.yaml#/Role'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  post:
+    operationId: createRole
+    summary: Create a new role
+    description: |
+      Creates a new role in the company (company_id extracted from JWT).
+      Reserved for admins.
+    tags:
+      - Roles
+    security:
+      - JWTAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/roles.yaml#/RoleCreate'
+          examples:
+            developer:
+              $ref: '../examples/roles_responses.json#/role_create_developer'
+            admin:
+              $ref: '../examples/roles_responses.json#/role_create_admin'
+    responses:
+      '201':
+        description: Role created
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/roles.yaml#/Role'
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/roles/{role_id}:
+  get:
+    operationId: getRole
+    summary: Get a role by ID
+    description: Full details of a role
+    tags:
+      - Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: role_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Role ID
+    responses:
+      '200':
+        description: Role found
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/roles.yaml#/Role'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  patch:
+    operationId: updateRole
+    summary: Update a role
+    description: |
+      Modifies role properties (display_name, description, is_active).
+      The technical `name` cannot be modified.
+    tags:
+      - Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: role_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Role ID
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/roles.yaml#/RoleUpdate'
+          examples:
+            default:
+              $ref: '../examples/roles_responses.json#/role_update'
+    responses:
+      '200':
+        description: Role updated
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/roles.yaml#/Role'
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  delete:
+    operationId: deleteRole
+    summary: Delete a role
+    description: |
+      Deletes a role. Fails if UserRoles still exist.
+      Recommendation: disable (is_active=false) instead of deleting.
+    tags:
+      - Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: role_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Role ID
+    responses:
+      '204':
+        description: Role deleted
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/roles/{role_id}/policies:
+  get:
+    operationId: listRolePolicies
+    summary: List role policies
+    description: All policies linked to this role (via RolePolicy)
+    tags:
+      - Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: role_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Role ID
+    responses:
+      '200':
+        description: List of role policies
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../components/schemas/policies.yaml#/Policy'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  post:
+    operationId: attachPolicyToRole
+    summary: Attach a policy to a role
+    description: |
+      Creates a RolePolicy link between the role and a policy.
+      Idempotent (no error if link already exists).
+    tags:
+      - Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: role_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Role ID
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - policy_id
+            properties:
+              policy_id:
+                type: string
+                format: uuid
+                description: ID of the policy to attach
+          examples:
+            default:
+              $ref: '../examples/roles_responses.json#/attach_policy_to_role'
+    responses:
+      '201':
+        description: Policy attached
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common.yaml#/SuccessResponse'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/roles/{role_id}/policies/{policy_id}:
+  delete:
+    operationId: detachPolicyFromRole
+    summary: Detach a policy from a role
+    description: Removes the RolePolicy link
+    tags:
+      - Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: role_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Role ID
+      - name: policy_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Policy ID
+    responses:
+      '204':
+        description: Policy detached from role
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '429':
+        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'

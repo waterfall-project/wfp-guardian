@@ -2,24 +2,15 @@ description: Unprocessable Entity - Validation error
 content:
   application/json:
     schema:
-      type: object
-      properties:
-        message:
-          type: string
-          example: Validation error
-        errors:
-          type: object
-          description: Field-specific validation errors
-          additionalProperties:
-            type: array
-            items:
-              type: string
+      $ref: '../schemas/Error.yaml'
     examples:
       validation_error:
         value:
+          error: validation_error
           message: Validation error
-          errors:
-            name:
-              - Field is required
-            description:
-              - String must be at most 200 characters
+          details:
+            path: "/v0/resource"
+            method: "POST"
+            request_id: "req-abc123xyz"
+            email: ["Invalid email format"]
+            age: ["Must be greater than 18"]

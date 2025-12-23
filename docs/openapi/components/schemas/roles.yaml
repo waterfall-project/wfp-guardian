@@ -1,0 +1,77 @@
+Role:
+  type: object
+  required:
+    - id
+    - name
+    - display_name
+    - company_id
+    - is_active
+    - created_at
+    - updated_at
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    name:
+      type: string
+      description: Technical name of the role
+      example: "project_manager"
+    display_name:
+      type: string
+      description: Display name
+      example: "Project Manager"
+    description:
+      type: string
+      nullable: true
+      description: Role description
+      example: "Full project management"
+    company_id:
+      type: string
+      format: uuid
+      description: Company ID (roles are isolated by company)
+      example: "650e8400-e29b-41d4-a716-446655440000"
+    is_active:
+      type: boolean
+      default: true
+      example: true
+    created_at:
+      type: string
+      format: date-time
+      example: "2025-01-15T10:30:00Z"
+    updated_at:
+      type: string
+      format: date-time
+      example: "2025-01-20T14:45:00Z"
+
+RoleCreate:
+  type: object
+  required:
+    - name
+    - display_name
+  properties:
+    name:
+      type: string
+      pattern: '^[a-z_]+$'
+      description: Technical name (lowercase, underscores)
+      example: "senior_developer"
+    display_name:
+      type: string
+      example: "Senior Developer"
+    description:
+      type: string
+      example: "Experienced developer with extended permissions"
+
+RoleUpdate:
+  type: object
+  properties:
+    display_name:
+      type: string
+      example: "Senior Project Manager"
+    description:
+      type: string
+      example: "Updated description"
+    is_active:
+      type: boolean
+      description: Enable/disable the role
+      example: true

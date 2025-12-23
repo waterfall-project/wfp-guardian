@@ -1,0 +1,91 @@
+Policy:
+  type: object
+  required:
+    - id
+    - name
+    - display_name
+    - company_id
+    - is_active
+    - created_at
+    - updated_at
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    name:
+      type: string
+      description: Technical name of the policy
+      example: "file_management"
+    display_name:
+      type: string
+      description: Display name
+      example: "File Management"
+    description:
+      type: string
+      nullable: true
+      description: Policy description
+      example: "Full permissions on files"
+    company_id:
+      type: string
+      format: uuid
+      description: Company ID
+      example: "650e8400-e29b-41d4-a716-446655440000"
+    priority:
+      type: integer
+      description: Priority (evaluation order)
+      default: 0
+      example: 10
+    is_active:
+      type: boolean
+      default: true
+      example: true
+    permissions_count:
+      type: integer
+      description: Number of permissions in the policy
+      example: 5
+    created_at:
+      type: string
+      format: date-time
+      example: "2025-01-15T10:30:00Z"
+    updated_at:
+      type: string
+      format: date-time
+      example: "2025-01-20T14:45:00Z"
+
+PolicyCreate:
+  type: object
+  required:
+    - name
+    - display_name
+  properties:
+    name:
+      type: string
+      pattern: '^[a-z_]+$'
+      example: "budget_approval"
+    display_name:
+      type: string
+      example: "Budget Approval"
+    description:
+      type: string
+      example: "Approve budgets < 10k€"
+    priority:
+      type: integer
+      default: 0
+      example: 5
+
+PolicyUpdate:
+  type: object
+  properties:
+    display_name:
+      type: string
+      example: "Budget Approval (Updated)"
+    description:
+      type: string
+      example: "Updated description"
+    priority:
+      type: integer
+      example: 10
+    is_active:
+      type: boolean
+      example: true

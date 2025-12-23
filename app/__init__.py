@@ -22,6 +22,7 @@ Functions:
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 from flask import Flask, abort, g, request
 from flask_cors import CORS
@@ -145,10 +146,13 @@ def register_error_handlers(app):
             request_id=getattr(g, "request_id", None),
         )
         response = {
+            "error": "invalid_token",
             "message": "Unauthorized",
-            "path": request.path,
-            "method": request.method,
-            "request_id": getattr(g, "request_id", None),
+            "details": {
+                "path": request.path,
+                "method": request.method,
+                "request_id": getattr(g, "request_id", None),
+            },
         }
         return response, 401
 
@@ -163,10 +167,13 @@ def register_error_handlers(app):
             request_id=getattr(g, "request_id", None),
         )
         response = {
+            "error": "forbidden",
             "message": "Forbidden",
-            "path": request.path,
-            "method": request.method,
-            "request_id": getattr(g, "request_id", None),
+            "details": {
+                "path": request.path,
+                "method": request.method,
+                "request_id": getattr(g, "request_id", None),
+            },
         }
         return response, 403
 
@@ -181,10 +188,13 @@ def register_error_handlers(app):
             request_id=getattr(g, "request_id", None),
         )
         response = {
+            "error": "not_found",
             "message": "Resource not found",
-            "path": request.path,
-            "method": request.method,
-            "request_id": getattr(g, "request_id", None),
+            "details": {
+                "path": request.path,
+                "method": request.method,
+                "request_id": getattr(g, "request_id", None),
+            },
         }
         return response, 404
 
@@ -199,10 +209,13 @@ def register_error_handlers(app):
             request_id=getattr(g, "request_id", None),
         )
         response = {
+            "error": "bad_request",
             "message": "Bad request",
-            "path": request.path,
-            "method": request.method,
-            "request_id": getattr(g, "request_id", None),
+            "details": {
+                "path": request.path,
+                "method": request.method,
+                "request_id": getattr(g, "request_id", None),
+            },
         }
         return response, 400
 
@@ -217,11 +230,14 @@ def register_error_handlers(app):
             request_id=getattr(g, "request_id", None),
         )
         response = {
+            "error": "unsupported_media_type",
             "message": "Unsupported media type",
-            "path": request.path,
-            "method": request.method,
-            "request_id": getattr(g, "request_id", None),
-            "exception": str(err),
+            "details": {
+                "path": request.path,
+                "method": request.method,
+                "request_id": getattr(g, "request_id", None),
+                "exception": str(err),
+            },
         }
         return response, 415
 
@@ -236,10 +252,13 @@ def register_error_handlers(app):
             request_id=getattr(g, "request_id", None),
         )
         response = {
+            "error": "conflict",
             "message": "Conflict",
-            "path": request.path,
-            "method": request.method,
-            "request_id": getattr(g, "request_id", None),
+            "details": {
+                "path": request.path,
+                "method": request.method,
+                "request_id": getattr(g, "request_id", None),
+            },
         }
         return response, 409
 
@@ -254,12 +273,39 @@ def register_error_handlers(app):
             request_id=getattr(g, "request_id", None),
         )
         response = {
+            "error": "validation_error",
             "message": "Unprocessable entity",
-            "path": request.path,
-            "method": request.method,
-            "request_id": getattr(g, "request_id", None),
+            "details": {
+                "path": request.path,
+                "method": request.method,
+                "request_id": getattr(g, "request_id", None),
+            },
         }
         return response, 422
+
+    @app.errorhandler(429)
+    def ratelimit_handler(err):
+        """Handler for 429 (too many requests) errors."""
+        logger.warning(
+            "Rate limit exceeded.",
+            str(err),
+            path=request.path,
+            method=request.method,
+            request_id=getattr(g, "request_id", None),
+        )
+        response = {
+            "error": "rate_limit_exceeded",
+            "message": "Rate limit exceeded. Please try again later.",
+            "details": {
+                "path": request.path,
+                "method": request.method,
+                "request_id": getattr(g, "request_id", None),
+                "description": (
+                    str(err.description) if hasattr(err, "description") else str(err)
+                ),
+            },
+        }
+        return response, 429
 
     @app.errorhandler(500)
     def internal_error(err):
@@ -271,15 +317,18 @@ def register_error_handlers(app):
             method=request.method,
             request_id=getattr(g, "request_id", None),
         )
-        response = {
+        response: dict[str, Any] = {
+            "error": "internal_error",
             "message": "Internal server error",
-            "path": request.path,
-            "method": request.method,
-            "request_id": getattr(g, "request_id", None),
+            "details": {
+                "path": request.path,
+                "method": request.method,
+                "request_id": getattr(g, "request_id", None),
+            },
         }
 
         if app.config.get("DEBUG"):
-            response["exception"] = str(err)
+            response["details"]["exception"] = str(err)
         return response, 500
 
     logger.info("Error handlers registered successfully.")

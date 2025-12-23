@@ -1,0 +1,103 @@
+{
+  "users_with_role_list": {
+    "summary": "List of users with role (paginated)",
+    "value": {
+      "data": [
+        {
+          "id": "150e8400-e29b-41d4-a716-446655440001",
+          "user_id": "12345678-90ab-cdef-1234-567890abcdef",
+          "role_id": "850e8400-e29b-41d4-a716-446655440001",
+          "company_id": "98765432-10ab-cdef-1234-567890abcdef",
+          "project_id": null,
+          "scope_type": "hierarchical",
+          "granted_by": "12345678-90ab-cdef-1234-567890abcdef",
+          "granted_at": "2025-01-10T10:00:00Z",
+          "expires_at": null,
+          "is_active": true
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 50,
+        "total_items": 1,
+        "total_pages": 1
+      }
+    }
+  },
+  "user_role_list": {
+    "summary": "List of user roles",
+    "value": [
+      {
+        "id": "150e8400-e29b-41d4-a716-446655440001",
+        "user_id": "12345678-90ab-cdef-1234-567890abcdef",
+        "role_id": "850e8400-e29b-41d4-a716-446655440001",
+        "company_id": "98765432-10ab-cdef-1234-567890abcdef",
+        "project_id": null,
+        "scope_type": "hierarchical",
+        "granted_by": "12345678-90ab-cdef-1234-567890abcdef",
+        "granted_at": "2025-01-10T10:00:00Z",
+        "expires_at": null,
+        "is_active": true
+      },
+      {
+        "id": "150e8400-e29b-41d4-a716-446655440002",
+        "user_id": "12345678-90ab-cdef-1234-567890abcdef",
+        "role_id": "850e8400-e29b-41d4-a716-446655440002",
+        "company_id": "98765432-10ab-cdef-1234-567890abcdef",
+        "project_id": "550e8400-e29b-41d4-a716-446655440000",
+        "scope_type": "direct",
+        "granted_by": "12345678-90ab-cdef-1234-567890abcdef",
+        "granted_at": "2025-01-15T14:30:00Z",
+        "expires_at": "2025-12-31T23:59:59Z",
+        "is_active": true
+      }
+    ]
+  },
+  "user_role_create_company_wide": {
+    "summary": "Company-wide Admin (Hierarchical)",
+    "value": {
+      "user_id": "12345678-90ab-cdef-1234-567890abcdef",
+      "role_id": "850e8400-e29b-41d4-a716-446655440001",
+      "project_id": null,
+      "scope_type": "hierarchical"
+    }
+  },
+  "user_role_create_project": {
+    "summary": "Project Specific Manager",
+    "value": {
+      "user_id": "12345678-90ab-cdef-1234-567890abcdef",
+      "role_id": "850e8400-e29b-41d4-a716-446655440002",
+      "project_id": "550e8400-e29b-41d4-a716-446655440000",
+      "scope_type": "direct"
+    }
+  },
+  "user_role_create_temporary": {
+    "summary": "Temporary Consultant Role",
+    "value": {
+      "user_id": "12345678-90ab-cdef-1234-567890abcdef",
+      "role_id": "850e8400-e29b-41d4-a716-446655440003",
+      "project_id": "550e8400-e29b-41d4-a716-446655440000",
+      "scope_type": "direct",
+      "expires_at": "2025-06-30T23:59:59Z"
+    }
+  },
+  "user_role_update_scope": {
+    "summary": "Change Scope",
+    "value": {
+      "project_id": "550e8400-e29b-41d4-a716-446655440001",
+      "scope_type": "direct"
+    }
+  },
+  "user_role_update_expiration": {
+    "summary": "Extend Expiration",
+    "value": {
+      "expires_at": "2026-12-31T23:59:59Z"
+    }
+  },
+  "user_role_update_deactivate": {
+    "summary": "Deactivate Role",
+    "value": {
+      "is_active": false
+    }
+  }
+}

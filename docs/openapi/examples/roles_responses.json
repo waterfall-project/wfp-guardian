@@ -1,0 +1,31 @@
+{
+  "role_create_developer": {
+    "summary": "Senior Developer Role",
+    "value": {
+      "name": "senior_developer",
+      "display_name": "Senior Developer",
+      "description": "Experienced developer with extended permissions"
+    }
+  },
+  "role_create_admin": {
+    "summary": "Project Admin Role",
+    "value": {
+      "name": "project_admin",
+      "display_name": "Project Admin",
+      "description": "Full project administration"
+    }
+  },
+  "role_update": {
+    "summary": "Update Role",
+    "value": {
+      "display_name": "Senior Project Manager",
+      "description": "Updated description"
+    }
+  },
+  "attach_policy_to_role": {
+    "summary": "Attach Policy",
+    "value": {
+      "policy_id": "950e8400-e29b-41d4-a716-446655440000"
+    }
+  }
+}

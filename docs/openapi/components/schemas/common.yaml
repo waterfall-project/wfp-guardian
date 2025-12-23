@@ -1,0 +1,72 @@
+PaginatedResponse:
+  type: object
+  required:
+    - data
+    - pagination
+  properties:
+    data:
+      type: array
+      description: List of items
+      items:
+        type: object
+    pagination:
+      type: object
+      required:
+        - page
+        - page_size
+        - total_items
+        - total_pages
+      properties:
+        page:
+          type: integer
+          description: Current page
+          example: 1
+        page_size:
+          type: integer
+          description: Items per page
+          example: 50
+        total_items:
+          type: integer
+          description: Total items count
+          example: 156
+        total_pages:
+          type: integer
+          description: Total pages count
+          example: 4
+
+ValidationError:
+  type: object
+  required:
+    - message
+    - errors
+  properties:
+    message:
+      type: string
+      example: "Validation failed"
+    errors:
+      type: array
+      items:
+        type: object
+        properties:
+          field:
+            type: string
+            example: "name"
+          message:
+            type: string
+            example: "Field is required"
+
+SuccessResponse:
+  type: object
+  required:
+    - success
+    - message
+  properties:
+    success:
+      type: boolean
+      example: true
+    message:
+      type: string
+      example: "Operation completed successfully"
+    data:
+      type: object
+      description: Additional data (optional)
