@@ -4,7 +4,7 @@
 
 # Testing Infrastructure
 
-This document describes the complete testing infrastructure for the Flask template project, including unit tests, integration tests, and their respective environments.
+This document describes the complete testing infrastructure for the Guardian Service, including unit tests, integration tests, and their respective environments.
 
 ## Table of Contents
 

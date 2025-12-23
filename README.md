@@ -1,7 +1,7 @@
 <div align="center">
   <img src="docs/assets/waterfall_logo.svg" alt="Waterfall Logo" width="200"/>
 
-  # wfp-flask-template
+  # wfp-guardian
 
   ![Test Coverage](docs/assets/coverage_badge.svg)
   ![Docstring Coverage](docs/assets/interrogate_badge.svg)
@@ -10,7 +10,7 @@
   ![License](https://img.shields.io/badge/license-AGPLv3-blue.svg)
   ![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
 
-  Professional Flask template for Waterfall projects with complete configuration, code standards, and integrated quality tools (Black, Ruff, MyPy, Pre-commit).
+  Guardian Service for Waterfall projects with complete configuration, code standards, and integrated quality tools (Black, Ruff, MyPy, Pre-commit).
 </div>
 
 ## 🚀 Quick Start
@@ -18,7 +18,7 @@
 ```bash
 # Clone and install
 git clone <repo-url>
-cd wfp-flask-template
+cd wfp-guardian
 python -m venv .venv
 source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 
@@ -153,7 +153,7 @@ For detailed testing documentation:
 ## 🏗️ Structure
 
 ```
-wfp-flask-template/
+wfp-guardian/
 ├── app/
 │   ├── __init__.py          # Application factory
 │   ├── config.py            # Configuration classes

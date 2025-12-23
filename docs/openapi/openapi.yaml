@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
-  title: Template Service API
+  title: Guardian Service API
   version: 0.0.1
   description: |
-    **Waterfall Template API** - Service template for Waterfall.
+    **Waterfall Guardian API** - Guardian Service for Waterfall.
 
     RESTful service for ...
 
@@ -22,9 +22,9 @@ info:
 servers:
   - url: http://localhost:8000/v0
     description: Local development server
-  - url: http://template:8000/v0
+  - url: http://guardian:8000/v0
     description: Docker Compose
-  - url: https://template.waterfall.example.com/v0
+  - url: https://guardian.waterfall.example.com/v0
     description: Production
 
 tags:

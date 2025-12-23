@@ -4,7 +4,7 @@
 
 # Documentation
 
-This directory contains the technical documentation for the WFP Flask Template project.
+This directory contains the technical documentation for the WFP Guardian Service.
 
 ## 📚 Contents
 

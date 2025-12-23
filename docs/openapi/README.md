@@ -4,7 +4,7 @@
 
 # OpenAPI Specification
 
-OpenAPI 3.0 specification for this service template.
+OpenAPI 3.0 specification for this Guardian service.
 
 ## Structure
 
@@ -136,7 +136,7 @@ Replace the example `/dummies` CRUD endpoints with your domain-specific resource
 
 ## Authentication
 
-This template uses JWT-based authentication with HTTP-only cookies.
+This service uses JWT-based authentication with HTTP-only cookies.
 
 ### Public Endpoints
 

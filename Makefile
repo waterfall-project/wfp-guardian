@@ -1,4 +1,4 @@
-# Makefile for Flask template project
+# Makefile for Guardian Service
 
 .PHONY: help install install-dev format lint type-check test test-cov test-cov-badge clean run compose-build compose-up compose-down docker-build-dev docker-build-test docker-build-prod docker-test monitoring-up monitoring-down monitoring-logs pre-commit-install pre-commit-run docstring-check docstring-coverage test-integration test-integration-services-up test-integration-services-down test-integration-services-status test-unit test-all
 
@@ -226,16 +226,16 @@ compose-down:
 
 # Docker Image commands
 docker-build-dev:
-	docker build --target development -t wfp-flask-template:dev .
+	docker build --target development -t wfp-guardian:dev .
 
 docker-build-test:
-	docker build --target test -t wfp-flask-template:test .
+	docker build --target test -t wfp-guardian:test .
 
 docker-build-prod:
-	docker build --target production -t wfp-flask-template:prod .
+	docker build --target production -t wfp-guardian:prod .
 
 docker-test: docker-build-test
-	docker run --rm wfp-flask-template:test
+	docker run --rm wfp-guardian:test
 
 # Monitoring stack commands
 monitoring-up:

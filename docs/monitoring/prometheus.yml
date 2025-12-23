@@ -13,7 +13,7 @@ scrape_configs:
           app: 'prometheus'
 
   # Flask application metrics
-  - job_name: 'wfp-flask-template'
+  - job_name: 'wfp-guardian'
     scrape_interval: 15s
     scrape_timeout: 10s
     metrics_path: '/v0/metrics'
@@ -21,4 +21,4 @@ scrape_configs:
       - targets: ['flask-app:5000']
         labels:
           environment: 'development'
-          app: 'wfp-flask-template'
+          app: 'wfp-guardian'

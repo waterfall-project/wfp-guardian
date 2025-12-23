@@ -1,5 +1,5 @@
 # Copyright (c) 2024 World Food Programme
-# This file is part of wfp-flask-template and is released under the MIT License.
+# This file is part of wfp-guardian and is released under the MIT License.
 # See LICENSE file for more information.
 
 """

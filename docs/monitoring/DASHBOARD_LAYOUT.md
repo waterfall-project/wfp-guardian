@@ -4,7 +4,7 @@
 
 # Grafana Dashboard - Visual Layout
 
-## Dashboard: WFP Flask Template - Application Metrics
+## Dashboard: WFP Guardian - Application Metrics
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -179,4 +179,4 @@
 - **DS_PROMETHEUS**: Datasource selector (top-left)
 - **job**: Application job filter (top-left)
   - Auto-populated from Prometheus jobs
-  - Default: wfp-flask-template
+  - Default: wfp-guardian

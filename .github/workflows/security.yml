@@ -18,31 +18,31 @@ permissions:
 jobs:
   # CodeQL requires GitHub Advanced Security on private repositories.
   # Uncomment this job if you have GHAS enabled.
-  # codeql:
-  #   name: CodeQL Analysis
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       language: [ 'python' ]
-  #
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Initialize CodeQL
-  #       uses: github/codeql-action/init@v3
-  #       with:
-  #         languages: ${{ matrix.language }}
-  #         queries: security-extended,security-and-quality
-  #
-  #     - name: Autobuild
-  #       uses: github/codeql-action/autobuild@v3
-  #
-  #     - name: Perform CodeQL Analysis
-  #       uses: github/codeql-action/analyze@v3
-  #       with:
-  #         category: "/language:${{matrix.language}}"
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'python' ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
 
   dependency-review:
     name: Dependency Review
@@ -98,7 +98,7 @@ jobs:
           context: .
           target: production
           load: true
-          tags: wfp-flask-template:security-scan
+          tags: wfp-identity:security-scan
           build-args: |
             BUILD_COMMIT=${{ github.sha }}
             BUILD_DATE=${{ github.event.repository.updated_at }}
@@ -108,7 +108,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: wfp-flask-template:security-scan
+          image-ref: wfp-identity:security-scan
           format: 'table'
           exit-code: '1'
           severity: 'CRITICAL,HIGH'

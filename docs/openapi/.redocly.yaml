@@ -1,5 +1,5 @@
 apis:
-  template@v0:
+  guardian@v0:
     root: openapi.yaml
 
 lint:
