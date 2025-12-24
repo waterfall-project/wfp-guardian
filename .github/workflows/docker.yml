@@ -61,8 +61,8 @@ jobs:
         with:
           context: .
           target: ${{ matrix.stage }}
-          push: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging') }}
-          load: ${{ !(github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging')) }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          load: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main') }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
@@ -72,7 +72,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Test Docker image
-        if: ${{ !(github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging')) }}
+        if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main') }}
         run: |
           IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
           echo "Testing image: $IMAGE_TAG"
@@ -142,7 +142,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Generate SBOM
-        if: ${{ !(github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging')) && matrix.stage == 'production' }}
+        if: matrix.stage == 'production'
         uses: anchore/sbom-action@v0
         with:
           image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
@@ -150,7 +150,7 @@ jobs:
           output-file: ./sbom-${{ matrix.stage }}.spdx.json
 
       - name: Upload SBOM
-        if: ${{ !(github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging')) && matrix.stage == 'production' }}
+        if: matrix.stage == 'production'
         uses: actions/upload-artifact@v6
         with:
           name: sbom-${{ matrix.stage }}
@@ -160,13 +160,14 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     strategy:
       matrix:
         stage: [development, test, production]
 
     permissions:
       contents: read
+      packages: read
       security-events: write
 
     steps:
