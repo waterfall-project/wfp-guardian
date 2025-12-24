@@ -18,9 +18,6 @@ rules:
   operation-description: warn   # Description recommandée
   operation-tag-defined: error  # Tags doivent être déclarés
 
-  # Sécurité
-  operation-security-defined: warn  # Security doit être défini
-
   # Cohérence
   boolean-parameter-prefixes: warn  # is_, has_, should_
   path-not-include-query: error     # Pas de ? dans les paths

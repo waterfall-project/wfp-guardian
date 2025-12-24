@@ -14,7 +14,7 @@
           type: string
           format: uuid
         description: Filter by user
-      - name: access_granted
+      - name: is_granted
         in: query
         schema:
           type: boolean
@@ -111,7 +111,7 @@
             - EXPORT
             - IMPORT
         description: Filter by operation
-      - name: access_granted
+      - name: is_granted
         in: query
         schema:
           type: boolean
