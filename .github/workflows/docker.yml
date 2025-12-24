@@ -162,7 +162,7 @@ jobs:
     if: github.event_name != 'pull_request'
     strategy:
       matrix:
-        stage: [dev, test, production]
+        stage: [development, test, production]
 
     permissions:
       contents: read
