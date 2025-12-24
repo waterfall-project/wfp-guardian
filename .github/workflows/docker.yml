@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        stage: [dev, test, production]
+        stage: [development, test, production]
 
     permissions:
       contents: read
@@ -54,7 +54,7 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha,prefix={{branch}}-
+            type=sha
 
       - name: Build Docker image
         uses: docker/build-push-action@v6
@@ -76,18 +76,35 @@ jobs:
           IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
           echo "Testing image: $IMAGE_TAG"
 
+          # For test stage, run pytest directly
+          if [[ "${{ matrix.stage }}" == "test" ]]; then
+            echo "Running pytest in test container..."
+            docker run --rm \
+              -e DATABASE_URL=sqlite:///:memory: \
+              -e USE_IDENTITY_SERVICE=false \
+              -e USE_GUARDIAN_SERVICE=false \
+              $IMAGE_TAG
+            exit 0
+          fi
+
+          # For development and production stages, test the running server
           # Start container
           docker run -d --name test-app -p 5000:5000 \
             -e FLASK_ENV=production \
-            -e SECRET_KEY=test-secret-key \
             -e DATABASE_TYPE=sqlite \
             -e DATABASE_URL=sqlite:///tmp/test.db \
+            -e WAIT_FOR_DB=false \
+            -e RUN_MIGRATIONS=false \
+            -e JWT_ALGORITHM=HS256 \
+            -e JWT_SECRET_KEY=test-jwt-secret-for-workflow \
+            -e USE_IDENTITY_SERVICE=false \
+            -e USE_GUARDIAN_SERVICE=false \
             $IMAGE_TAG
 
           # Wait for app to be ready
           echo "Waiting for application to start..."
           for i in {1..30}; do
-            if curl -f http://localhost:5000/api/v1/health > /dev/null 2>&1; then
+            if curl -f http://localhost:5000/v0/health > /dev/null 2>&1; then
               echo "✓ Application is responding"
               break
             fi
@@ -101,7 +118,7 @@ jobs:
           done
 
           # Test health endpoint
-          RESPONSE=$(curl -s http://localhost:5000/api/v1/health)
+          RESPONSE=$(curl -s http://localhost:5000/v0/health)
           echo "Health check response: $RESPONSE"
 
           # Stop container
