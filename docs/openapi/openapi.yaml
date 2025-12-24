@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Guardian Service API
-  version: 0.0.1
+  version: 0.0.1-alpha1
   description: |
     **Waterfall Guardian API** - Centralized Authorization Service for the Waterfall Platform.
 

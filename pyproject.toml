@@ -7,7 +7,7 @@ packages = ["app"]
 
 [project]
 name = "wfp-guardian"
-version = "0.0.1"
+version = "0.0.1-alpha1"
 description = "Waterfall Project Guardian Service"
 requires-python = ">=3.9"
 dependencies = [
