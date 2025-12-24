@@ -82,6 +82,8 @@ jobs:
             -e SECRET_KEY=test-secret-key \
             -e DATABASE_TYPE=sqlite \
             -e DATABASE_URL=sqlite:///tmp/test.db \
+            -e WAIT_FOR_DB=false \
+            -e RUN_MIGRATIONS=false \
             $IMAGE_TAG
 
           # Wait for app to be ready
