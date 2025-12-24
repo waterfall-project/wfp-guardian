@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        stage: [dev, test, production]
+        stage: [development, test, production]
 
     permissions:
       contents: read
@@ -54,15 +54,15 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha,prefix={{branch}}-
+            type=sha
 
       - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           target: ${{ matrix.stage }}
-          push: false
-          load: true
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          load: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main') }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
@@ -72,22 +72,40 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Test Docker image
+        if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main') }}
         run: |
           IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
           echo "Testing image: $IMAGE_TAG"
 
+          # For test stage, run pytest directly
+          if [[ "${{ matrix.stage }}" == "test" ]]; then
+            echo "Running pytest in test container..."
+            docker run --rm \
+              -e DATABASE_URL=sqlite:///:memory: \
+              -e USE_IDENTITY_SERVICE=false \
+              -e USE_GUARDIAN_SERVICE=false \
+              $IMAGE_TAG
+            exit 0
+          fi
+
+          # For development and production stages, test the running server
           # Start container
           docker run -d --name test-app -p 5000:5000 \
             -e FLASK_ENV=production \
-            -e SECRET_KEY=test-secret-key \
             -e DATABASE_TYPE=sqlite \
             -e DATABASE_URL=sqlite:///tmp/test.db \
+            -e WAIT_FOR_DB=false \
+            -e RUN_MIGRATIONS=false \
+            -e JWT_ALGORITHM=HS256 \
+            -e JWT_SECRET_KEY=test-jwt-secret-for-workflow \
+            -e USE_IDENTITY_SERVICE=false \
+            -e USE_GUARDIAN_SERVICE=false \
             $IMAGE_TAG
 
           # Wait for app to be ready
           echo "Waiting for application to start..."
           for i in {1..30}; do
-            if curl -f http://localhost:5000/api/v1/health > /dev/null 2>&1; then
+            if curl -f http://localhost:5000/v0/health > /dev/null 2>&1; then
               echo "✓ Application is responding"
               break
             fi
@@ -101,7 +119,7 @@ jobs:
           done
 
           # Test health endpoint
-          RESPONSE=$(curl -s http://localhost:5000/api/v1/health)
+          RESPONSE=$(curl -s http://localhost:5000/v0/health)
           echo "Health check response: $RESPONSE"
 
           # Stop container
@@ -124,15 +142,15 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Generate SBOM
-        if: github.event_name != 'pull_request' && matrix.stage == 'production'
+        if: matrix.stage == 'production'
         uses: anchore/sbom-action@v0
         with:
-          image: ${{ steps.meta.outputs.tags }}
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           artifact-name: sbom-${{ matrix.stage }}.spdx.json
           output-file: ./sbom-${{ matrix.stage }}.spdx.json
 
       - name: Upload SBOM
-        if: github.event_name != 'pull_request' && matrix.stage == 'production'
+        if: matrix.stage == 'production'
         uses: actions/upload-artifact@v6
         with:
           name: sbom-${{ matrix.stage }}
@@ -142,13 +160,14 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     strategy:
       matrix:
-        stage: [dev, test, production]
+        stage: [development, test, production]
 
     permissions:
       contents: read
+      packages: read
       security-events: write
 
     steps:
@@ -252,9 +271,15 @@ jobs:
           echo "Build: ${{ needs.build.result }}"
           echo "Security Scan: ${{ needs.security-scan.result }}"
 
-          if [[ "${{ needs.build.result }}" != "success" ]] || \
-             [[ "${{ needs.security-scan.result }}" != "success" ]]; then
-            echo "❌ Docker pipeline failed"
+          if [[ "${{ needs.build.result }}" != "success" ]]; then
+            echo "❌ Build failed"
+            exit 1
+          fi
+
+          # Security scan only runs on main, so skipped is acceptable on other branches
+          if [[ "${{ needs.security-scan.result }}" != "success" ]] && \
+             [[ "${{ needs.security-scan.result }}" != "skipped" ]]; then
+            echo "❌ Security scan failed"
             exit 1
           fi
 
