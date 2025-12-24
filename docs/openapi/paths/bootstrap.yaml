@@ -5,18 +5,19 @@
     description: |
       **RBAC Initialization Endpoint** called by Identity during bootstrap.
 
-      **Public if system not initialized** - Otherwise returns 400 error.
+      **Service-to-Service Only** - Requires `X-Internal-Token` header.
 
       This endpoint:
-      1. Checks if Guardian is already initialized (via Redis/DB flag)
-      2. Creates 4 standard Roles for the company:
+      1. Validates `X-Internal-Token` against configured secret
+      2. Checks if Guardian is already initialized (via Redis/DB flag)
+      3. Creates 4 standard Roles for the company:
          - `company_admin`: Full access
          - `project_manager`: Project management
          - `member`: Project participation
          - `viewer`: Read only
-      3. Creates 4 standard Policies with appropriate permissions
-      4. Creates UserRole to assign `company_admin` to the first user
-      5. Marks Guardian as initialized
+      4. Creates 4 standard Policies with appropriate permissions
+      5. Creates UserRole to assign `company_admin` to the first user
+      6. Marks Guardian as initialized
 
       **Usage**:
       ```python
@@ -27,12 +28,21 @@
               'company_id': 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
               'user_id': 'f1e2d3c4-b5a6-9807-dcba-fe0987654321'
           },
+          headers={'X-Internal-Token': os.environ['INTERNAL_SERVICE_TOKEN']},
           timeout=10.0
       )
       ```
     tags:
-      - System
-    security: []
+      - Bootstrap
+    security:
+      - InternalToken: []
+    parameters:
+      - name: X-Internal-Token
+        in: header
+        required: true
+        schema:
+          type: string
+        description: Internal service-to-service authentication token
     requestBody:
       required: true
       content:
@@ -43,7 +53,7 @@
             default:
               $ref: '../examples/bootstrap_responses.json#/bootstrap_request'
     responses:
-      '200':
+      '201':
         description: RBAC initialized successfully
         content:
           application/json:
@@ -54,6 +64,8 @@
                 $ref: '../examples/bootstrap_responses.json#/bootstrap_response'
       '400':
         $ref: '../components/responses/BadRequest.yaml'
+      '422':
+        $ref: '../components/responses/UnprocessableEntity.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 

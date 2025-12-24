@@ -75,16 +75,16 @@ CheckAccessResponse:
       example: true
     reason:
       type: string
-      description: Explanation if access is denied
+      description: Reason for access decision
       example: "no_matching_role"
       enum:
         - granted
-        - no_matching_role
         - no_permission
+        - no_matching_role
+        - role_expired
+        - role_inactive
         - project_mismatch
         - company_mismatch
-        - inactive_role
-        - expired_role
     message:
       type: string
       description: Detailed message

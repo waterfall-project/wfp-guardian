@@ -17,7 +17,13 @@ openapi/
 │   └── responses/        # Reusable HTTP responses
 ├── paths/                 # Endpoint definitions
 │   ├── system.yaml       # System endpoints (health, ready, version, config, metrics)
-│   └── dummies.yaml      # CRUD endpoints (example - replace with your domain)
+│   ├── access.yaml       # Access control endpoints
+│   ├── roles.yaml        # Role management
+│   ├── policies.yaml     # Policy management
+│   ├── permissions.yaml  # Permission management
+│   ├── user_roles.yaml   # User role assignments
+│   ├── audit.yaml        # Audit trail endpoints
+│   └── bootstrap.yaml    # System initialization
 ├── examples/              # Request/response examples
 └── bundle/                # Generated bundled files
 ```
@@ -123,16 +129,50 @@ Standard system endpoints for health, monitoring, and configuration:
 - `GET /configuration` - Active configuration (without secrets)
 - `GET /metrics` - Prometheus metrics
 
-### Business Endpoints
+### Access Control Endpoints
 
-Replace the example `/dummies` CRUD endpoints with your domain-specific resources:
+Core authorization endpoints:
 
-- `GET /dummies` - List entities (example)
-- `POST /dummies` - Create entity (example)
-- `GET /dummies/{id}` - Get single entity (example)
-- `PUT /dummies/{id}` - Update entity (full replacement) (example)
-- `PATCH /dummies/{id}` - Partial update (example)
-- `DELETE /dummies/{id}` - Delete entity (example)
+- `POST /check-access` - Check if user has permission for an action
+- `POST /batch-check-access` - Batch permission checks (up to 50)
+- `GET /users/{user_id}/permissions` - Get all permissions for a user
+
+### RBAC Management Endpoints
+
+Role-Based Access Control management:
+
+- `GET/POST /roles` - List and create roles
+- `GET/PATCH/DELETE /roles/{role_id}` - Role CRUD operations
+- `GET/POST/DELETE /roles/{role_id}/policies` - Manage role policies
+- `GET/POST /policies` - List and create policies
+- `GET/PATCH/DELETE /policies/{policy_id}` - Policy CRUD operations
+- `GET/POST/DELETE /policies/{policy_id}/permissions` - Manage policy permissions
+- `GET /permissions` - List all permissions
+- `GET /permissions/by-service` - Permissions grouped by service
+
+### User Role Endpoints
+
+Manage user role assignments:
+
+- `GET/POST /users/{user_id}/roles` - List and assign roles to user
+- `DELETE /users/{user_id}/roles/{user_role_id}` - Remove role from user
+- `GET /roles/{role_id}/users` - List users with a specific role
+
+### Audit Endpoints
+
+Access logs and compliance:
+
+- `GET /access-logs` - Query access logs
+- `GET /access-logs/{log_id}` - Get specific log entry
+- `GET /access-logs/statistics` - Audit statistics
+- `GET /access-logs/export` - Export logs (CSV/JSON)
+
+### Bootstrap Endpoints
+
+System initialization:
+
+- `POST /bootstrap` - Initialize RBAC system
+- `POST /companies/{company_id}/init-roles` - Initialize roles for a company
 
 ## Authentication
 

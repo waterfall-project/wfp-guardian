@@ -1,10 +1,61 @@
 /access-logs:
+  head:
+    operationId: headAccessLogs
+    summary: Get access logs count
+    description: Returns only headers with X-Total-Count for pagination without body.
+    tags:
+      - Audit
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: user_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter by user
+      - name: access_granted
+        in: query
+        schema:
+          type: boolean
+        description: Filter by result
+      - name: from_date
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Start date
+      - name: to_date
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: End date
+    responses:
+      '200':
+        description: Headers only with X-Total-Count
+        headers:
+          X-Total-Count:
+            description: Total number of items
+            schema:
+              type: integer
+              example: 15234
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
   get:
     operationId: getAccessLogs
     summary: Get access logs (audit)
     description: |
       List access logs with advanced filtering.
       Retention: 90 days by default.
+
+      **Security**: Results are automatically filtered by the user's company_id from JWT.
+      The `company_id` query parameter is only available for super-admins to query other companies.
 
       **Use Cases**:
       - Security audit (denied access)
@@ -27,7 +78,7 @@
         schema:
           type: string
           format: uuid
-        description: Filter by company
+        description: Filter by company (super-admin only, otherwise ignored and JWT company_id used)
       - name: project_id
         in: query
         schema:
@@ -119,8 +170,65 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  delete:
+    operationId: purgeAccessLogs
+    summary: Purge old access logs (GDPR)
+    description: |
+      Delete access logs older than a specified date.
+
+      **GDPR Compliance**: Enables data retention policy enforcement.
+
+      **Requirements**:
+      - `before` parameter is required
+      - Minimum retention: 30 days (cannot delete recent logs)
+      - Admin permission required
+
+      **Response**: Number of deleted entries.
+    tags:
+      - Audit
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: before
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date-time
+        description: Delete logs older than this date (minimum 30 days ago)
+        example: "2024-10-01T00:00:00Z"
+      - name: company_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Limit purge to a specific company (admin only)
+    responses:
+      '200':
+        description: Logs purged successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deleted_count:
+                  type: integer
+                  description: Number of deleted log entries
+                  example: 15234
+                before_date:
+                  type: string
+                  format: date-time
+                  description: Cutoff date used for purge
+                  example: "2024-10-01T00:00:00Z"
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -157,8 +265,6 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -219,75 +325,5 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
-      '500':
-        $ref: '../components/responses/ServerError.yaml'
-
-/access-logs/export:
-  get:
-    operationId: exportAccessLogs
-    summary: Export access logs
-    description: |
-      Export access logs to CSV for external analysis or archiving.
-      Same filters as GET /access-logs.
-
-      **Limit**: Maximum 10,000 logs per export (pagination required for more).
-    tags:
-      - Audit
-    security:
-      - JWTAuth: []
-    parameters:
-      - name: from_date
-        in: query
-        required: true
-        schema:
-          type: string
-          format: date-time
-        description: Start date
-      - name: to_date
-        in: query
-        required: true
-        schema:
-          type: string
-          format: date-time
-        description: End date
-      - name: user_id
-        in: query
-        schema:
-          type: string
-          format: uuid
-        description: Filter by user
-      - name: service
-        in: query
-        schema:
-          type: string
-        description: Filter by service
-      - name: access_granted
-        in: query
-        schema:
-          type: boolean
-        description: Filter by result
-    responses:
-      '200':
-        description: CSV exported
-        content:
-          text/csv:
-            schema:
-              type: string
-              format: binary
-        headers:
-          Content-Disposition:
-            schema:
-              type: string
-            description: attachment; filename="access_logs_2025-01-20.csv"
-      '400':
-        $ref: '../components/responses/BadRequest.yaml'
-      '401':
-        $ref: '../components/responses/Unauthorized.yaml'
-      '403':
-        $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'

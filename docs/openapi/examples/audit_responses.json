@@ -12,7 +12,7 @@
           "resource_id": "file-12345678-90ab-cdef-1234-567890abcdef",
           "operation": "DELETE",
           "access_granted": true,
-          "reason": "permission_granted",
+          "reason": "granted",
           "ip_address": "192.168.1.100",
           "user_agent": "Mozilla/5.0",
           "context": {
@@ -56,7 +56,7 @@
       "resource_id": "file-12345678-90ab-cdef-1234-567890abcdef",
       "operation": "DELETE",
       "access_granted": true,
-      "reason": "permission_granted",
+      "reason": "granted",
       "ip_address": "192.168.1.100",
       "user_agent": "Mozilla/5.0",
       "context": {

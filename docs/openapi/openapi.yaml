@@ -3,14 +3,22 @@ info:
   title: Guardian Service API
   version: 0.0.1
   description: |
-    **Waterfall Guardian API** - Guardian Service for Waterfall.
+    **Waterfall Guardian API** - Centralized Authorization Service for the Waterfall Platform.
 
-    RESTful service for ...
+    This service is the single source of truth for permissions and access control within the Waterfall ecosystem.
+    It implements a comprehensive Role-Based Access Control (RBAC) system with fine-grained policies.
+
+    **Key Features**:
+    - **Access Control**: High-performance permission checks (`/check-access`) with caching.
+    - **RBAC Management**: Full lifecycle management for Roles, Policies, and Permissions.
+    - **User Assignments**: Manage user roles within companies and projects.
+    - **Audit Trail**: Comprehensive access logs for security and compliance.
+    - **System Bootstrap**: Automated initialization for new tenants.
 
     **Integrations**:
-    - Identity: User management
-    - Redis: Distributed cache
-    - Guardian: RBAC authorization
+    - **Identity Service**: Consumes user and company events.
+    - **Redis**: Distributed caching for low-latency access checks.
+    - **PostgreSQL**: Persistent storage for RBAC configuration and audit logs.
 
   contact:
     name: Waterfall Team
@@ -30,8 +38,20 @@ servers:
 tags:
   - name: System
     description: Health checks, monitoring, configuration
-  - name: Dummies
-    description: CRUD operations for dummy entities (example/template)
+  - name: Access Control
+    description: Permission checks and user permissions retrieval
+  - name: Roles
+    description: Role management (CRUD operations)
+  - name: Policies
+    description: Policy management and permission assignments
+  - name: Permissions
+    description: Permission definitions (read-only, seeded by system)
+  - name: User Roles
+    description: User role assignments within companies and projects
+  - name: Audit
+    description: Access logs for security and compliance
+  - name: Bootstrap
+    description: System initialization for new tenants
 
 paths:
   # System endpoints
@@ -97,20 +117,12 @@ paths:
     $ref: './paths/audit.yaml#/~1access-logs~1{log_id}'
   /access-logs/statistics:
     $ref: './paths/audit.yaml#/~1access-logs~1statistics'
-  /access-logs/export:
-    $ref: './paths/audit.yaml#/~1access-logs~1export'
 
   # Bootstrap endpoints
   /bootstrap:
     $ref: './paths/bootstrap.yaml#/~1bootstrap'
   /companies/{company_id}/init-roles:
     $ref: './paths/bootstrap.yaml#/~1companies~1{company_id}~1init-roles'
-
-  # Dummy CRUD endpoints
-  /dummies:
-    $ref: './paths/dummies.yaml#/~1dummies'
-  /dummies/{dummyId}:
-    $ref: './paths/dummies.yaml#/~1dummies~1{dummyId}'
 
 components:
   securitySchemes:
@@ -127,6 +139,16 @@ components:
         - `email` (string): User email
         - `exp` (timestamp): Token expiration date
         - `iat` (timestamp): Token issued at date
+
+    InternalToken:
+      type: apiKey
+      in: header
+      name: X-Internal-Token
+      description: |
+        Internal service-to-service authentication token.
+
+        Used for endpoints called by other Waterfall services (Identity, etc.).
+        Must match the `INTERNAL_SERVICE_TOKEN` environment variable.
 
 security:
   - JWTAuth: []

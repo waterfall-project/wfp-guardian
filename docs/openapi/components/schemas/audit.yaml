@@ -17,35 +17,35 @@ AccessLog:
     user_id:
       type: string
       format: uuid
-      description: Utilisateur ayant effectué la requête
+      description: User who made the request
       example: "12345678-90ab-cdef-1234-567890abcdef"
     company_id:
       type: string
       format: uuid
-      description: Company de l'utilisateur
+      description: User's company
       example: "98765432-10ab-cdef-1234-567890abcdef"
     project_id:
       type: string
       format: uuid
       nullable: true
-      description: Projet du contexte (si applicable)
+      description: Project context (if applicable)
       example: "550e8400-e29b-41d4-a716-446655440000"
     service:
       type: string
-      description: Service demandeur
+      description: Requesting service
       example: "storage"
     resource_name:
       type: string
-      description: Type de ressource
+      description: Resource type
       example: "files"
     resource_id:
       type: string
       nullable: true
-      description: ID de la ressource spécifique (si applicable)
+      description: Specific resource ID (if applicable)
       example: "file-12345-uuid"
     operation:
       type: string
-      description: Opération demandée
+      description: Requested operation
       example: "DELETE"
       enum:
         - LIST
@@ -58,139 +58,68 @@ AccessLog:
         - IMPORT
     access_granted:
       type: boolean
-      description: Accès accordé (true) ou refusé (false)
+      description: Access granted (true) or denied (false)
       example: true
     reason:
       type: string
       nullable: true
-      description: Raison du résultat (surtout si refus)
+      description: Reason for access decision
       example: "no_permission"
       enum:
-        - permission_granted
+        - granted
         - no_permission
-        - user_not_found
-        - role_not_found
-        - resource_not_found
-        - insufficient_privileges
-        - access_denied
+        - no_matching_role
+        - role_expired
+        - role_inactive
+        - project_mismatch
+        - company_mismatch
     ip_address:
       type: string
       nullable: true
-      description: Adresse IP de la requête
+      description: Request IP address
       example: "192.168.1.100"
     user_agent:
       type: string
       nullable: true
-      description: User-Agent de la requête
+      description: Request User-Agent
       example: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
     context:
       type: object
       nullable: true
-      description: Contexte supplémentaire de la requête
+      description: Additional request context
       example:
         target_company_id: "child-company-uuid"
         file_size: 2048576
     created_at:
       type: string
       format: date-time
-      description: Date/heure de la tentative d'accès
+      description: Date/time of the access attempt
       example: "2025-01-20T14:35:22Z"
-
-AccessLogFilter:
-  type: object
-  properties:
-    user_id:
-      type: string
-      format: uuid
-      description: Filtrer par utilisateur
-      example: "12345678-90ab-cdef-1234-567890abcdef"
-    company_id:
-      type: string
-      format: uuid
-      description: Filtrer par company
-      example: "98765432-10ab-cdef-1234-567890abcdef"
-    project_id:
-      type: string
-      format: uuid
-      description: Filtrer par projet
-      example: "550e8400-e29b-41d4-a716-446655440000"
-    service:
-      type: string
-      description: Filtrer par service
-      example: "storage"
-    resource_name:
-      type: string
-      description: Filtrer par type de ressource
-      example: "files"
-    operation:
-      type: string
-      description: Filtrer par opération
-      example: "DELETE"
-      enum:
-        - LIST
-        - CREATE
-        - READ
-        - UPDATE
-        - DELETE
-        - APPROVE
-        - EXPORT
-        - IMPORT
-    access_granted:
-      type: boolean
-      description: |
-        Filtrer par résultat:
-        - true = accès accordés uniquement
-        - false = refus uniquement
-        - null/absent = tous
-      example: false
-    from_date:
-      type: string
-      format: date-time
-      description: Date de début
-      example: "2025-01-01T00:00:00Z"
-    to_date:
-      type: string
-      format: date-time
-      description: Date de fin
-      example: "2025-01-31T23:59:59Z"
-    page:
-      type: integer
-      minimum: 1
-      default: 1
-      description: Numéro de page
-      example: 1
-    page_size:
-      type: integer
-      minimum: 1
-      maximum: 100
-      default: 50
-      description: Nombre d'éléments par page
-      example: 50
 
 AuditStatistics:
   type: object
-  description: Statistiques d'audit agrégées
+  description: Aggregated audit statistics
   properties:
     total_requests:
       type: integer
-      description: Nombre total de requêtes
+      description: Total number of requests
       example: 15234
     granted_requests:
       type: integer
-      description: Nombre d'accès accordés
+      description: Number of granted accesses
       example: 14890
     denied_requests:
       type: integer
-      description: Nombre d'accès refusés
+      description: Number of denied accesses
       example: 344
     success_rate:
       type: number
       format: float
-      description: Taux de succès (%)
+      description: Success rate (%)
       example: 97.74
     by_service:
       type: array
-      description: Agrégation par service
+      description: Aggregation by service
       items:
         type: object
         properties:
@@ -208,7 +137,7 @@ AuditStatistics:
             example: 122
     by_operation:
       type: array
-      description: Agrégation par opération
+      description: Aggregation by operation
       items:
         type: object
         properties:
@@ -226,7 +155,7 @@ AuditStatistics:
             example: 44
     top_users:
       type: array
-      description: Top 10 utilisateurs par nombre de requêtes
+      description: Top 10 users by number of requests
       items:
         type: object
         properties:

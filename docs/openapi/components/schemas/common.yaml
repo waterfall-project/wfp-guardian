@@ -42,18 +42,19 @@ ValidationError:
   properties:
     message:
       type: string
-      example: "Validation failed"
+      description: Human-readable error message
+      example: "Validation error"
     errors:
-      type: array
-      items:
-        type: object
-        properties:
-          field:
-            type: string
-            example: "name"
-          message:
-            type: string
-            example: "Field is required"
+      type: object
+      description: Field-level validation errors (Marshmallow format)
+      additionalProperties:
+        type: array
+        items:
+          type: string
+      example:
+        name: ["This field is required"]
+        email: ["Invalid email format", "Email already exists"]
+        age: ["Must be greater than 18"]
 
 SuccessResponse:
   type: object

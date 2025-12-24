@@ -21,6 +21,19 @@ Permission:
       type: string
       description: Service name
       example: "storage"
+      enum:
+        - identity
+        - storage
+        - project
+        - diagram
+        - requirement
+        - system
+        - work
+        - budget
+        - timesheet
+        - analytics
+        - basic-io
+        - resources
     resource_name:
       type: string
       description: Resource type
@@ -51,32 +64,3 @@ Permission:
       type: string
       format: date-time
       example: "2025-01-20T14:45:00Z"
-
-PermissionCreate:
-  type: object
-  required:
-    - service
-    - resource_name
-    - operation
-  properties:
-    service:
-      type: string
-      example: "diagram"
-    resource_name:
-      type: string
-      example: "diagrams"
-    operation:
-      type: string
-      enum:
-        - LIST
-        - CREATE
-        - READ
-        - UPDATE
-        - DELETE
-        - APPROVE
-        - EXPORT
-        - IMPORT
-      example: "CREATE"
-    description:
-      type: string
-      example: "Create diagrams"

@@ -1,4 +1,32 @@
 /roles:
+  head:
+    operationId: headRoles
+    summary: Get roles count
+    description: Returns only headers with X-Total-Count for pagination without body.
+    tags:
+      - Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: is_active
+        in: query
+        schema:
+          type: boolean
+        description: Filter by active status
+    responses:
+      '200':
+        description: Headers only with X-Total-Count
+        headers:
+          X-Total-Count:
+            description: Total number of items
+            schema:
+              type: integer
+              example: 42
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
   get:
     operationId: listRoles
     summary: List all roles
@@ -46,8 +74,6 @@
                         $ref: '../components/schemas/roles.yaml#/Role'
       '401':
         $ref: '../components/responses/Unauthorized.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -85,8 +111,10 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
+      '409':
+        $ref: '../components/responses/Conflict.yaml'
+      '422':
+        $ref: '../components/responses/UnprocessableEntity.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -118,8 +146,6 @@
         $ref: '../components/responses/NotFound.yaml'
       '401':
         $ref: '../components/responses/Unauthorized.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -165,8 +191,8 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
+      '422':
+        $ref: '../components/responses/UnprocessableEntity.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -199,8 +225,6 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -221,21 +245,39 @@
           type: string
           format: uuid
         description: Role ID
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+        description: Page number
+      - name: page_size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        description: Items per page
     responses:
       '200':
         description: List of role policies
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: '../components/schemas/policies.yaml#/Policy'
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/PaginatedResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas/policies.yaml#/Policy'
       '404':
         $ref: '../components/responses/NotFound.yaml'
       '401':
         $ref: '../components/responses/Unauthorized.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -286,8 +328,6 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -324,7 +364,5 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'

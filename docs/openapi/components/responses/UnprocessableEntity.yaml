@@ -2,15 +2,18 @@ description: Unprocessable Entity - Validation error
 content:
   application/json:
     schema:
-      $ref: '../schemas/Error.yaml'
+      $ref: '../schemas/common.yaml#/ValidationError'
     examples:
       validation_error:
         value:
-          error: validation_error
-          message: Validation error
-          details:
-            path: "/v0/resource"
-            method: "POST"
-            request_id: "req-abc123xyz"
+          message: "Validation error"
+          errors:
+            name: ["This field is required"]
+            email: ["Invalid email format", "Email already exists"]
+      validation_multiple_fields:
+        value:
+          message: "Validation error"
+          errors:
+            name: ["This field is required"]
             email: ["Invalid email format"]
             age: ["Must be greater than 18"]

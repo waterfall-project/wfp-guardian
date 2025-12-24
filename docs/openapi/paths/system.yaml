@@ -24,6 +24,8 @@
                   type: string
                   format: date-time
                   example: 2025-12-22T10:30:00Z
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
       '429':
         $ref: '../components/responses/TooManyRequests.yaml'
       '500':
@@ -75,6 +77,8 @@
                   type: string
                   format: date-time
                   example: 2025-12-22T10:30:00Z
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
       '429':
         $ref: '../components/responses/TooManyRequests.yaml'
       '500':
@@ -139,8 +143,6 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -214,8 +216,6 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -267,6 +267,8 @@
                 # HELP flask_exporter_info Information about the Prometheus Flask exporter
                 # TYPE flask_exporter_info gauge
                 flask_exporter_info{version="0.23.2"} 1.0
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
       '429':
         $ref: '../components/responses/TooManyRequests.yaml'
       '500':

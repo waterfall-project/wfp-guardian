@@ -21,6 +21,21 @@
           type: string
           format: uuid
         description: User ID
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+        description: Page number
+      - name: page_size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        description: Items per page
       - name: project_id
         in: query
         schema:
@@ -38,9 +53,14 @@
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: '../components/schemas/user_roles.yaml#/UserRole'
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/PaginatedResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas/user_roles.yaml#/UserRole'
             examples:
               default:
                 $ref: '../examples/user_roles_responses.json#/user_role_list'
@@ -48,8 +68,6 @@
         $ref: '../components/responses/NotFound.yaml'
       '401':
         $ref: '../components/responses/Unauthorized.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -105,8 +123,8 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
+      '422':
+        $ref: '../components/responses/UnprocessableEntity.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -145,8 +163,6 @@
         $ref: '../components/responses/NotFound.yaml'
       '401':
         $ref: '../components/responses/Unauthorized.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -203,8 +219,8 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
+      '422':
+        $ref: '../components/responses/UnprocessableEntity.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -242,8 +258,6 @@
         $ref: '../components/responses/Unauthorized.yaml'
       '403':
         $ref: '../components/responses/Forbidden.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
 
@@ -313,7 +327,5 @@
         $ref: '../components/responses/NotFound.yaml'
       '401':
         $ref: '../components/responses/Unauthorized.yaml'
-      '429':
-        $ref: '../components/responses/TooManyRequests.yaml'
       '500':
         $ref: '../components/responses/ServerError.yaml'
