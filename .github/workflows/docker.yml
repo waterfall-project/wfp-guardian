@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        stage: [dev, test, production]
+        stage: [development, test, production]
 
     permissions:
       contents: read
