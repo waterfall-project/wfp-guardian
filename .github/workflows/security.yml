@@ -112,7 +112,7 @@ jobs:
           echo "Secrets Scan: ${{ needs.secrets-scan.result }}"
 
           if [[ "${{ needs.bandit-scan.result }}" != "success" ]] || \
-             [[ "${{ needs.docker-scan.result }}" == "failure" ]] || \
+             [[ "${{ needs.docker-scan.result }}" != "success" && "${{ needs.docker-scan.result }}" != "skipped" ]] || \
              [[ "${{ needs.secrets-scan.result }}" != "success" ]]; then
             echo "❌ Security checks failed"
             exit 1
