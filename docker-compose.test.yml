@@ -58,6 +58,7 @@ services:
       REDIS_HOST: redis-test
       REDIS_PORT: 6379
       SERVICE_PORT: 5001
+      JWT_ALGORITHM: HS256
       JWT_SECRET: test-secret-key-shared
       LOG_LEVEL: INFO
       WAIT_FOR_DB: "true"

@@ -192,6 +192,17 @@ warn_no_return = true
 follow_imports = "normal"
 ignore_missing_imports = true
 strict_optional = true
+exclude = [
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "build",
+    "dist",
+    "migrations",
+]
 
 [[tool.mypy.overrides]]
 module = "tests.*"

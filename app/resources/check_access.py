@@ -27,12 +27,17 @@ class CheckAccessResource(Resource):
 
         Returns:
             tuple: A tuple containing the response dictionary and HTTP status code.
-                   The response includes 'access_granted', 'reason', and 'cache_hit'.
+                   The response includes 'access_granted', 'reason', 'message', etc.
         """
-        # Implementation goes here
+        # Implementation goes here - mock response
         mock_json = {
             "access_granted": True,
-            "reason": "permission_granted",
-            "cache_hit": False,
+            "reason": "granted",
+            "message": "Access granted via role 'project_manager' on project 'alpha'",
+            "access_type": "direct",
+            "matched_role": {
+                "role_id": "850e8400-e29b-41d4-a716-446655440000",
+                "role_name": "project_manager",
+            },
         }
         return mock_json, 200

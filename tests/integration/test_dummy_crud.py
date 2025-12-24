@@ -12,7 +12,10 @@ These tests verify the complete CRUD functionality for Dummy resources
 in a real environment with all services configured.
 """
 
+import pytest
 
+
+@pytest.mark.skip(reason="Dummy endpoints are disabled in routes.py")
 class TestDummyCRUD:
     """Integration tests for Dummy resource CRUD operations."""
 

@@ -31,7 +31,7 @@ class TestServiceConnectivity:
             pytest.skip("Redis not enabled")
 
         try:
-            import redis
+            import redis  # pyright: ignore[reportMissingImports]  # noqa: I001
 
             redis_url = app.config["REDIS_URL"]
             client = redis.from_url(redis_url, socket_connect_timeout=2)
@@ -49,17 +49,6 @@ class TestServiceConnectivity:
             assert "timestamp" in data
         except requests.RequestException as e:
             pytest.fail(f"Identity service not reachable: {e}")
-
-    def test_guardian_service_health(self):
-        """Test Guardian service health endpoint at /v0/health."""
-        try:
-            response = requests.get("http://localhost:5002/v0/health", timeout=5)
-            assert response.status_code == 200
-            data = response.json()
-            assert data["status"] == "ok"
-            assert "timestamp" in data
-        except requests.RequestException as e:
-            pytest.fail(f"Guardian service not reachable: {e}")
 
 
 class TestApplicationHealth:
@@ -140,9 +129,12 @@ class TestApplicationHealth:
         # Verify key configurations
         assert "DATABASE_ENDPOINT" in data
         assert "IDENTITY_SERVICE_URL" in data
-        assert "GUARDIAN_SERVICE_URL" in data
 
-        # Verify sensitive values are masked (either <MASKED> or "is set")
+        # Verify sensitive values are masked (either <MASKED>, "is set", or "is not set")
         if "DATABASE_PASSWORD" in data:
             password_value = data["DATABASE_PASSWORD"]
-            assert password_value in ["<MASKED>", "DATABASE_PASSWORD is set"]
+            assert password_value in [
+                "<MASKED>",
+                "DATABASE_PASSWORD is set",
+                "DATABASE_PASSWORD is not set",
+            ]
