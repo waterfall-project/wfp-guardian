@@ -106,7 +106,7 @@ jobs:
           done
 
           # Test health endpoint
-          RESPONSE=$(curl -s http://localhost:5000v0/health)
+          RESPONSE=$(curl -s http://localhost:5000/v0/health)
           echo "Health check response: $RESPONSE"
 
           # Stop container
