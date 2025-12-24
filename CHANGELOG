@@ -1,0 +1,51 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.0.1] - 2025-12-24
+
+### Added
+- Initial project setup with Flask application factory pattern
+- Complete RBAC authorization service architecture
+- Access control endpoints (`/check-access`, `/batch-check-access`)
+- RBAC management endpoints (Roles, Policies, Permissions, User Roles)
+- Audit trail system for access logs
+- Bootstrap endpoint for tenant initialization
+- Health and readiness endpoints for Kubernetes
+- Metrics endpoint for Prometheus monitoring
+- JWT authentication and authorization middleware
+- Rate limiting with Flask-Limiter
+- Redis caching support (optional)
+- PostgreSQL and SQLite database support
+- Identity service client integration
+- Comprehensive test suite (unit + integration)
+- Docker and Docker Compose configuration
+- CI/CD ready with GitHub Actions support
+- Code quality tools (Black, Ruff, MyPy, Bandit)
+- Pre-commit hooks configuration
+- OpenAPI 3.0 specification
+- Grafana + Prometheus monitoring stack
+- Complete documentation (API, monitoring, testing)
+- Dual licensing (AGPLv3 + Commercial)
+- Makefile with development commands
+
+### Configuration
+- Multi-environment support (development, testing, integration, staging, production)
+- Environment-based configuration via `.env` files
+- Configurable logging with structured output
+- CORS configuration for cross-origin requests
+- Database migration support with Alembic
+
+### Documentation
+- README with quick start guide
+- OpenAPI specification for all endpoints
+- Monitoring and metrics documentation
+- Testing documentation (unit and integration)
+- Coding standards guide
+- Contributing guidelines
+- Code of conduct
+
+[0.0.1]: https://github.com/waterfall-project/wfp-guardian/releases/tag/v0.0.1
