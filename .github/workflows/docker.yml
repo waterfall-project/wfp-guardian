@@ -79,11 +79,15 @@ jobs:
           # Start container
           docker run -d --name test-app -p 5000:5000 \
             -e FLASK_ENV=production \
-            -e SECRET_KEY=test-secret-key \
+            -e SECRET_KEY=test-secret-key-for-docker-workflow \
             -e DATABASE_TYPE=sqlite \
             -e DATABASE_URL=sqlite:///tmp/test.db \
             -e WAIT_FOR_DB=false \
             -e RUN_MIGRATIONS=false \
+            -e JWT_ALGORITHM=HS256 \
+            -e JWT_SECRET=test-jwt-secret-for-workflow \
+            -e USE_IDENTITY_SERVICE=false \
+            -e USE_GUARDIAN_SERVICE=false \
             $IMAGE_TAG
 
           # Wait for app to be ready
