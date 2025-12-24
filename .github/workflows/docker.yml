@@ -76,6 +76,18 @@ jobs:
           IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
           echo "Testing image: $IMAGE_TAG"
 
+          # For test stage, run pytest directly
+          if [[ "${{ matrix.stage }}" == "test" ]]; then
+            echo "Running pytest in test container..."
+            docker run --rm \
+              -e DATABASE_URL=sqlite:///:memory: \
+              -e USE_IDENTITY_SERVICE=false \
+              -e USE_GUARDIAN_SERVICE=false \
+              $IMAGE_TAG
+            exit 0
+          fi
+
+          # For development and production stages, test the running server
           # Start container
           docker run -d --name test-app -p 5000:5000 \
             -e FLASK_ENV=production \
