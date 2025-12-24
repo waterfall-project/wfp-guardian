@@ -202,6 +202,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-results-${{ matrix.stage }}.sarif'
           severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
           exit-code: '0'
 
       - name: Upload Trivy results to GitHub Security
@@ -216,6 +217,7 @@ jobs:
           image-ref: ${{ steps.image.outputs.tag }}
           format: 'table'
           exit-code: '1'
+          ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
 
   image-size-check:

@@ -1,8 +1,0 @@
-# Trivy Ignore File
-# Format: CVE-ID [expiration-date] [reason]
-
-# PostgreSQL libpq integer wraparound vulnerability
-# No fix available yet from Debian (status: affected)
-# Tracking: https://avd.aquasec.com/nvd/cve-2025-12818
-# TODO: Remove when Debian releases patched version
-CVE-2025-12818

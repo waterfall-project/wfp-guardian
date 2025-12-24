@@ -82,6 +82,7 @@ jobs:
           image-ref: wfp-identity:security-scan
           format: 'table'
           exit-code: '1'
+          ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
 
   secrets-scan:
