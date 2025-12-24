@@ -11,10 +11,11 @@ def test_unauthorized_handler(client):
 
     assert response.status_code == 401
     data = response.get_json()
+    assert data["error"] == "invalid_token"
     assert data["message"] == "Unauthorized"
-    assert data["path"] == "/unauthorized"
-    assert data["method"] == "GET"
-    assert "request_id" in data
+    assert data["details"]["path"] == "/unauthorized"
+    assert data["details"]["method"] == "GET"
+    assert "request_id" in data["details"]
 
 
 def test_forbidden_handler(client):
@@ -23,10 +24,11 @@ def test_forbidden_handler(client):
 
     assert response.status_code == 403
     data = response.get_json()
+    assert data["error"] == "forbidden"
     assert data["message"] == "Forbidden"
-    assert data["path"] == "/forbidden"
-    assert data["method"] == "GET"
-    assert "request_id" in data
+    assert data["details"]["path"] == "/forbidden"
+    assert data["details"]["method"] == "GET"
+    assert "request_id" in data["details"]
 
 
 def test_not_found_handler(client):
@@ -35,10 +37,11 @@ def test_not_found_handler(client):
 
     assert response.status_code == 404
     data = response.get_json()
+    assert data["error"] == "not_found"
     assert data["message"] == "Resource not found"
-    assert data["path"] == "/nonexistent-route"
-    assert data["method"] == "GET"
-    assert "request_id" in data
+    assert data["details"]["path"] == "/nonexistent-route"
+    assert data["details"]["method"] == "GET"
+    assert "request_id" in data["details"]
 
 
 def test_bad_request_handler(client):
@@ -47,10 +50,11 @@ def test_bad_request_handler(client):
 
     assert response.status_code == 400
     data = response.get_json()
+    assert data["error"] == "bad_request"
     assert data["message"] == "Bad request"
-    assert data["path"] == "/bad"
-    assert data["method"] == "GET"
-    assert "request_id" in data
+    assert data["details"]["path"] == "/bad"
+    assert data["details"]["method"] == "GET"
+    assert "request_id" in data["details"]
 
 
 def test_internal_server_error_handler(client):
@@ -59,10 +63,11 @@ def test_internal_server_error_handler(client):
 
     assert response.status_code == 500
     data = response.get_json()
+    assert data["error"] == "internal_error"
     assert data["message"] == "Internal server error"
-    assert data["path"] == "/fail"
-    assert data["method"] == "GET"
-    assert "request_id" in data
+    assert data["details"]["path"] == "/fail"
+    assert data["details"]["method"] == "GET"
+    assert "request_id" in data["details"]
 
 
 def test_internal_server_error_handler_with_debug(app):
@@ -74,9 +79,10 @@ def test_internal_server_error_handler_with_debug(app):
 
         assert response.status_code == 500
         data = response.get_json()
+        assert data["error"] == "internal_error"
         assert data["message"] == "Internal server error"
-        assert "exception" in data
-        assert "Test internal error" in data["exception"]
+        assert "exception" in data["details"]
+        assert "Test internal error" in data["details"]["exception"]
 
     # Explicitly clean up database connection
     from app.models.db import db
@@ -94,8 +100,9 @@ def test_internal_server_error_handler_without_debug(app):
 
         assert response.status_code == 500
         data = response.get_json()
+        assert data["error"] == "internal_error"
         assert data["message"] == "Internal server error"
-        assert "exception" not in data
+        assert "exception" not in data["details"]
 
 
 def test_error_handlers_with_different_methods(client):
@@ -108,19 +115,19 @@ def test_error_handlers_with_different_methods(client):
     response = client.get("/unauthorized")
     assert response.status_code == 401
     data = response.get_json()
-    assert data["method"] == "GET"
+    assert data["details"]["method"] == "GET"
 
     # Test 403 with GET
     response = client.get("/forbidden")
     assert response.status_code == 403
     data = response.get_json()
-    assert data["method"] == "GET"
+    assert data["details"]["method"] == "GET"
 
     # Test 400 with GET
     response = client.get("/bad")
     assert response.status_code == 400
     data = response.get_json()
-    assert data["method"] == "GET"
+    assert data["details"]["method"] == "GET"
 
 
 def test_error_handlers_preserve_request_context(client, app):
@@ -130,4 +137,4 @@ def test_error_handlers_preserve_request_context(client, app):
     assert response.status_code == 401
     data = response.get_json()
     # request_id should be present (even if None) as it's set in the response
-    assert "request_id" in data
+    assert "request_id" in data["details"]

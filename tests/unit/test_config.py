@@ -82,7 +82,6 @@ class TestDefaultValues:
     def test_external_services_defaults(self):
         """Test external services default configuration values."""
         assert abs(Config.EXTERNAL_SERVICES_TIMEOUT - 5.0) < 0.001
-        assert Config.GUARDIAN_SERVICE_URL is None
         assert Config.IDENTITY_SERVICE_URL is None
 
     def test_mock_user_defaults(self):
@@ -107,7 +106,6 @@ class TestDevelopmentConfig:
     def test_development_service_flags(self):
         """Test that external services are disabled in development."""
         assert DevelopmentConfig.USE_IDENTITY_SERVICE is False
-        assert DevelopmentConfig.USE_GUARDIAN_SERVICE is False
 
     def test_development_debug_mode(self):
         """Test that debug mode is enabled in development."""
@@ -136,7 +134,6 @@ class TestTestingConfig:
     def test_testing_service_flags(self):
         """Test that external services are disabled in testing."""
         assert TestingConfig.USE_IDENTITY_SERVICE is False
-        assert TestingConfig.USE_GUARDIAN_SERVICE is False
 
     def test_testing_testing_flag(self):
         """Test that TESTING flag is enabled in testing."""
@@ -157,7 +154,6 @@ class TestIntegrationConfig:
     def test_integration_service_flags(self):
         """Test that external services are enabled in integration."""
         assert IntegrationConfig.USE_IDENTITY_SERVICE is True
-        assert IntegrationConfig.USE_GUARDIAN_SERVICE is True
 
     def test_integration_testing_flag(self):
         """Test that TESTING flag is enabled in integration."""
@@ -178,7 +174,6 @@ class TestStagingConfig:
     def test_staging_service_flags(self):
         """Test that external services are enabled in staging."""
         assert StagingConfig.USE_IDENTITY_SERVICE is True
-        assert StagingConfig.USE_GUARDIAN_SERVICE is True
 
     def test_staging_debug_mode(self):
         """Test that debug mode is enabled in staging."""
@@ -195,7 +190,6 @@ class TestProductionConfig:
     def test_production_service_flags(self):
         """Test that external services are enabled in production."""
         assert ProductionConfig.USE_IDENTITY_SERVICE is True
-        assert ProductionConfig.USE_GUARDIAN_SERVICE is True
 
     def test_production_debug_mode(self):
         """Test that debug mode is disabled in production."""
@@ -361,47 +355,6 @@ class TestIdentityServiceValidation:
         monkeypatch.setenv("USE_IDENTITY_SERVICE", "false")
         if "IDENTITY_SERVICE_URL" in os.environ:
             monkeypatch.delenv("IDENTITY_SERVICE_URL")
-
-        from importlib import reload
-
-        from app import config as config_module
-
-        reload(config_module)
-        from app.config import DevelopmentConfig as ReloadedDev
-
-        # Should not raise any exception
-        ReloadedDev.validate()
-
-
-# =============================================================================
-# Test Configuration Validation - Guardian Service
-# =============================================================================
-
-
-class TestGuardianServiceValidation:
-    """Test Guardian Service configuration validation."""
-
-    def test_guardian_url_required_when_enabled(self, monkeypatch):
-        """Test that GUARDIAN_SERVICE_URL is required when USE_GUARDIAN_SERVICE is enabled."""
-        monkeypatch.setenv("USE_GUARDIAN_SERVICE", "true")
-        if "GUARDIAN_SERVICE_URL" in os.environ:
-            monkeypatch.delenv("GUARDIAN_SERVICE_URL")
-
-        from importlib import reload
-
-        from app import config as config_module
-
-        reload(config_module)
-        from app.config import DevelopmentConfig as ReloadedDev
-
-        with pytest.raises(ValueError, match="GUARDIAN_SERVICE_URL is required"):
-            ReloadedDev.validate()
-
-    def test_guardian_url_not_required_when_disabled(self, monkeypatch):
-        """Test that GUARDIAN_SERVICE_URL is not required when USE_GUARDIAN_SERVICE is disabled."""
-        monkeypatch.setenv("USE_GUARDIAN_SERVICE", "false")
-        if "GUARDIAN_SERVICE_URL" in os.environ:
-            monkeypatch.delenv("GUARDIAN_SERVICE_URL")
 
         from importlib import reload
 

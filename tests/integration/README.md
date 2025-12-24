@@ -111,7 +111,7 @@ Understanding where each component runs:
 2. Services `wfp-identity` and `wfp-guardian` cloned in sibling directories:
    ```
    parent/
-   ├── wfp-flask-template/  (this repo)
+   ├── wfp-guardian/  (this repo)
    ├── wfp-identity/
    └── wfp-guardian/
    ```

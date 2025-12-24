@@ -6,7 +6,7 @@
 
 ## Overview
 
-This guide explains how to import and configure the Grafana dashboard for monitoring your WFP Flask Template application.
+This guide explains how to import and configure the Grafana dashboard for monitoring your WFP Guardian Service.
 
 ## Dashboard Features
 
@@ -92,7 +92,7 @@ The dashboard includes two template variables:
 - **Type**: Query
 - **Query**: `label_values(flask_http_request_total, job)`
 - **Description**: Select the Flask application job to monitor
-- **Default**: `wfp-flask-template`
+- **Default**: `wfp-guardian`
 
 ### Time Range
 
@@ -176,7 +176,7 @@ metadata:
   labels:
     grafana_dashboard: "1"
 data:
-  wfp-flask-template.json: |
+  wfp-guardian.json: |
     # Paste grafana-dashboard.json content here
 ```
 
@@ -204,7 +204,7 @@ Grafana sidecar will automatically detect and load the dashboard.
 
 4. **Verify job label**:
    - Metrics must have `job` label matching the dashboard variable
-   - Check in Prometheus: `flask_http_request_total{job="wfp-flask-template"}`
+   - Check in Prometheus: `flask_http_request_total{job="wfp-guardian"}`
 
 ### Dashboard Shows "No Data"
 
@@ -243,7 +243,7 @@ To share or version control your customized dashboard:
 ```bash
 # Export via API
 curl -H "Authorization: Bearer ${GRAFANA_API_KEY}" \
-  "${GRAFANA_URL}/api/dashboards/uid/wfp-flask-template" \
+  "${GRAFANA_URL}/api/dashboards/uid/wfp-guardian" \
   | jq '.dashboard' > my-custom-dashboard.json
 ```
 

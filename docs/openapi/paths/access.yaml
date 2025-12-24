@@ -1,0 +1,174 @@
+/check-access:
+  post:
+    operationId: checkAccess
+    summary: Check user access
+    description: |
+      Most critical endpoint of the system (called thousands of times/day).
+      Checks if a user has permission to perform an operation on a resource.
+
+      **Performance**:
+      - Cache hit: < 5ms
+      - Cache miss: < 30ms
+      - TTL: 5 minutes (permissions), 1 hour (hierarchy)
+
+      **Decorator Usage**:
+      ```python
+      @check_access("storage", "files", "DELETE", context_builder=lambda file_id: {"resource_id": file_id})
+      async def delete_file(file_id: str):
+          # Business logic if access granted
+      ```
+    tags:
+      - Access Control
+    security:
+      - JWTAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/access.yaml#/CheckAccessRequest'
+          examples:
+            simple:
+              $ref: '../examples/access_responses.json#/check_access_request_simple'
+            with_project:
+              $ref: '../examples/access_responses.json#/check_access_request_with_project'
+            with_target_company:
+              $ref: '../examples/access_responses.json#/check_access_request_with_target_company'
+            with_resource:
+              $ref: '../examples/access_responses.json#/check_access_request_with_resource'
+    responses:
+      '200':
+        description: Verification result (granted or denied)
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/access.yaml#/CheckAccessResponse'
+            examples:
+              granted:
+                $ref: '../examples/access_responses.json#/check_access_response_granted'
+              denied:
+                $ref: '../examples/access_responses.json#/check_access_response_denied'
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/batch-check-access:
+  post:
+    operationId: batchCheckAccess
+    summary: Check multiple accesses in batch
+    description: |
+      Checks up to **50 accesses** simultaneously (UI optimization).
+      Typically used to show/hide action buttons.
+
+      **Limit**: Maximum 50 checks per request. Returns 400 if exceeded.
+
+      **UI Example**:
+      ```javascript
+      const checks = [
+        {service: "diagram", resource_name: "diagrams", operation: "CREATE"},
+        {service: "diagram", resource_name: "diagrams", operation: "DELETE"},
+        {service: "storage", resource_name: "files", operation: "UPLOAD"}
+      ];
+      const results = await guardianClient.batchCheckAccess(checks);
+      // Show/hide buttons based on results
+      ```
+    tags:
+      - Access Control
+    security:
+      - JWTAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/access.yaml#/BatchCheckAccessRequest'
+          examples:
+            default:
+              $ref: '../examples/access_responses.json#/batch_check_access_request'
+    responses:
+      '200':
+        description: Check results
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/access.yaml#/BatchCheckAccessResponse'
+            examples:
+              default:
+                $ref: '../examples/access_responses.json#/batch_check_access_response'
+      '400':
+        description: |
+          Bad Request. Possible causes:
+          - Invalid request format
+          - **Too many checks**: Maximum 50 items per batch exceeded
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/Error.yaml'
+            examples:
+              too_many_checks:
+                summary: Batch limit exceeded
+                value:
+                  error: "bad_request"
+                  message: "Batch limit exceeded: maximum 50 checks allowed, got 75"
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/users/{user_id}/permissions:
+  get:
+    operationId: getUserPermissions
+    summary: Get all user permissions
+    description: |
+      Lists all roles, policies, and permissions for a user.
+      Useful for debugging or profile display.
+
+      **Project Filtering**:
+      - Without project_id: company-wide permissions only
+      - With project_id: company-wide + specific project permissions
+    tags:
+      - Access Control
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: User ID
+        example: "12345678-90ab-cdef-1234-567890abcdef"
+      - name: project_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+        description: Filter by project (optional)
+        example: "550e8400-e29b-41d4-a716-446655440000"
+    responses:
+      '200':
+        description: User permissions
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/access.yaml#/UserPermissionsResponse'
+            examples:
+              default:
+                $ref: '../examples/access_responses.json#/user_permissions_response'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'

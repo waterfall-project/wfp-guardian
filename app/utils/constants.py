@@ -21,9 +21,6 @@ ERROR_DATABASE_URL_NOT_SET = (
 )
 ERROR_DATABASE_TYPE_INVALID = "DATABASE_TYPE must be one of: sqlite, postgresql, mysql."
 ERROR_DATABASE_CONFIG_INCOMPLETE = "Database configuration incomplete. Provide either DATABASE_URL or all required connection variables (HOST, PORT, USER, PASSWORD, NAME for postgresql/mysql)."
-ERROR_GUARDIAN_URL_REQUIRED = (
-    "GUARDIAN_SERVICE_URL is required when USE_GUARDIAN_SERVICE is enabled."
-)
 ERROR_IDENTITY_URL_REQUIRED = (
     "IDENTITY_SERVICE_URL is required when USE_IDENTITY_SERVICE is enabled."
 )
@@ -42,7 +39,6 @@ DEFAULT_MAX_PAGE_LIMIT = 100
 
 # External Services Configuration
 DEFAULT_EXTERNAL_SERVICES_TIMEOUT = "5"
-DEFAULT_USE_GUARDIAN = "true"
 DEFAULT_USE_IDENTITY = "true"
 DEFAULT_USE_REDIS_CACHE = "false"
 

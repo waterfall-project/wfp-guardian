@@ -1,0 +1,174 @@
+AccessLog:
+  type: object
+  required:
+    - id
+    - user_id
+    - company_id
+    - service
+    - resource_name
+    - operation
+    - access_granted
+    - created_at
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    user_id:
+      type: string
+      format: uuid
+      description: User who made the request
+      example: "12345678-90ab-cdef-1234-567890abcdef"
+    company_id:
+      type: string
+      format: uuid
+      description: User's company
+      example: "98765432-10ab-cdef-1234-567890abcdef"
+    project_id:
+      type: string
+      format: uuid
+      nullable: true
+      description: Project context (if applicable)
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    service:
+      type: string
+      description: Requesting service
+      example: "storage"
+    resource_name:
+      type: string
+      description: Resource type
+      example: "files"
+    resource_id:
+      type: string
+      nullable: true
+      description: Specific resource ID (if applicable)
+      example: "file-12345-uuid"
+    operation:
+      type: string
+      description: Requested operation
+      example: "DELETE"
+      enum:
+        - LIST
+        - CREATE
+        - READ
+        - UPDATE
+        - DELETE
+        - APPROVE
+        - EXPORT
+        - IMPORT
+    access_granted:
+      type: boolean
+      description: Access granted (true) or denied (false)
+      example: true
+    reason:
+      type: string
+      nullable: true
+      description: Reason for access decision
+      example: "no_permission"
+      enum:
+        - granted
+        - no_permission
+        - no_matching_role
+        - role_expired
+        - role_inactive
+        - project_mismatch
+        - company_mismatch
+    ip_address:
+      type: string
+      nullable: true
+      description: Request IP address
+      example: "192.168.1.100"
+    user_agent:
+      type: string
+      nullable: true
+      description: Request User-Agent
+      example: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
+    context:
+      type: object
+      nullable: true
+      description: Additional request context
+      example:
+        target_company_id: "child-company-uuid"
+        file_size: 2048576
+    created_at:
+      type: string
+      format: date-time
+      description: Date/time of the access attempt
+      example: "2025-01-20T14:35:22Z"
+
+AuditStatistics:
+  type: object
+  description: Aggregated audit statistics
+  properties:
+    total_requests:
+      type: integer
+      description: Total number of requests
+      example: 15234
+    granted_requests:
+      type: integer
+      description: Number of granted accesses
+      example: 14890
+    denied_requests:
+      type: integer
+      description: Number of denied accesses
+      example: 344
+    success_rate:
+      type: number
+      format: float
+      description: Success rate (%)
+      example: 97.74
+    by_service:
+      type: array
+      description: Aggregation by service
+      items:
+        type: object
+        properties:
+          service:
+            type: string
+            example: "storage"
+          count:
+            type: integer
+            example: 8523
+          granted:
+            type: integer
+            example: 8401
+          denied:
+            type: integer
+            example: 122
+    by_operation:
+      type: array
+      description: Aggregation by operation
+      items:
+        type: object
+        properties:
+          operation:
+            type: string
+            example: "READ"
+          count:
+            type: integer
+            example: 9234
+          granted:
+            type: integer
+            example: 9190
+          denied:
+            type: integer
+            example: 44
+    top_users:
+      type: array
+      description: Top 10 users by number of requests
+      items:
+        type: object
+        properties:
+          user_id:
+            type: string
+            format: uuid
+            example: "12345678-90ab-cdef-1234-567890abcdef"
+          count:
+            type: integer
+            example: 456
+          granted:
+            type: integer
+            example: 450
+          denied:
+            type: integer
+            example: 6

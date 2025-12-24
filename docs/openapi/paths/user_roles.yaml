@@ -1,0 +1,331 @@
+/users/{user_id}/roles:
+  get:
+    operationId: listUserRoles
+    summary: List all roles for a user
+    description: |
+      List all roles assigned to a user.
+      Automatically filtered by company_id from JWT.
+
+      **Optional Project Filtering**:
+      - Without project_id: all roles (company-wide + specific projects)
+      - With project_id: company-wide roles + specific project roles only
+    tags:
+      - User Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: User ID
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+        description: Page number
+      - name: page_size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        description: Items per page
+      - name: project_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter by project (optional)
+      - name: is_active
+        in: query
+        schema:
+          type: boolean
+        description: Filter by active status
+    responses:
+      '200':
+        description: List of user roles
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/PaginatedResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas/user_roles.yaml#/UserRole'
+            examples:
+              default:
+                $ref: '../examples/user_roles_responses.json#/user_role_list'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  post:
+    operationId: assignRoleToUser
+    summary: Assign a role to a user
+    description: |
+      Creates a UserRole to assign a role to a user.
+
+      **Scopes**:
+      - project_id=NULL, scope_type=direct: Company-wide, exact company
+      - project_id=NULL, scope_type=hierarchical: Company + children
+      - project_id=UUID, scope_type=direct: Specific project only
+
+      **Optional Expiration**: expires_at for temporary roles
+    tags:
+      - User Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: User ID
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/user_roles.yaml#/UserRoleCreate'
+          examples:
+            company_wide_hierarchical:
+              $ref: '../examples/user_roles_responses.json#/user_role_create_company_wide'
+            project_specific:
+              $ref: '../examples/user_roles_responses.json#/user_role_create_project'
+            temporary:
+              $ref: '../examples/user_roles_responses.json#/user_role_create_temporary'
+    responses:
+      '201':
+        description: Role assigned
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/user_roles.yaml#/UserRole'
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '422':
+        $ref: '../components/responses/UnprocessableEntity.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/users/{user_id}/roles/{user_role_id}:
+  get:
+    operationId: getUserRole
+    summary: Get a UserRole by ID
+    description: Details of a role assignment
+    tags:
+      - User Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: User ID
+      - name: user_role_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: UserRole ID
+    responses:
+      '200':
+        description: UserRole found
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/user_roles.yaml#/UserRole'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  patch:
+    operationId: updateUserRole
+    summary: Update a UserRole
+    description: |
+      Modifies scope (project_id, scope_type), expiration, or active status.
+      user_id and role_id cannot be modified.
+    tags:
+      - User Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: User ID
+      - name: user_role_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: UserRole ID
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/user_roles.yaml#/UserRoleUpdate'
+          examples:
+            change_scope:
+              $ref: '../examples/user_roles_responses.json#/user_role_update_scope'
+            extend_expiration:
+              $ref: '../examples/user_roles_responses.json#/user_role_update_expiration'
+            deactivate:
+              $ref: '../examples/user_roles_responses.json#/user_role_update_deactivate'
+    responses:
+      '200':
+        description: UserRole updated
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/user_roles.yaml#/UserRole'
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '422':
+        $ref: '../components/responses/UnprocessableEntity.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  delete:
+    operationId: removeRoleFromUser
+    summary: Remove a role from a user
+    description: |
+      Removes the role assignment.
+      Recommendation: disable (is_active=false) instead of deleting to keep history.
+    tags:
+      - User Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: User ID
+      - name: user_role_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: UserRole ID
+    responses:
+      '204':
+        description: Role removed
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/roles/{role_id}/users:
+  get:
+    operationId: listUsersWithRole
+    summary: List all users with a role
+    description: |
+      List all UserRoles for a given role.
+      Automatically filtered by company_id from JWT.
+    tags:
+      - User Roles
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: role_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Role ID
+      - name: project_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter by project (optional)
+      - name: is_active
+        in: query
+        schema:
+          type: boolean
+        description: Filter by active status
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+        description: Page number
+      - name: page_size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        description: Items per page
+    responses:
+      '200':
+        description: List of users with this role
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/PaginatedResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas/user_roles.yaml#/UserRole'
+            examples:
+              default:
+                $ref: '../examples/user_roles_responses.json#/users_with_role_list'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'

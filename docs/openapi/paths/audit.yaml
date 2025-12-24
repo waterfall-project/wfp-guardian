@@ -1,0 +1,329 @@
+/access-logs:
+  head:
+    operationId: headAccessLogs
+    summary: Get access logs count
+    description: Returns only headers with X-Total-Count for pagination without body.
+    tags:
+      - Audit
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: user_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter by user
+      - name: is_granted
+        in: query
+        schema:
+          type: boolean
+        description: Filter by result
+      - name: from_date
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Start date
+      - name: to_date
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: End date
+    responses:
+      '200':
+        description: Headers only with X-Total-Count
+        headers:
+          X-Total-Count:
+            description: Total number of items
+            schema:
+              type: integer
+              example: 15234
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  get:
+    operationId: getAccessLogs
+    summary: Get access logs (audit)
+    description: |
+      List access logs with advanced filtering.
+      Retention: 90 days by default.
+
+      **Security**: Results are automatically filtered by the user's company_id from JWT.
+      The `company_id` query parameter is only available for super-admins to query other companies.
+
+      **Use Cases**:
+      - Security audit (denied access)
+      - Regulatory compliance
+      - Permission debugging
+      - Usage statistics
+    tags:
+      - Audit
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: user_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter by user
+      - name: company_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter by company (super-admin only, otherwise ignored and JWT company_id used)
+      - name: project_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter by project
+      - name: service
+        in: query
+        schema:
+          type: string
+        description: Filter by service
+        example: "storage"
+      - name: resource_name
+        in: query
+        schema:
+          type: string
+        description: Filter by resource type
+        example: "files"
+      - name: operation
+        in: query
+        schema:
+          type: string
+          enum:
+            - LIST
+            - CREATE
+            - READ
+            - UPDATE
+            - DELETE
+            - APPROVE
+            - EXPORT
+            - IMPORT
+        description: Filter by operation
+      - name: is_granted
+        in: query
+        schema:
+          type: boolean
+        description: |
+          Filter by result:
+          - true = granted access only
+          - false = denied access only
+          - absent = all
+      - name: from_date
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Start date
+        example: "2025-01-01T00:00:00Z"
+      - name: to_date
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: End date
+        example: "2025-01-31T23:59:59Z"
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+        description: Page number
+      - name: page_size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        description: Items per page
+    responses:
+      '200':
+        description: List of access logs
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/PaginatedResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas/audit.yaml#/AccessLog'
+            examples:
+              default:
+                $ref: '../examples/audit_responses.json#/access_log_list'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+  delete:
+    operationId: purgeAccessLogs
+    summary: Purge old access logs (GDPR)
+    description: |
+      Delete access logs older than a specified date.
+
+      **GDPR Compliance**: Enables data retention policy enforcement.
+
+      **Requirements**:
+      - `before` parameter is required
+      - Minimum retention: 30 days (cannot delete recent logs)
+      - Admin permission required
+
+      **Response**: Number of deleted entries.
+    tags:
+      - Audit
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: before
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date-time
+        description: Delete logs older than this date (minimum 30 days ago)
+        example: "2024-10-01T00:00:00Z"
+      - name: company_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Limit purge to a specific company (admin only)
+    responses:
+      '200':
+        description: Logs purged successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deleted_count:
+                  type: integer
+                  description: Number of deleted log entries
+                  example: 15234
+                before_date:
+                  type: string
+                  format: date-time
+                  description: Cutoff date used for purge
+                  example: "2024-10-01T00:00:00Z"
+      '400':
+        $ref: '../components/responses/BadRequest.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/access-logs/{log_id}:
+  get:
+    operationId: getAccessLog
+    summary: Get access log by ID
+    description: Full details of an access log entry.
+    tags:
+      - Audit
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: log_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Log ID
+    responses:
+      '200':
+        description: Log found
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/audit.yaml#/AccessLog'
+            examples:
+              default:
+                $ref: '../examples/audit_responses.json#/access_log_detail'
+      '404':
+        $ref: '../components/responses/NotFound.yaml'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'
+
+/access-logs/statistics:
+  get:
+    operationId: getAccessLogsStatistics
+    summary: Aggregated audit statistics
+    description: |
+      Aggregations of access logs for analysis and reporting.
+
+      **Metrics**:
+      - Total requests / success rate
+      - Distribution by service
+      - Distribution by operation
+      - Top 10 most active users
+    tags:
+      - Audit
+    security:
+      - JWTAuth: []
+    parameters:
+      - name: from_date
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Start date
+        example: "2025-01-01T00:00:00Z"
+      - name: to_date
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: End date
+        example: "2025-01-31T23:59:59Z"
+      - name: company_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter by company (optional)
+      - name: project_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter by project (optional)
+    responses:
+      '200':
+        description: Aggregated statistics
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/audit.yaml#/AuditStatistics'
+            examples:
+              default:
+                $ref: '../examples/audit_responses.json#/audit_statistics'
+      '401':
+        $ref: '../components/responses/Unauthorized.yaml'
+      '403':
+        $ref: '../components/responses/Forbidden.yaml'
+      '500':
+        $ref: '../components/responses/ServerError.yaml'

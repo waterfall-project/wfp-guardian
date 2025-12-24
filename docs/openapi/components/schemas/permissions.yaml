@@ -1,0 +1,66 @@
+Permission:
+  type: object
+  required:
+    - id
+    - name
+    - service
+    - resource_name
+    - operation
+    - created_at
+    - updated_at
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    name:
+      type: string
+      description: Unique name format service:resource:operation
+      example: "storage:files:DELETE"
+    service:
+      type: string
+      description: Service name
+      example: "storage"
+      enum:
+        - identity
+        - storage
+        - project
+        - diagram
+        - requirement
+        - system
+        - work
+        - budget
+        - timesheet
+        - analytics
+        - basic-io
+        - resources
+    resource_name:
+      type: string
+      description: Resource type
+      example: "files"
+    operation:
+      type: string
+      description: Operation
+      example: "DELETE"
+      enum:
+        - LIST
+        - CREATE
+        - READ
+        - UPDATE
+        - DELETE
+        - APPROVE
+        - EXPORT
+        - IMPORT
+    description:
+      type: string
+      nullable: true
+      description: Permission description
+      example: "Delete files"
+    created_at:
+      type: string
+      format: date-time
+      example: "2025-01-15T10:30:00Z"
+    updated_at:
+      type: string
+      format: date-time
+      example: "2025-01-20T14:45:00Z"

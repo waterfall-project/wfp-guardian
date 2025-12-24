@@ -19,11 +19,17 @@ headers:
     description: Number of seconds before retry
     schema:
       type: integer
-      example: 42
+      example: 60
 content:
   application/json:
     schema:
       $ref: '../schemas/Error.yaml'
-    example:
-      error: rate_limit_exceeded
-      message: Too many requests. Please try again in 42 seconds.
+    examples:
+      rate_limit_exceeded:
+        value:
+          error: rate_limit_exceeded
+          message: Rate limit exceeded. Please try again later.
+          details:
+            limit: 100
+            remaining: 0
+            reset: 1702201860

@@ -1,13 +1,30 @@
+# Redocly configuration for Guardian API
+# https://redocly.com/docs/cli/configuration/
+
+extends:
+  - recommended
+
 apis:
-  template@v0:
+  guardian@v0:
     root: openapi.yaml
 
-lint:
-  extends:
-    - recommended
-  rules:
-    no-server-example.com: off
-    no-server-variables-empty-enum: warn
+rules:
+  # Désactivations justifiées
+  no-server-example.com: off  # Dev local nécessaire
 
-  decorators:
-    remove-unused-components: on
+  # Renforcements
+  operation-operationId: error  # operationId obligatoire
+  operation-summary: error      # Summary obligatoire
+  operation-description: warn   # Description recommandée
+  operation-tag-defined: error  # Tags doivent être déclarés
+
+  # Sécurité
+  operation-security-defined: warn  # Security doit être défini
+
+  # Cohérence
+  boolean-parameter-prefixes: warn  # is_, has_, should_
+  path-not-include-query: error     # Pas de ? dans les paths
+  tag-description: warn             # Tous les tags doivent avoir une description
+
+decorators:
+  remove-unused-components: on

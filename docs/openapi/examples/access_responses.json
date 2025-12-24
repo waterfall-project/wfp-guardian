@@ -1,0 +1,151 @@
+{
+  "check_access_request_simple": {
+    "summary": "Simple check (LIST)",
+    "value": {
+      "service": "storage",
+      "resource_name": "files",
+      "operation": "LIST"
+    }
+  },
+  "check_access_request_with_project": {
+    "summary": "With specific project",
+    "value": {
+      "service": "diagram",
+      "resource_name": "diagrams",
+      "operation": "CREATE",
+      "context": {
+        "project_id": "550e8400-e29b-41d4-a716-446655440000"
+      }
+    }
+  },
+  "check_access_request_with_target_company": {
+    "summary": "With target company (hierarchy)",
+    "value": {
+      "service": "identity",
+      "resource_name": "users",
+      "operation": "READ",
+      "context": {
+        "target_company_id": "650e8400-e29b-41d4-a716-446655440000"
+      }
+    }
+  },
+  "check_access_request_with_resource": {
+    "summary": "With specific resource",
+    "value": {
+      "service": "storage",
+      "resource_name": "files",
+      "operation": "DELETE",
+      "context": {
+        "resource_id": "750e8400-e29b-41d4-a716-446655440000",
+        "project_id": "550e8400-e29b-41d4-a716-446655440000"
+      }
+    }
+  },
+  "check_access_response_granted": {
+    "summary": "Access granted",
+    "value": {
+      "access_granted": true,
+      "reason": "granted",
+      "message": "User has permission storage:files:DELETE",
+      "access_type": "direct",
+      "matched_role": {
+        "role_id": "850e8400-e29b-41d4-a716-446655440000",
+        "role_name": "project_manager",
+        "scope_type": "direct",
+        "project_id": "550e8400-e29b-41d4-a716-446655440000"
+      },
+      "cache_hit": true
+    }
+  },
+  "check_access_response_denied": {
+    "summary": "Access denied",
+    "value": {
+      "access_granted": false,
+      "reason": "no_permission",
+      "message": "User does not have permission storage:files:DELETE",
+      "cache_hit": false
+    }
+  },
+  "batch_check_access_request": {
+    "summary": "Batch check request",
+    "value": {
+      "checks": [
+        {
+          "service": "diagram",
+          "resource_name": "diagrams",
+          "operation": "CREATE",
+          "context": {
+            "project_id": "550e8400-e29b-41d4-a716-446655440000"
+          }
+        },
+        {
+          "service": "diagram",
+          "resource_name": "diagrams",
+          "operation": "DELETE",
+          "context": {
+            "project_id": "550e8400-e29b-41d4-a716-446655440000"
+          }
+        },
+        {
+          "service": "storage",
+          "resource_name": "files",
+          "operation": "CREATE"
+        }
+      ]
+    }
+  },
+  "batch_check_access_response": {
+    "summary": "Batch check results",
+    "value": {
+      "results": [
+        {
+          "access_granted": true,
+          "reason": "granted",
+          "message": "User has permission diagram:diagrams:CREATE",
+          "cache_hit": true
+        },
+        {
+          "access_granted": false,
+          "reason": "no_permission",
+          "message": "User does not have permission diagram:diagrams:DELETE",
+          "cache_hit": true
+        },
+        {
+          "access_granted": true,
+          "reason": "granted",
+          "message": "User has permission storage:files:CREATE",
+          "cache_hit": true
+        }
+      ],
+      "processing_time_ms": 12
+    }
+  },
+  "user_permissions_response": {
+    "summary": "User permissions",
+    "value": {
+      "user_id": "12345678-90ab-cdef-1234-567890abcdef",
+      "company_id": "98765432-10ab-cdef-1234-567890abcdef",
+      "project_id": "550e8400-e29b-41d4-a716-446655440000",
+      "roles": [
+        {
+          "role_id": "850e8400-e29b-41d4-a716-446655440000",
+          "role_name": "project_manager",
+          "display_name": "Project Manager",
+          "scope_type": "direct",
+          "project_id": "550e8400-e29b-41d4-a716-446655440000"
+        }
+      ],
+      "permissions": [
+        "diagram:diagrams:CREATE",
+        "diagram:diagrams:READ"
+      ],
+      "policies": [
+        {
+          "policy_id": "950e8400-e29b-41d4-a716-446655440000",
+          "policy_name": "diagram_management",
+          "permissions_count": 5
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "access_log_list": {
+    "value": {
+      "data": [
+        {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "user_id": "12345678-90ab-cdef-1234-567890abcdef",
+          "company_id": "98765432-10ab-cdef-1234-567890abcdef",
+          "project_id": "550e8400-e29b-41d4-a716-446655440000",
+          "service": "storage",
+          "resource_name": "files",
+          "resource_id": "file-12345678-90ab-cdef-1234-567890abcdef",
+          "operation": "DELETE",
+          "access_granted": true,
+          "reason": "granted",
+          "ip_address": "192.168.1.100",
+          "user_agent": "Mozilla/5.0",
+          "context": {
+            "file_size": 2048576
+          },
+          "created_at": "2025-01-20T14:35:22Z"
+        },
+        {
+          "id": "660e8400-e29b-41d4-a716-446655440000",
+          "user_id": "12345678-90ab-cdef-1234-567890abcdef",
+          "company_id": "98765432-10ab-cdef-1234-567890abcdef",
+          "project_id": null,
+          "service": "diagram",
+          "resource_name": "diagrams",
+          "resource_id": null,
+          "operation": "CREATE",
+          "access_granted": false,
+          "reason": "no_permission",
+          "ip_address": "192.168.1.105",
+          "user_agent": "Mozilla/5.0",
+          "context": null,
+          "created_at": "2025-01-20T14:36:10Z"
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 50,
+        "total_items": 15234,
+        "total_pages": 305
+      }
+    }
+  },
+  "access_log_detail": {
+    "value": {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "user_id": "12345678-90ab-cdef-1234-567890abcdef",
+      "company_id": "98765432-10ab-cdef-1234-567890abcdef",
+      "project_id": "550e8400-e29b-41d4-a716-446655440000",
+      "service": "storage",
+      "resource_name": "files",
+      "resource_id": "file-12345678-90ab-cdef-1234-567890abcdef",
+      "operation": "DELETE",
+      "access_granted": true,
+      "reason": "granted",
+      "ip_address": "192.168.1.100",
+      "user_agent": "Mozilla/5.0",
+      "context": {
+        "file_size": 2048576
+      },
+      "created_at": "2025-01-20T14:35:22Z"
+    }
+  },
+  "audit_statistics": {
+    "value": {
+      "total_requests": 15234,
+      "granted_requests": 14890,
+      "denied_requests": 344,
+      "success_rate": 97.74,
+      "by_service": [
+        {
+          "service": "storage",
+          "count": 8523,
+          "granted": 8401,
+          "denied": 122
+        },
+        {
+          "service": "diagram",
+          "count": 4234,
+          "granted": 4178,
+          "denied": 56
+        },
+        {
+          "service": "project",
+          "count": 2477,
+          "granted": 2311,
+          "denied": 166
+        }
+      ],
+      "by_operation": [
+        {
+          "operation": "READ",
+          "count": 9234,
+          "granted": 9190,
+          "denied": 44
+        },
+        {
+          "operation": "LIST",
+          "count": 3456,
+          "granted": 3401,
+          "denied": 55
+        },
+        {
+          "operation": "CREATE",
+          "count": 1523,
+          "granted": 1489,
+          "denied": 34
+        }
+      ],
+      "top_users": [
+        {
+          "user_id": "12345678-90ab-cdef-1234-567890abcdef",
+          "count": 456,
+          "granted": 450,
+          "denied": 6
+        },
+        {
+          "user_id": "12345678-90ab-cdef-1234-567890abcdef",
+          "count": 398,
+          "granted": 390,
+          "denied": 8
+        }
+      ]
+    }
+  }
+}

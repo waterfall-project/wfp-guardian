@@ -1,4 +1,4 @@
-# Makefile for Flask template project
+# Makefile for Guardian Service
 
 .PHONY: help install install-dev format lint type-check test test-cov test-cov-badge clean run compose-build compose-up compose-down docker-build-dev docker-build-test docker-build-prod docker-test monitoring-up monitoring-down monitoring-logs pre-commit-install pre-commit-run docstring-check docstring-coverage test-integration test-integration-services-up test-integration-services-down test-integration-services-status test-unit test-all
 
@@ -97,7 +97,7 @@ test-integration:
 	@echo "⚠️  Make sure integration services are running: make test-integration-services-up"
 	pytest tests/integration/ -v
 
-# Start integration test services (PostgreSQL, Redis, Identity, Guardian)
+# Start integration test services (PostgreSQL, Redis, Identity)
 test-integration-services-up:
 	@echo "Starting integration test services..."
 	docker compose -f docker-compose.test.yml up -d
@@ -106,11 +106,11 @@ test-integration-services-up:
 	@echo "Waiting for services to be healthy..."
 	@for i in 1 2 3 4 5 6 7 8 9 10 11 12; do \
 		HEALTHY=$$(docker compose -f docker-compose.test.yml ps | grep -c "(healthy)"); \
-		if [ $$HEALTHY -eq 4 ]; then \
-			echo "✓ All 4 services are healthy"; \
+		if [ $$HEALTHY -eq 3 ]; then \
+			echo "✓ All 3 services are healthy"; \
 			break; \
 		fi; \
-		echo "  Waiting... ($$HEALTHY/4 services healthy)"; \
+		echo "  Waiting... ($$HEALTHY/3 services healthy)"; \
 		sleep 5; \
 		if [ $$i -eq 12 ]; then \
 			echo "⚠️  Timeout: Not all services became healthy"; \
@@ -125,7 +125,6 @@ test-integration-services-up:
 	@echo "  PostgreSQL: localhost:5433"
 	@echo "  Redis:      localhost:6380"
 	@echo "  Identity:   http://localhost:5001"
-	@echo "  Guardian:   http://localhost:5002"
 	@echo ""
 	@echo "Run tests with: make test-integration"
 
@@ -226,16 +225,16 @@ compose-down:
 
 # Docker Image commands
 docker-build-dev:
-	docker build --target development -t wfp-flask-template:dev .
+	docker build --target development -t wfp-guardian:dev .
 
 docker-build-test:
-	docker build --target test -t wfp-flask-template:test .
+	docker build --target test -t wfp-guardian:test .
 
 docker-build-prod:
-	docker build --target production -t wfp-flask-template:prod .
+	docker build --target production -t wfp-guardian:prod .
 
 docker-test: docker-build-test
-	docker run --rm wfp-flask-template:test
+	docker run --rm wfp-guardian:test
 
 # Monitoring stack commands
 monitoring-up:

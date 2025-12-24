@@ -1,0 +1,33 @@
+{
+  "policy_create_budget": {
+    "summary": "Budget Approval Policy",
+    "value": {
+      "name": "budget_approval",
+      "display_name": "Budget Approval",
+      "description": "Approve budgets < 10k€",
+      "priority": 5
+    }
+  },
+  "policy_create_files": {
+    "summary": "File Management Policy",
+    "value": {
+      "name": "file_management",
+      "display_name": "File Management",
+      "description": "Full CRUD on files",
+      "priority": 10
+    }
+  },
+  "policy_update": {
+    "summary": "Update Policy",
+    "value": {
+      "display_name": "Budget Approval (Updated)",
+      "priority": 10
+    }
+  },
+  "attach_permission_to_policy": {
+    "summary": "Attach Permission",
+    "value": {
+      "permission_id": "950e8400-e29b-41d4-a716-446655440000"
+    }
+  }
+}

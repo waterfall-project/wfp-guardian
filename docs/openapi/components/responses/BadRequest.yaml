@@ -2,8 +2,15 @@ description: Bad request - Invalid input or missing required parameters
 content:
   application/json:
     schema:
-      type: object
-      properties:
-        message:
-          type: string
-          example: Bad request
+      $ref: '../schemas/Error.yaml'
+    examples:
+      bad_request:
+        value:
+          error: bad_request
+          message: Invalid input parameters
+          details:
+            path: "/v0/resource"
+            method: "POST"
+            request_id: "req-abc123xyz"
+            field: "service"
+            reason: "required"

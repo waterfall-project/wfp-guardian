@@ -12,10 +12,13 @@ These tests verify that error handlers work correctly in a real environment
 with all services configured.
 """
 
+import pytest
+
 
 class TestErrorHandlers:
     """Integration tests for HTTP error handlers."""
 
+    @pytest.mark.skip(reason="Dummy endpoints are disabled in routes.py")
     def test_unsupported_media_type_handler(self, authenticated_client, api_url):
         """Test the 415 unsupported media type error handler.
 
@@ -64,6 +67,7 @@ class TestErrorHandlers:
         assert "message" in data
         assert "not found" in data["message"].lower()
 
+    @pytest.mark.skip(reason="Dummy endpoints are disabled in routes.py")
     def test_conflict_handler(self, authenticated_client, api_url, session):
         """Test the 409 conflict error handler.
 
@@ -90,6 +94,7 @@ class TestErrorHandlers:
         data = response.get_json()
         assert "message" in data or "errors" in data
 
+    @pytest.mark.skip(reason="Dummy endpoints are disabled in routes.py")
     def test_unprocessable_entity_handler(self, authenticated_client, api_url):
         """Test the 422 unprocessable entity error handler.
 

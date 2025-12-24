@@ -1156,8 +1156,8 @@
       {
         "current": {
           "selected": false,
-          "text": "wfp-flask-template",
-          "value": "wfp-flask-template"
+          "text": "wfp-guardian",
+          "value": "wfp-guardian"
         },
         "datasource": {
           "type": "prometheus",
@@ -1189,7 +1189,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "WFP Flask Template - Application Metrics",
-  "uid": "wfp-flask-template",
+  "uid": "wfp-guardian",
   "version": 1,
   "weekStart": ""
 }

@@ -8,14 +8,26 @@ content:
         value:
           error: database_error
           message: Database connection failed
+          details:
+            path: "/v0/resource"
+            method: "GET"
+            request_id: "req-abc123xyz"
       redis_error:
         value:
           error: redis_error
           message: Redis cache unavailable
+          details:
+            path: "/v0/resource"
+            method: "GET"
+            request_id: "req-abc123xyz"
       identity_service_error:
         value:
           error: identity_service_error
           message: Identity service unavailable
+          details:
+            path: "/v0/resource"
+            method: "GET"
+            request_id: "req-abc123xyz"
       internal_error:
         value:
           error: internal_error

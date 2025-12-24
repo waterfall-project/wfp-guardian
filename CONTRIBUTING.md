@@ -2,9 +2,9 @@
   <img src="docs/assets/waterfall_logo.svg" alt="Waterfall Logo" width="200"/>
 </div>
 
-# Contributing to wfp-flask-template
+# Contributing to wfp-guardian
 
-Thank you for your interest in contributing to **wfp-flask-template**!
+Thank you for your interest in contributing to **wfp-guardian**!
 
 > **Note**: This template is part of the larger [Waterfall Development](https://github.com/bengeek06/waterfall-development) project. For overall project conventions, please refer to the main project's [CONTRIBUTING.md](https://github.com/bengeek06/waterfall-development/blob/develop/CONTRIBUTING.md).
 
@@ -81,7 +81,7 @@ release/v1.2.0                         # Release preparation
 ```bash
 # Clone the project
 git clone <repo-url>
-cd wfp-flask-template
+cd wfp-guardian
 
 # Virtual environment
 python -m venv .venv

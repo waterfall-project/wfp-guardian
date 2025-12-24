@@ -15,13 +15,12 @@ resources with Guardian permission checks.
 import re
 from enum import Enum
 from functools import wraps
-from typing import Optional
+from typing import Any, Optional
 from uuid import UUID
 
 from flask import g, jsonify, request
 
 from app.service import SERVICE_NAME
-from app.services.guardian_client import check_access
 from app.utils.logger import logger
 
 
@@ -131,6 +130,45 @@ def _get_user_id() -> Optional[str]:
         return None
 
     return str(user_id)
+
+
+def check_access(
+    user_id: UUID,
+    service: str,
+    resource: str,
+    operation: str,
+    context: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
+    """Check user access permission via Guardian service.
+
+    Args:
+        user_id: UUID of the user making the request.
+        service: Service identifier (e.g., "project", "storage").
+        resource: Resource type (e.g., "projects", "milestones").
+        operation: Operation type (LIST, CREATE, READ, UPDATE, DELETE).
+        context: Optional context dictionary with project_id, target_company_id, etc.
+
+    Returns:
+        Dictionary containing access decision:
+        {
+            "access_granted": bool,
+            "reason": str,
+            "message": str
+        }
+    """
+    # Mock implementation: always grant access
+    logger.debug(
+        "guardian_check_access_mock",
+        user_id=str(user_id),
+        service=service,
+        resource=resource,
+        operation=operation,
+    )
+    return {
+        "access_granted": True,
+        "reason": "mock_access_granted",
+        "message": "Access granted by mock implementation",
+    }
 
 
 def access_required(operation: Operation):

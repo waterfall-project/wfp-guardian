@@ -1,8 +1,8 @@
-# Prometheus Configuration Example for Flask Template
+# Prometheus Configuration Example for Guardian Service
 
 # Add this job to your prometheus.yml to scrape metrics from the Flask app
 scrape_configs:
-  - job_name: 'wfp-flask-template'
+  - job_name: 'wfp-guardian'
 
     # Scrape interval (how often to collect metrics)
     scrape_interval: 15s
@@ -16,7 +16,7 @@ scrape_configs:
       - targets: ['localhost:5000']
         labels:
           environment: 'development'
-          app: 'wfp-flask-template'
+          app: 'wfp-guardian'
 
     # Optional: Add more advanced configurations
     metric_relabel_configs:
@@ -26,7 +26,7 @@ scrape_configs:
         action: drop
 
   # Kubernetes service discovery example
-  - job_name: 'wfp-flask-template-k8s'
+  - job_name: 'wfp-guardian-k8s'
     kubernetes_sd_configs:
       - role: pod
         namespaces:

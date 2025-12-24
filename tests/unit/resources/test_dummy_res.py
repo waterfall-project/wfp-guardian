@@ -10,11 +10,13 @@
 
 from unittest.mock import patch
 
+import pytest
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from app.models.dummy_model import Dummy
 
 
+@pytest.mark.skip(reason="Dummy endpoints are disabled in routes.py")
 class TestDummyListResource:
     """Test cases for DummyListResource (GET list, POST create)."""
 
@@ -224,6 +226,7 @@ class TestDummyListResource:
         assert "message" in data
 
 
+@pytest.mark.skip(reason="Dummy endpoints are disabled in routes.py")
 class TestDummyResource:
     """Test cases for DummyResource (GET, PUT, PATCH, DELETE by ID)."""
 
@@ -454,6 +457,7 @@ class TestDummyResource:
         assert "message" in data
 
 
+@pytest.mark.skip(reason="Dummy endpoints are disabled in routes.py")
 class TestDummyListPaginationErrors:
     """Test cases for pagination validation errors."""
 

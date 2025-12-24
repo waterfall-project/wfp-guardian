@@ -66,6 +66,7 @@ jobs:
           path: |
             .coverage
             htmlcov/
+          if-no-files-found: ignore
 
 # TODO: Réactiver quand wfp-identity et wfp-guardian seront publiés sur GHCR
   # integration-tests:
