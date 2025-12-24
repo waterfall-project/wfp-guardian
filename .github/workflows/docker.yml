@@ -271,9 +271,15 @@ jobs:
           echo "Build: ${{ needs.build.result }}"
           echo "Security Scan: ${{ needs.security-scan.result }}"
 
-          if [[ "${{ needs.build.result }}" != "success" ]] || \
-             [[ "${{ needs.security-scan.result }}" != "success" ]]; then
-            echo "❌ Docker pipeline failed"
+          if [[ "${{ needs.build.result }}" != "success" ]]; then
+            echo "❌ Build failed"
+            exit 1
+          fi
+
+          # Security scan only runs on main, so skipped is acceptable on other branches
+          if [[ "${{ needs.security-scan.result }}" != "success" ]] && \
+             [[ "${{ needs.security-scan.result }}" != "skipped" ]]; then
+            echo "❌ Security scan failed"
             exit 1
           fi
 
