@@ -914,7 +914,7 @@ version: '3.8'
 
 services:
   prometheus:
-    image: prom/prometheus:v2.47.0
+    image: prom/prometheus:v2.54.0
     ports:
       - "9090:9090"
     volumes:
