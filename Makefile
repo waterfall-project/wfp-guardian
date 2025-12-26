@@ -1,6 +1,6 @@
 # Makefile for Guardian Service
 
-.PHONY: help install install-dev format lint type-check test test-cov test-cov-badge clean run compose-build compose-up compose-down docker-build-dev docker-build-test docker-build-prod docker-test monitoring-up monitoring-down monitoring-logs pre-commit-install pre-commit-run docstring-check docstring-coverage test-integration test-integration-services-up test-integration-services-down test-integration-services-status test-unit test-all
+.PHONY: help install install-dev format lint type-check test test-cov test-cov-badge clean run compose-build compose-up compose-down docker-build-dev docker-build-test docker-build-prod docker-test monitoring-up monitoring-down monitoring-logs pre-commit-install pre-commit-run docstring-check docstring-coverage test-integration test-unit test-all
 
 # Default target
 help:
@@ -15,9 +15,6 @@ help:
 	@echo "  make test              - Run unit + integration (requires services running)"
 	@echo "  make test-unit         - Run unit tests only"
 	@echo "  make test-integration  - Run integration tests (requires services)"
-	@echo "  make test-integration-services-up   - Start integration test services"
-	@echo "  make test-integration-services-down - Stop integration test services"
-	@echo "  make test-integration-services-status - Check services status"
 	@echo "  make test-cov          - Run unit + integration with coverage (requires services)"
 	@echo "  make test-all          - Complete test suite: start services, test with coverage, stop"
 	@echo "  make test-cov-badge    - Generate test coverage badge"
@@ -32,9 +29,7 @@ help:
 	@echo "  make docker-build-test - Build test Docker image"
 	@echo "  make docker-build-prod - Build production Docker image"
 	@echo "  make docker-test       - Run tests in Docker container"
-	@echo "  make monitoring-up     - Start monitoring stack (Flask + Prometheus + Grafana)"
-	@echo "  make monitoring-down   - Stop monitoring stack"
-	@echo "  make monitoring-logs   - View monitoring stack logs"
+	@echo "  make check             - Run all quality checks (format, lint, type-check, docstring-check, test)"
 
 # Install production dependencies
 install:
@@ -82,7 +77,7 @@ test:
 	pytest tests/unit/ -v
 	@echo ""
 	@echo "Running integration tests..."
-	@echo "⚠️  Make sure integration services are running: make test-integration-services-up"
+	@echo "⚠️  Make sure integration services are running: make compose-up"
 	pytest tests/integration/ -v
 	@echo ""
 	@echo "✓ All tests completed"
@@ -94,58 +89,18 @@ test-unit:
 # Run integration tests only
 test-integration:
 	@echo "Running integration tests..."
-	@echo "⚠️  Make sure integration services are running: make test-integration-services-up"
+	@echo "⚠️  Make sure integration services are running: make compose-up"
 	pytest tests/integration/ -v
-
-# Start integration test services (PostgreSQL, Redis, Identity)
-test-integration-services-up:
-	@echo "Starting integration test services..."
-	docker compose -f docker-compose.test.yml up -d
-	@echo "✓ Services started"
-	@echo ""
-	@echo "Waiting for services to be healthy..."
-	@for i in 1 2 3 4 5 6 7 8 9 10 11 12; do \
-		HEALTHY=$$(docker compose -f docker-compose.test.yml ps | grep -c "(healthy)"); \
-		if [ $$HEALTHY -eq 3 ]; then \
-			echo "✓ All 3 services are healthy"; \
-			break; \
-		fi; \
-		echo "  Waiting... ($$HEALTHY/3 services healthy)"; \
-		sleep 5; \
-		if [ $$i -eq 12 ]; then \
-			echo "⚠️  Timeout: Not all services became healthy"; \
-			docker compose -f docker-compose.test.yml ps; \
-			exit 1; \
-		fi; \
-	done
-	@echo ""
-	docker compose -f docker-compose.test.yml ps
-	@echo ""
-	@echo "Services available at:"
-	@echo "  PostgreSQL: localhost:5433"
-	@echo "  Redis:      localhost:6380"
-	@echo "  Identity:   http://localhost:5001"
-	@echo ""
-	@echo "Run tests with: make test-integration"
-
-# Stop integration test services
-test-integration-services-down:
-	@echo "Stopping integration test services..."
-	docker compose -f docker-compose.test.yml down
-	@echo "✓ Services stopped"
-
-# Check integration test services status
-test-integration-services-status:
-	@echo "Integration test services status:"
-	docker compose -f docker-compose.test.yml ps
 
 # Run all tests (unit + integration) with services
 test-all:
 	@echo "Running complete test suite..."
-	@$(MAKE) test-integration-services-up
+	@$(MAKE) compose-up
+	@echo "Waiting for services to be healthy..."
+	@sleep 5
 	@echo ""
 	@echo "Running unit tests with coverage..."
-	@rm -rf .coverage htmlcov/
+	@rm -rf .coverage htmlcov/ coverage.xml
 	pytest tests/unit/ -v --cov=app --cov-report=
 	@echo ""
 	@echo "Flushing Redis to clear rate limiting counters..."
@@ -157,7 +112,8 @@ test-all:
 	@echo "Generating combined coverage report..."
 	coverage report
 	coverage html
-	@$(MAKE) test-integration-services-down
+	coverage xml
+	@$(MAKE) compose-down
 	@echo ""
 	@echo "✓ All tests completed"
 	@echo "✓ Coverage report generated in htmlcov/"
@@ -165,7 +121,7 @@ test-all:
 # Run tests with coverage (unit + integration combined)
 test-cov:
 	@echo "Running unit tests with coverage..."
-	@rm -rf .coverage htmlcov/
+	@rm -rf .coverage htmlcov/ coverage.xml
 	pytest tests/unit/ -v --cov=app --cov-report=
 	@echo ""
 	@echo "Flushing Redis to clear rate limiting counters..."
@@ -177,16 +133,16 @@ test-cov:
 	@echo "Generating combined coverage report..."
 	coverage report
 	coverage html
+	coverage xml
 	@echo ""
-	@echo "✓ Coverage report generated in htmlcov/"
+	@echo "✓ Coverage report generated in htmlcov/ and coverage.xml"
 	@echo "  Open htmlcov/index.html to view the report"
 
 # Generate test coverage badge
 test-cov-badge:
 	@echo "Generating test coverage badge..."
-	pytest tests/ --cov=app --cov-report=xml --cov-report=term -q
-	genbadge coverage -i coverage.xml -o docs/coverage_badge.svg
-	@echo "✅ Badge generated: docs/coverage_badge.svg"
+	genbadge coverage -i coverage.xml -o docs/assets/coverage_badge.svg
+	@echo "✓ Badge generated: docs/assets/coverage_badge.svg"
 
 # Install pre-commit hooks
 pre-commit-install:
@@ -206,7 +162,7 @@ clean:
 	find . -type d -name ".ruff_cache" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete
-	rm -rf build/ dist/ htmlcov/ .coverage
+	rm -rf build/ dist/ htmlcov/ .coverage coverage.xml
 	@echo "✓ Cleaned"
 
 # Run development server
@@ -215,47 +171,40 @@ run:
 
 # Docker Compose commands
 compose-build:
+	@echo "Building Docker Compose services..."
 	docker compose -f docker-compose.test.yml build
+	@echo "✓ Docker Compose services built"
 
 compose-up:
+	@echo "Starting Docker Compose services..."
 	docker compose -f docker-compose.test.yml up -d
+	@echo "✓ Docker Compose services started"
 
 compose-down:
+	@echo "Stopping Docker Compose services..."
 	docker compose -f docker-compose.test.yml down
+	@echo "✓ Docker Compose services stopped"
 
 # Docker Image commands
 docker-build-dev:
+	@echo "Building development Docker image..."
 	docker build --target development -t wfp-guardian:dev .
+	@echo "✓ Development image built: wfp-guardian:dev"
 
 docker-build-test:
+	@echo "Building test Docker image..."
 	docker build --target test -t wfp-guardian:test .
+	@echo "✓ Test image built: wfp-guardian:test"
 
 docker-build-prod:
+	@echo "Building production Docker image..."
 	docker build --target production -t wfp-guardian:prod .
+	@echo "✓ Production image built: wfp-guardian:prod"
 
 docker-test: docker-build-test
+	@echo "Running tests in Docker container..."
 	docker run --rm wfp-guardian:test
-
-# Monitoring stack commands
-monitoring-up:
-	@echo "Starting monitoring stack (Flask + Prometheus + Grafana)..."
-	docker compose -f docs/monitoring/docker-compose.monitoring.yml up -d
-	@echo "✓ Monitoring stack started"
-	@echo ""
-	@echo "Access services at:"
-	@echo "  Flask App:   http://localhost:5000"
-	@echo "  Prometheus:  http://localhost:9090"
-	@echo "  Grafana:     http://localhost:3000 (admin/admin)"
-	@echo ""
-	@echo "View logs with: make monitoring-logs"
-
-monitoring-down:
-	@echo "Stopping monitoring stack..."
-	docker compose -f docs/monitoring/docker-compose.monitoring.yml down
-	@echo "✓ Monitoring stack stopped"
-
-monitoring-logs:
-	docker compose -f docs/monitoring/docker-compose.monitoring.yml logs -f
+	@echo "✓ Docker tests completed"
 
 # Quality check (all checks)
 check: format lint type-check docstring-check test
