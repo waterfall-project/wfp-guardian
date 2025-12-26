@@ -152,7 +152,7 @@ Returns the current version of the service.
   "version": "0.0.1",
   "build_date": "2025-12-22T10:30:00Z",
   "commit": "abc123d",
-  "python_version": "3.11.0"
+  "python_version": "3.11"
 }
 ```
 
