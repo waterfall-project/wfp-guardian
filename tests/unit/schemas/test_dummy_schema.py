@@ -10,7 +10,7 @@ for DummySchema, DummyCreateSchema, and DummyUpdateSchema.
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, cast
 
 import pytest
@@ -34,8 +34,8 @@ class TestDummySchema:
         """Test serializing a Dummy model instance."""
         schema = DummySchema()
         dummy_id = uuid.uuid4()
-        created_at = datetime.now(timezone.utc)
-        updated_at = datetime.now(timezone.utc)
+        created_at = datetime.now(UTC)
+        updated_at = datetime.now(UTC)
 
         # Create a mock Dummy instance
         dummy = Dummy(name="Test Dummy")
@@ -59,8 +59,8 @@ class TestDummySchema:
         schema = DummySchema()
         dummy = Dummy(name="Test")
         dummy.id = uuid.uuid4()
-        dummy.created_at = datetime.now(timezone.utc)
-        dummy.updated_at = datetime.now(timezone.utc)
+        dummy.created_at = datetime.now(UTC)
+        dummy.updated_at = datetime.now(UTC)
 
         result = cast("dict[str, Any]", schema.dump(dummy))
 
@@ -74,8 +74,8 @@ class TestDummySchema:
         dummy = Dummy(name="Test")
         dummy.id = uuid.uuid4()
         dummy.description = None
-        dummy.created_at = datetime.now(timezone.utc)
-        dummy.updated_at = datetime.now(timezone.utc)
+        dummy.created_at = datetime.now(UTC)
+        dummy.updated_at = datetime.now(UTC)
 
         result = cast("dict[str, Any]", schema.dump(dummy))
 
@@ -87,8 +87,8 @@ class TestDummySchema:
         dummy = Dummy(name="Test")
         dummy.id = uuid.uuid4()
         dummy.extra_metadata = None
-        dummy.created_at = datetime.now(timezone.utc)
-        dummy.updated_at = datetime.now(timezone.utc)
+        dummy.created_at = datetime.now(UTC)
+        dummy.updated_at = datetime.now(UTC)
 
         result = cast("dict[str, Any]", schema.dump(dummy))
 
@@ -119,8 +119,8 @@ class TestDummyCreateSchema:
         data = {
             "name": "Test",
             "id": str(uuid.uuid4()),
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
+            "updated_at": datetime.now(UTC).isoformat(),
         }
 
         result = schema.load(data, session=session)
@@ -321,8 +321,8 @@ class TestDummyUpdateSchema:
         data = {
             "name": "Test",
             "id": str(uuid.uuid4()),
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
+            "updated_at": datetime.now(UTC).isoformat(),
         }
 
         result = schema.load(data, session=session)

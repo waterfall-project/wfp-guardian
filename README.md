@@ -238,6 +238,57 @@ wfp-guardian/
 └── wsgi.py                  # Production entry point (Gunicorn)
 ```
 
+## 🏷️ Versioning & Releases
+
+This project uses [Semantic Versioning](https://semver.org/) with pre-release support.
+
+### Version Format
+
+| Branch | Tag Format | Example | Docker Tags |
+|--------|------------|---------|-------------|
+| `develop` | `vX.Y.Z-alphaN` | `v0.1.0-alpha1` | `:0.1.0-alpha1` |
+| `staging` | `vX.Y.Z-betaN` | `v0.1.0-beta1` | `:0.1.0-beta1` |
+| `main` | `vX.Y.Z` | `v0.1.0` | `:0.1.0`, `:0.1`, `:0`, `:latest` |
+
+### Creating a Release
+
+Use the provided script to bump version and create a tag:
+
+```bash
+# Alpha release (from develop)
+./scripts/tag_repo.sh --version=0.1.0-alpha1
+
+# Beta release (from staging)
+./scripts/tag_repo.sh --version=0.1.0-beta1
+
+# Stable release (from main)
+./scripts/tag_repo.sh --version=0.1.0
+```
+
+The script will:
+1. ✅ Update `VERSION` file
+2. ✅ Update `pyproject.toml`
+3. ✅ Update `docs/openapi/openapi.yaml`
+4. ✅ Commit changes
+5. ✅ Create annotated git tag
+
+Then push to trigger the release workflow:
+
+```bash
+git push origin <branch> --tags
+```
+
+### Release Workflow
+
+When a tag is pushed, the [release workflow](.github/workflows/release.yml) automatically:
+
+1. **Validates** tag format and VERSION file match
+2. **Builds** Python distribution packages (wheel, sdist)
+3. **Builds & pushes** Docker images to `ghcr.io`
+4. **Creates** GitHub Release with changelog and artifacts
+
+Pre-releases (alpha, beta, rc) are marked as such on GitHub and don't update the `:latest` Docker tag.
+
 ## 📄 License
 
 Dual license:

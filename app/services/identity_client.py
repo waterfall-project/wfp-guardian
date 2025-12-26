@@ -13,7 +13,7 @@ for validating companies, retrieving user information, and managing
 company hierarchies in a multi-tenant context.
 """
 
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 import requests
@@ -22,9 +22,7 @@ from flask import current_app, request
 from app.utils.logger import logger
 
 
-def get_user(
-    user_id: UUID, company_id: Optional[UUID] = None
-) -> Optional[dict[str, Any]]:
+def get_user(user_id: UUID, company_id: UUID | None = None) -> dict[str, Any] | None:
     """Retrieve user details via Identity service.
 
     Used to display audit trail information (changed_by, created_by names).
@@ -86,7 +84,7 @@ def get_user(
         return None
 
 
-def get_company_hierarchy(company_id: UUID) -> Optional[dict[str, Any]]:
+def get_company_hierarchy(company_id: UUID) -> dict[str, Any] | None:
     """Retrieve company hierarchy (parent/children).
 
     Used for filtering projects with hierarchical visibility.

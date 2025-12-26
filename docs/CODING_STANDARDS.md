@@ -34,27 +34,30 @@ bar = (0, )
 
 [Official PEP 8 Documentation](https://peps.python.org/pep-0008/)
 
-### 2. Black - Code Formatter
+### 2. Ruff Format - Code Formatter
 
-Automatic and non-negotiable code formatting.
+Automatic and non-negotiable code formatting using Ruff's built-in formatter.
 
 **Configuration** (`pyproject.toml`):
 ```toml
-[tool.black]
-line-length = 88
-target-version = ["py39"]
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 ```
 
 **Features:**
 - Double quotes by default
 - Trailing commas in multi-line
 - Consistent and deterministic formatting
+- Compatible with Black style
 
-[Black Documentation](https://black.readthedocs.io/)
+[Ruff Formatter Documentation](https://docs.astral.sh/ruff/formatter/)
 
 ### 3. isort - Import Sorting
 
-Automatic import organization compatible with Black.
+Automatic import organization compatible with Ruff.
 
 **Configuration** (`pyproject.toml`):
 ```toml
@@ -89,7 +92,7 @@ Ultra-fast linter that replaces flake8, pylint, pyupgrade, etc.
 ```toml
 [tool.ruff]
 line-length = 88
-target-version = "py39"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "N", "UP", "B", "C4", "SIM", "TCH", "PTH"]
@@ -116,7 +119,7 @@ Static type checking.
 **Configuration** (`pyproject.toml`):
 ```toml
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
@@ -185,9 +188,9 @@ def function_with_docstring(param1: str, param2: int) -> bool:
 
 Pre-commit hooks run automatically on each commit:
 
-1. **Black** - Automatic formatting
-2. **isort** - Import organization
-3. **Ruff** - Linting with auto-fix
+1. **isort** - Import organization
+2. **Ruff** - Linting with auto-fix
+3. **Ruff Format** - Automatic formatting
 4. **MyPy** - Type checking
 5. **Bandit** - Security analysis
 6. **check-added-large-files** - Prevents files > 1MB
@@ -210,7 +213,7 @@ Add to `.vscode/settings.json`:
 {
   "python.linting.enabled": true,
   "python.linting.ruffEnabled": true,
-  "python.formatting.provider": "black",
+  "editor.defaultFormatter": "charliermarsh.ruff",
   "python.analysis.typeCheckingMode": "basic",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
@@ -222,9 +225,9 @@ Add to `.vscode/settings.json`:
 
 ### PyCharm
 
-1. Install plugins: Black Formatter, Mypy
-2. Settings → Tools → Black → Enable
-3. Settings → Tools → External Tools → Add ruff
+1. Install plugins: Ruff, Mypy
+2. Settings → Tools → Ruff → Enable
+3. Settings → Editor → Code Style → Formatter → Ruff
 
 ## Rule Exceptions
 
@@ -240,15 +243,15 @@ Use exceptions sparingly and document why:
 - [PEP 8 - Style Guide](https://peps.python.org/pep-0008/)
 - [PEP 257 - Docstring Conventions](https://peps.python.org/pep-0257/)
 - [PEP 484 - Type Hints](https://peps.python.org/pep-0484/)
-- [Black Documentation](https://black.readthedocs.io/)
 - [Ruff Documentation](https://docs.astral.sh/ruff/)
+- [Ruff Formatter Documentation](https://docs.astral.sh/ruff/formatter/)
 - [MyPy Documentation](https://mypy.readthedocs.io/)
 - [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html)
 - [Type Hints Cheat Sheet](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html)
 
   "python.linting.enabled": true,
   "python.linting.ruffEnabled": true,
-  "python.formatting.provider": "black",
+  "editor.defaultFormatter": "charliermarsh.ruff",
   "python.analysis.typeCheckingMode": "basic",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
@@ -259,9 +262,9 @@ Use exceptions sparingly and document why:
 
 ### PyCharm
 
-1. Installer les plugins : Black Formatter, Mypy
-2. Settings → Tools → Black → Enable
-3. Settings → Tools → External Tools → Ajouter ruff
+1. Installer les plugins : Ruff, Mypy
+2. Settings → Tools → Ruff → Enable
+3. Settings → Editor → Code Style → Formatter → Ruff
 
 ## Exceptions
 
@@ -277,7 +280,7 @@ Mais utilisez ces exceptions avec parcimonie et documentez pourquoi.
 ## Références
 
 - [PEP 8 - Style Guide](https://peps.python.org/pep-0008/)
-- [Black Documentation](https://black.readthedocs.io/)
 - [Ruff Documentation](https://docs.astral.sh/ruff/)
+- [Ruff Formatter Documentation](https://docs.astral.sh/ruff/formatter/)
 - [MyPy Documentation](https://mypy.readthedocs.io/)
 - [Type Hints Cheat Sheet](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html)

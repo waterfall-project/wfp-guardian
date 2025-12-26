@@ -15,7 +15,7 @@ USE_IDENTITY_SERVICE is enabled) and mock mode (when disabled).
 
 import uuid
 from functools import wraps
-from typing import Any, Optional
+from typing import Any
 
 import jwt
 from flask import current_app, g, jsonify, request
@@ -23,7 +23,7 @@ from flask import current_app, g, jsonify, request
 
 def _validate_user_company_access_if_needed(
     user_id: uuid.UUID, company_id: uuid.UUID
-) -> Optional[tuple[Any, int]]:
+) -> tuple[Any, int] | None:
     """Validate user access to company if Identity service is enabled.
 
     Args:
@@ -61,7 +61,7 @@ def _validate_user_company_access_if_needed(
     return None
 
 
-def _extract_token() -> tuple[Optional[str], Optional[tuple[Any, int]]]:
+def _extract_token() -> tuple[str | None, tuple[Any, int] | None]:
     """Extract JWT token from access_token httpOnly cookie.
 
     Returns:
@@ -85,7 +85,7 @@ def _extract_token() -> tuple[Optional[str], Optional[tuple[Any, int]]]:
     return token, None
 
 
-def _decode_jwt_token(token: str) -> tuple[Optional[dict], Optional[tuple[Any, int]]]:
+def _decode_jwt_token(token: str) -> tuple[dict | None, tuple[Any, int] | None]:
     """Decode and validate JWT token.
 
     Args:
@@ -118,7 +118,7 @@ def _decode_jwt_token(token: str) -> tuple[Optional[dict], Optional[tuple[Any, i
         )
 
 
-def _validate_token_claims(payload: dict) -> tuple[bool, Optional[tuple[Any, int]]]:
+def _validate_token_claims(payload: dict) -> tuple[bool, tuple[Any, int] | None]:
     """Validate required claims in JWT payload.
 
     Args:

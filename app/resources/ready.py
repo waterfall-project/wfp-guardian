@@ -13,7 +13,7 @@ This module provides a comprehensive readiness check endpoint to verify that all
 external dependencies (database, redis, guardian, identity) are available.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import requests
@@ -52,7 +52,7 @@ class ReadyResource(Resource):
         ready_data: dict[str, Any] = {
             "status": "ready",
             "checks": {},
-            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "timestamp": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         }
 
         all_checks_passed = True
@@ -132,9 +132,9 @@ class ReadyResource(Resource):
             dict: Database health status with latency
         """
         try:
-            start_time = datetime.now(timezone.utc)
+            start_time = datetime.now(UTC)
             result = db.session.execute(text("SELECT 1"))
-            end_time = datetime.now(timezone.utc)
+            end_time = datetime.now(UTC)
 
             if result.scalar() == 1:
                 latency_ms = (end_time - start_time).total_seconds() * 1000
@@ -171,10 +171,10 @@ class ReadyResource(Resource):
                     "latency_ms": 0,
                 }
 
-            start_time = datetime.now(timezone.utc)
+            start_time = datetime.now(UTC)
             client = redis.from_url(redis_url, socket_connect_timeout=2)
             client.ping()
-            end_time = datetime.now(timezone.utc)
+            end_time = datetime.now(UTC)
 
             latency_ms = (end_time - start_time).total_seconds() * 1000
             return {
@@ -207,9 +207,9 @@ class ReadyResource(Resource):
             health_url = f"{guardian_url.rstrip('/')}/health"
             timeout = current_app.config.get("EXTERNAL_SERVICES_TIMEOUT", 5)
 
-            start_time = datetime.now(timezone.utc)
+            start_time = datetime.now(UTC)
             response = requests.get(health_url, timeout=timeout)
-            end_time = datetime.now(timezone.utc)
+            end_time = datetime.now(UTC)
 
             latency_ms = (end_time - start_time).total_seconds() * 1000
 
@@ -249,9 +249,9 @@ class ReadyResource(Resource):
             health_url = f"{identity_url.rstrip('/')}/health"
             timeout = current_app.config.get("EXTERNAL_SERVICES_TIMEOUT", 5)
 
-            start_time = datetime.now(timezone.utc)
+            start_time = datetime.now(UTC)
             response = requests.get(health_url, timeout=timeout)
-            end_time = datetime.now(timezone.utc)
+            end_time = datetime.now(UTC)
 
             latency_ms = (end_time - start_time).total_seconds() * 1000
 
