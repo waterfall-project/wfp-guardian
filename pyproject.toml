@@ -9,7 +9,7 @@ packages = ["app"]
 name = "wfp-guardian"
 version = "0.0.1-alpha1"
 description = "Waterfall Project Guardian Service"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
     "colorlog",
     "structlog",
@@ -90,7 +90,7 @@ exclude_lines = [
 # Black formatter configuration
 [tool.black]
 line-length = 88
-target-version = ["py39", "py310", "py311", "py312", "py313"]
+target-version = ["py311", "py312", "py313"]
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -123,7 +123,7 @@ sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 # Ruff linter configuration (replaces flake8, pylint, etc.)
 [tool.ruff]
 line-length = 88
-target-version = "py39"
+target-version = "py311"
 extend-exclude = [
     ".git",
     ".venv",
@@ -178,7 +178,7 @@ line-ending = "auto"
 
 # MyPy type checking configuration
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false  # Start with false, enable gradually
