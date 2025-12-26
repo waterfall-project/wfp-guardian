@@ -12,7 +12,7 @@ Health check resource for the Flask application.
 This module provides a simple health check endpoint to verify that the service is running.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from flask import current_app
 from flask_restful import Resource
@@ -44,5 +44,5 @@ class HealthResource(Resource):
 
         return {
             "status": "ok",
-            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "timestamp": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         }, 200

@@ -13,7 +13,7 @@ operations and testing patterns in the application.
 """
 
 import uuid
-from typing import Optional, Union
+from typing import Optional
 
 from app.models.constants import DUMMY_DESCRIPTION_MAX_LENGTH, DUMMY_NAME_MAX_LENGTH
 from app.models.db import db
@@ -45,8 +45,8 @@ class Dummy(UUIDMixin, TimestampMixin, db.Model):
     def __init__(
         self,
         name: str,
-        description: Optional[str] = None,
-        extra_metadata: Optional[dict] = None,
+        description: str | None = None,
+        extra_metadata: dict | None = None,
         **kwargs,
     ) -> None:
         """Initialize a new Dummy instance.
@@ -72,7 +72,7 @@ class Dummy(UUIDMixin, TimestampMixin, db.Model):
 
     @classmethod
     def get_all(
-        cls, limit: Optional[int] = None, offset: Optional[int] = None
+        cls, limit: int | None = None, offset: int | None = None
     ) -> list["Dummy"]:
         """Retrieve all Dummy records from the database with optional pagination.
 
@@ -103,7 +103,7 @@ class Dummy(UUIDMixin, TimestampMixin, db.Model):
         return result
 
     @classmethod
-    def get_by_id(cls, dummy_id: Union[uuid.UUID, str]) -> Optional["Dummy"]:
+    def get_by_id(cls, dummy_id: uuid.UUID | str) -> Optional["Dummy"]:
         """Retrieve a Dummy record by its primary key ID.
 
         Args:
@@ -120,7 +120,7 @@ class Dummy(UUIDMixin, TimestampMixin, db.Model):
         """
         if isinstance(dummy_id, str):
             dummy_id = uuid.UUID(dummy_id)
-        result: Optional[Dummy] = db.session.get(cls, dummy_id)
+        result: Dummy | None = db.session.get(cls, dummy_id)
         return result
 
     @classmethod
@@ -138,15 +138,15 @@ class Dummy(UUIDMixin, TimestampMixin, db.Model):
             >>> dummy.description if dummy else "Not found"
             'Test description'
         """
-        result: Optional[Dummy] = cls.query.filter_by(name=name).first()
+        result: Dummy | None = cls.query.filter_by(name=name).first()
         return result
 
     @classmethod
     def create(
         cls,
         name: str,
-        description: Optional[str] = None,
-        extra_metadata: Optional[dict] = None,
+        description: str | None = None,
+        extra_metadata: dict | None = None,
     ) -> "Dummy":
         """Create and persist a new Dummy record.
 

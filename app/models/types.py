@@ -15,7 +15,6 @@ optimal performance and native type support where available.
 
 import json
 import uuid
-from typing import Optional, Union
 
 from sqlalchemy import String, Text, TypeDecorator
 from sqlalchemy.dialects.postgresql import JSONB as PostgreSQLJSONB  # noqa: N811
@@ -59,8 +58,8 @@ class GUID(TypeDecorator):
             return dialect.type_descriptor(String(36))
 
     def process_bind_param(
-        self, value: Union[uuid.UUID, str, None], dialect
-    ) -> Union[uuid.UUID, str, None]:
+        self, value: uuid.UUID | str | None, dialect
+    ) -> uuid.UUID | str | None:
         """Convert Python value to database format.
 
         Args:
@@ -78,8 +77,8 @@ class GUID(TypeDecorator):
             return str(value) if isinstance(value, uuid.UUID) else value
 
     def process_result_value(
-        self, value: Union[uuid.UUID, str, None], dialect
-    ) -> Optional[uuid.UUID]:
+        self, value: uuid.UUID | str | None, dialect
+    ) -> uuid.UUID | None:
         """Convert database value to Python UUID.
 
         Args:
@@ -135,8 +134,8 @@ class JSONB(TypeDecorator):
             return dialect.type_descriptor(Text())
 
     def process_bind_param(
-        self, value: Union[dict, list, None], dialect
-    ) -> Union[dict, list, str, None]:
+        self, value: dict | list | None, dialect
+    ) -> dict | list | str | None:
         """Convert Python value to database format.
 
         Args:
@@ -152,8 +151,8 @@ class JSONB(TypeDecorator):
             return json.dumps(value)
 
     def process_result_value(
-        self, value: Union[str, dict, list, None], dialect
-    ) -> Union[dict, list, None]:
+        self, value: str | dict | list | None, dialect
+    ) -> dict | list | None:
         """Convert database value to Python object.
 
         Args:

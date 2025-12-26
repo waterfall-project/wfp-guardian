@@ -15,7 +15,7 @@ resources with Guardian permission checks.
 import re
 from enum import Enum
 from functools import wraps
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from flask import g, jsonify, request
@@ -58,7 +58,7 @@ def camel_to_snake(name: str) -> str:
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
-def _get_resource_name(kwargs: dict, args: tuple) -> Optional[str]:
+def _get_resource_name(kwargs: dict, args: tuple) -> str | None:
     """Extract resource name from kwargs, request, or class name.
 
     The resource name is extracted in the following priority order:
@@ -105,7 +105,7 @@ def _get_resource_name(kwargs: dict, args: tuple) -> Optional[str]:
     return resource_name
 
 
-def _get_user_id() -> Optional[str]:
+def _get_user_id() -> str | None:
     """Extract user_id from Flask g.user_context.
 
     The user_context is set by the @require_jwt_auth decorator,
@@ -137,7 +137,7 @@ def check_access(
     service: str,
     resource: str,
     operation: str,
-    context: Optional[dict[str, Any]] = None,
+    context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Check user access permission via Guardian service.
 
