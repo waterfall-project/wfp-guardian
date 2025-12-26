@@ -40,9 +40,8 @@
 
       **Checks**:
       - PostgreSQL connection
-      - Redis connection
-      - Identity Service accessible (optional)
-      - Guardian Service accessible (optional)
+      - Redis connection (if enabled)
+      - Identity Service accessible (if enabled)
 
       **Usage**: Kubernetes readiness probe
     operationId: readinessCheck
@@ -65,9 +64,6 @@
                       type: string
                       example: ok
                     redis:
-                      type: string
-                      example: ok
-                    guardian:
                       type: string
                       example: ok
                     identity:
