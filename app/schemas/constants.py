@@ -18,6 +18,9 @@ from app.models.constants import (
     POLICY_DESCRIPTION_MAX_LENGTH,
     POLICY_DISPLAY_NAME_MAX_LENGTH,
     POLICY_NAME_MAX_LENGTH,
+    ROLE_DESCRIPTION_MAX_LENGTH,
+    ROLE_DISPLAY_NAME_MAX_LENGTH,
+    ROLE_NAME_MAX_LENGTH,
 )
 
 # Dummy model validation messages
@@ -41,4 +44,19 @@ POLICY_DISPLAY_NAME_TOO_LONG = (
 )
 POLICY_DESCRIPTION_TOO_LONG = (
     f"Description cannot exceed {POLICY_DESCRIPTION_MAX_LENGTH} characters."
+)
+
+# Role model validation messages
+ROLE_NAME_EMPTY = "Name cannot be empty."
+ROLE_NAME_TOO_LONG = f"Name cannot exceed {ROLE_NAME_MAX_LENGTH} characters."
+ROLE_NAME_INVALID_FORMAT = (
+    "Name must contain only lowercase letters and underscores (a-z, _)."
+)
+ROLE_NAME_NOT_UNIQUE = "Role name must be unique within the company."
+ROLE_DISPLAY_NAME_EMPTY = "Display name cannot be empty."
+ROLE_DISPLAY_NAME_TOO_LONG = (
+    f"Display name cannot exceed {ROLE_DISPLAY_NAME_MAX_LENGTH} characters."
+)
+ROLE_DESCRIPTION_TOO_LONG = (
+    f"Description cannot exceed {ROLE_DESCRIPTION_MAX_LENGTH} characters."
 )

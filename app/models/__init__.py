@@ -10,5 +10,6 @@
 
 from app.models.permission import Permission
 from app.models.policy import Policy
+from app.models.role import Role
 
-__all__ = ["Permission", "Policy"]
+__all__ = ["Permission", "Policy", "Role"]
