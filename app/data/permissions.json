@@ -1,0 +1,154 @@
+[
+	{
+		"service": "wfp-flask-template",
+		"resources": [
+			{
+				"name": "config",
+				"operations": [
+					"READ"
+				],
+				"description": "Wfp-flask-template config resource"
+			},
+			{
+				"name": "dummy",
+				"operations": [
+					"CREATE",
+					"DELETE",
+					"LIST",
+					"READ",
+					"UPDATE"
+				],
+				"description": "Wfp-flask-template dummy resource"
+			},
+			{
+				"name": "version",
+				"operations": [
+					"READ"
+				],
+				"description": "Wfp-flask-template version resource"
+			}
+		]
+	},
+	{
+		"service": "wfp-guardian",
+		"resources": [
+			{
+				"name": "config",
+				"operations": [
+					"READ"
+				],
+				"description": "Wfp-guardian config resource"
+			},
+			{
+				"name": "dummy",
+				"operations": [
+					"CREATE",
+					"DELETE",
+					"LIST",
+					"READ",
+					"UPDATE"
+				],
+				"description": "Wfp-guardian dummy resource"
+			},
+			{
+				"name": "version",
+				"operations": [
+					"READ"
+				],
+				"description": "Wfp-guardian version resource"
+			}
+		]
+	},
+	{
+		"service": "wfp-identity",
+		"resources": [
+			{
+				"name": "config",
+				"operations": [
+					"READ"
+				],
+				"description": "Wfp-identity config resource"
+			},
+			{
+				"name": "dummy",
+				"operations": [
+					"CREATE",
+					"DELETE",
+					"LIST",
+					"READ",
+					"UPDATE"
+				],
+				"description": "Wfp-identity dummy resource"
+			},
+			{
+				"name": "version",
+				"operations": [
+					"READ"
+				],
+				"description": "Wfp-identity version resource"
+			}
+		]
+	},
+	{
+		"service": "wfp-license-server",
+		"resources": [
+			{
+				"name": "config",
+				"operations": [
+					"READ"
+				],
+				"description": "Wfp-license-server config resource"
+			},
+			{
+				"name": "dummy",
+				"operations": [
+					"CREATE",
+					"DELETE",
+					"LIST",
+					"READ",
+					"UPDATE"
+				],
+				"description": "Wfp-license-server dummy resource"
+			},
+			{
+				"name": "license",
+				"operations": [
+					"CREATE",
+					"DELETE",
+					"LIST",
+					"READ",
+					"UPDATE"
+				],
+				"description": "Wfp-license-server license resource"
+			},
+			{
+				"name": "license_regenerate_token",
+				"operations": [
+					"UPDATE"
+				],
+				"description": "Wfp-license-server license_regenerate_token resource"
+			},
+			{
+				"name": "license_usage",
+				"operations": [
+					"READ"
+				],
+				"description": "Wfp-license-server license_usage resource"
+			},
+			{
+				"name": "license_users",
+				"operations": [
+					"READ"
+				],
+				"description": "Wfp-license-server license_users resource"
+			},
+			{
+				"name": "version",
+				"operations": [
+					"READ"
+				],
+				"description": "Wfp-license-server version resource"
+			}
+		]
+	}
+]
