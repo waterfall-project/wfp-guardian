@@ -22,20 +22,20 @@ from app.models.constants import (
     POLICY_NAME_MAX_LENGTH,
 )
 from app.models.db import db
-from app.models.types import TimestampMixin, UUIDMixin
+from app.models.types import GUID, TimestampMixin, UUIDMixin
 
 # Association table for Policy-Permission many-to-many relationship
 policy_permissions = db.Table(
     "policy_permissions",
     db.Column(
         "policy_id",
-        db.Uuid,
+        GUID(),
         db.ForeignKey("policies.id", ondelete="CASCADE"),
         primary_key=True,
     ),
     db.Column(
         "permission_id",
-        db.Uuid,
+        GUID(),
         db.ForeignKey("permissions.id", ondelete="CASCADE"),
         primary_key=True,
     ),
@@ -81,7 +81,7 @@ class Policy(UUIDMixin, TimestampMixin, db.Model):
         "Permission",
         secondary=policy_permissions,
         backref="policies",
-        lazy="select",
+        lazy="selectin",
     )
 
     # Unique constraint on name per company
@@ -205,13 +205,20 @@ class Policy(UUIDMixin, TimestampMixin, db.Model):
 
         Note:
             This method is idempotent - attaching an already attached
-            permission is a no-op.
+            permission will raise an IntegrityError on commit.
         """
+        from uuid import UUID
+
         from app.models.permission import Permission
 
-        permission = db.session.get(Permission, permission_id)
-        if permission and permission not in self.permissions:
+        perm_uuid = UUID(permission_id)
+        permission = db.session.get(Permission, perm_uuid)
+        if permission:
+            # Debug: check if already in list
+            if permission in self.permissions:
+                return  # Already attached
             self.permissions.append(permission)
+            db.session.add(self)  # Ensure policy is in session
 
     def detach_permission(self, permission_id: str) -> bool:
         """Detach a permission from this policy.
@@ -222,9 +229,11 @@ class Policy(UUIDMixin, TimestampMixin, db.Model):
         Returns:
             True if permission was detached, False if not found.
         """
+        from uuid import UUID
+
         from app.models.permission import Permission
 
-        permission = db.session.get(Permission, permission_id)
+        permission = db.session.get(Permission, UUID(permission_id))
         if permission and permission in self.permissions:
             self.permissions.remove(permission)
             return True
