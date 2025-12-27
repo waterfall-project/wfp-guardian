@@ -289,6 +289,7 @@ class TestPermissionSeeder:
             # Verify description was updated
             updated = Permission.get_by_name("storage:files:READ")
             assert updated is not None
+            assert updated.description is not None
             assert "New description - READ" in updated.description
 
     def test_seed_permissions_unchanged(self, app):
