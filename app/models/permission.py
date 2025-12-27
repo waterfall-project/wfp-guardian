@@ -130,31 +130,51 @@ class Permission(UUIDMixin, TimestampMixin, db.Model):
         return cls.query.filter_by(name=name).first()
 
     @classmethod
-    def get_by_service(cls, service: str) -> list["Permission"]:
+    def get_by_service(
+        cls, service: str, limit: int | None = None, offset: int | None = None
+    ) -> list["Permission"]:
         """Retrieve all Permissions for a specific service.
 
         Args:
             service: The service identifier to filter by.
+            limit: Maximum number of records to return. If None, returns all records.
+            offset: Number of records to skip. If None, starts from the beginning.
 
         Returns:
             List of Permission instances for the service.
         """
-        return cls.query.filter_by(service=service).all()
+        query = cls.query.filter_by(service=service)
+        if offset is not None:
+            query = query.offset(offset)
+        if limit is not None:
+            query = query.limit(limit)
+        return query.all()
 
     @classmethod
     def get_by_service_and_resource(
-        cls, service: str, resource_name: str
+        cls,
+        service: str,
+        resource_name: str,
+        limit: int | None = None,
+        offset: int | None = None,
     ) -> list["Permission"]:
         """Retrieve all Permissions for a specific service and resource.
 
         Args:
             service: The service identifier to filter by.
             resource_name: The resource name to filter by.
+            limit: Maximum number of records to return. If None, returns all records.
+            offset: Number of records to skip. If None, starts from the beginning.
 
         Returns:
             List of Permission instances for the service and resource.
         """
-        return cls.query.filter_by(service=service, resource_name=resource_name).all()
+        query = cls.query.filter_by(service=service, resource_name=resource_name)
+        if offset is not None:
+            query = query.offset(offset)
+        if limit is not None:
+            query = query.limit(limit)
+        return query.all()
 
     def to_dict(self) -> dict:
         """Convert Permission to dictionary representation.

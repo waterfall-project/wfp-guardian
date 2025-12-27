@@ -7,7 +7,7 @@
 # - Commercial License for proprietary use
 #
 # See LICENSE and LICENSE.md files in the root directory for full license text.
-# For commercial licensing inquiries, contact: benjamin@waterfall-project.pro
+# For commercial licensing inquiries, contact: contact@waterfall-project.pro
 """
 sync_permissions.py
 -------------------
@@ -17,7 +17,7 @@ from all microservices in the waterfall project.
 
 This script:
 1. Scans ../*/app/resources/*.py files
-2. Extracts resources decorated with @check_access_required
+2. Extracts resources decorated with @access_required
 3. Updates app/data/permissions.json with discovered permissions
 
 Usage:
@@ -50,8 +50,8 @@ class PermissionExtractor:
 
     def find_service_directories(self, service_filter: str | None = None) -> list[Path]:
         """Find all service directories matching pattern."""
-        # The script lives in `scripts/` which may be nested; climb two
-        # levels to reach the repository root that contains service folders.
+        # The script lives in `scripts/` (base_dir); climb two levels:
+        # scripts/ -> wfp-guardian/ -> waterfall-project/ (repo root with all services)
         services_dir = self.base_dir.parent.parent
         service_dirs = []
 
@@ -93,13 +93,24 @@ class PermissionExtractor:
         """
         Determine if a resource class represents a collection endpoint.
 
-        Collection endpoints:
-        - Have 'List' in class name (e.g., RoleListResource)
-        - End with service/resource pattern without ID parameter
+        This helper is intentionally conservative and currently only treats
+        classes whose name contains "List" as collection endpoints
+        (e.g., RoleListResource, UserRoleListResource).
+
+        As a result, collection endpoints that do not follow this naming
+        convention will be treated as single-resource endpoints by
+        extract_operation_from_method, and their GET methods will be
+        mapped to READ instead of LIST.
+
+        The heuristic can be extended in the future (e.g., by inspecting
+        pluralized names or route patterns) if needed.
+
+        Args:
+            class_name: The name of the resource class to check.
+
+        Returns:
+            True if the class is considered a collection endpoint.
         """
-        # Check for 'List' in class name
-        # Conservative: only trust 'List' in name for now
-        # Could be extended to detect plural forms or route patterns
         return "List" in class_name
 
     def extract_operation_from_method(
@@ -216,12 +227,17 @@ class PermissionExtractor:
         if operations:
             # Compute a source_file relative to the repository root (two
             # levels up from scripts/). Use os.path.relpath for robustness
-            # and fall back to absolute path if something goes wrong.
+            # and fall back to filename only if something goes wrong to
+            # avoid leaking absolute paths.
             try:
                 repo_root = self.base_dir.parent.parent
                 rel = os.path.relpath(file_path, start=repo_root)
-            except Exception:
-                rel = str(file_path)
+            except Exception as e:
+                print(
+                    f"⚠️  Failed to compute relative path for {file_path}: {e}. "
+                    f"Using filename only as fallback."
+                )
+                rel = file_path.name
 
             return {
                 "service": service_name,

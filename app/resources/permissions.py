@@ -46,21 +46,28 @@ class PermissionListResource(Resource):
             offset (int, optional): Number of records to skip. Default: 0
 
         Returns:
-            tuple: JSON response with list of Permission entities and HTTP 200.
+            tuple: (dict, int). JSON response body with:
+                - permissions (list): List of Permission entities for this page.
+                - count (int): Number of permissions returned in this page.
+                - total (int): Total number of matching permissions.
 
         Example response:
-            [
-                {
-                    "id": "uuid",
-                    "name": "storage:files:DELETE",
-                    "service": "storage",
-                    "resource_name": "files",
-                    "operation": "DELETE",
-                    "description": "Storage files resource - DELETE",
-                    "created_at": "2025-01-01T00:00:00",
-                    "updated_at": "2025-01-01T00:00:00"
-                }
-            ]
+            {
+                "permissions": [
+                    {
+                        "id": "uuid",
+                        "name": "storage:files:DELETE",
+                        "service": "storage",
+                        "resource_name": "files",
+                        "operation": "DELETE",
+                        "description": "Storage files resource - DELETE",
+                        "created_at": "2025-01-01T00:00:00",
+                        "updated_at": "2025-01-01T00:00:00"
+                    }
+                ],
+                "count": 1,
+                "total": 1
+            }
         """
         logger.info("Retrieving permissions")
 
@@ -93,24 +100,23 @@ class PermissionListResource(Resource):
             service = request.args.get("service", type=str)
             resource_name = request.args.get("resource_name", type=str)
 
-            # Build query based on filters
+            # Build query based on filters and paginate at DB level
             if service and resource_name:
-                permissions = Permission.get_by_service_and_resource(
-                    service, resource_name
+                # Filter by both service and resource_name, paginate at DB level
+                query = Permission.query.filter_by(
+                    service=service, resource_name=resource_name
                 )
-                # Apply pagination manually for filtered results
-                total = len(permissions)
-                permissions = permissions[offset : offset + limit]
+                total = query.count()
+                permissions = query.offset(offset).limit(limit).all()
             elif service:
-                permissions = Permission.get_by_service(service)
-                # Apply pagination manually for filtered results
-                total = len(permissions)
-                permissions = permissions[offset : offset + limit]
+                # Filter by service only, paginate at DB level
+                query = Permission.query.filter_by(service=service)
+                total = query.count()
+                permissions = query.offset(offset).limit(limit).all()
             else:
+                # No filters: paginate at DB level and include total count
                 permissions = Permission.get_all(limit=limit, offset=offset)
-                # For unfiltered query, we'd need a count query for accurate total
-                # For simplicity, we'll omit total count in this case
-                total = None
+                total = Permission.query.count()
 
         except ValueError as e:
             logger.warning(f"Invalid query parameters: {e}")
@@ -122,16 +128,14 @@ class PermissionListResource(Resource):
         # Serialize permissions
         result = [perm.to_dict() for perm in permissions]
 
-        # Include pagination metadata if available
+        # Build response with pagination metadata
         response = {
             "permissions": result,
             "count": len(result),
+            "total": total,
         }
 
-        if total is not None:
-            response["total"] = total
-
-        logger.info(f"Retrieved {len(result)} permissions")
+        logger.info(f"Retrieved {len(result)} permissions (total: {total})")
         return response, 200
 
 
