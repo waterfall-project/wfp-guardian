@@ -106,6 +106,57 @@ class PermissionSeeder:
 
         return permissions
 
+    def _needs_update(self, existing: Permission, perm_data: dict) -> bool:
+        """Check if an existing permission needs to be updated.
+
+        Args:
+            existing: Existing Permission object from database
+            perm_data: New permission data dictionary
+
+        Returns:
+            True if any fields have changed, False otherwise
+        """
+        has_changes: bool = (
+            existing.service != perm_data["service"]
+            or existing.resource_name != perm_data["resource_name"]
+            or existing.operation != perm_data["operation"]
+            or existing.description != perm_data["description"]
+        )
+        return has_changes
+
+    def _update_permission(
+        self, existing: Permission, perm_data: dict, dry_run: bool
+    ) -> None:
+        """Update an existing permission with new data.
+
+        Args:
+            existing: Existing Permission object to update
+            perm_data: New permission data dictionary
+            dry_run: If True, skip actual update
+        """
+        if not dry_run:
+            existing.service = perm_data["service"]
+            existing.resource_name = perm_data["resource_name"]
+            existing.operation = perm_data["operation"]
+            existing.description = perm_data["description"]
+
+        action = "[DRY RUN] Would update" if dry_run else "Updated"
+        current_app.logger.info(f"{action} permission: {perm_data['name']}")
+
+    def _create_permission(self, perm_data: dict, dry_run: bool) -> None:
+        """Create a new permission.
+
+        Args:
+            perm_data: Permission data dictionary
+            dry_run: If True, skip actual creation
+        """
+        if not dry_run:
+            permission = Permission(**perm_data)
+            db.session.add(permission)
+
+        action = "[DRY RUN] Would create" if dry_run else "Created"
+        current_app.logger.info(f"{action} permission: {perm_data['name']}")
+
     def seed_permissions(self, dry_run: bool = False) -> dict[str, int]:
         """Seed permissions into the database.
 
@@ -128,34 +179,14 @@ class PermissionSeeder:
             existing = Permission.get_by_name(perm_data["name"])
 
             if existing:
-                # Check if any fields changed
-                needs_update = (
-                    existing.service != perm_data["service"]
-                    or existing.resource_name != perm_data["resource_name"]
-                    or existing.operation != perm_data["operation"]
-                    or existing.description != perm_data["description"]
-                )
-
-                if needs_update:
-                    if not dry_run:
-                        existing.service = perm_data["service"]
-                        existing.resource_name = perm_data["resource_name"]
-                        existing.operation = perm_data["operation"]
-                        existing.description = perm_data["description"]
+                if self._needs_update(existing, perm_data):
+                    self._update_permission(existing, perm_data, dry_run)
                     updated += 1
-                    current_app.logger.info(
-                        f"{'[DRY RUN] Would update' if dry_run else 'Updated'} permission: {perm_data['name']}"
-                    )
                 else:
                     unchanged += 1
             else:
-                if not dry_run:
-                    permission = Permission(**perm_data)
-                    db.session.add(permission)
+                self._create_permission(perm_data, dry_run)
                 created += 1
-                current_app.logger.info(
-                    f"{'[DRY RUN] Would create' if dry_run else 'Created'} permission: {perm_data['name']}"
-                )
 
         if not dry_run:
             db.session.commit()
