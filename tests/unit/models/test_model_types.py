@@ -29,7 +29,6 @@ class TestGUID:
 
     def test_guid_with_sqlite_dialect(self):
         """Test GUID behavior with SQLite dialect."""
-        from sqlalchemy import String
         from sqlalchemy.dialects import sqlite
 
         guid = GUID()
