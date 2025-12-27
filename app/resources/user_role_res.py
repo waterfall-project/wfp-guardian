@@ -29,6 +29,13 @@ from app.schemas.user_role_schema import (
 )
 from app.utils.logger import logger
 
+# Error message constants
+ERROR_COMPANY_ID_NOT_FOUND = "company_id not found in JWT"
+ERROR_INVALID_UUID_FORMAT = "Invalid UUID format"
+ERROR_INTERNAL_SERVER = "Internal server error"
+ERROR_INVALID_UUID_REQUEST = "Invalid UUID in GET request"
+ERROR_USER_ROLE_NOT_FOUND = "User role not found"
+
 
 class UserRoleListResource(Resource):
     """List and create user role assignments."""
@@ -46,7 +53,7 @@ class UserRoleListResource(Resource):
             user_uuid = UUID(user_id)
             company_id = getattr(g, "company_id", None)
             if not company_id:
-                return {"error": "company_id not found in JWT"}, 401
+                return {"error": ERROR_COMPANY_ID_NOT_FOUND}, 401
 
             # Parse optional filters
             project_id_str = request.args.get("project_id")
@@ -68,10 +75,10 @@ class UserRoleListResource(Resource):
 
         except (ValueError, AttributeError) as e:
             logger.error("Invalid UUID in HEAD request", error=str(e))
-            return {"error": "Invalid UUID format"}, 400
+            return {"error": ERROR_INVALID_UUID_FORMAT}, 400
         except Exception as e:
             logger.exception("Error in HEAD user roles", error=str(e))
-            return {"error": "Internal server error"}, 500
+            return {"error": ERROR_INTERNAL_SERVER}, 500
 
     def get(self, user_id: str) -> tuple:
         """List all roles assigned to a user.
@@ -86,7 +93,7 @@ class UserRoleListResource(Resource):
             user_uuid = UUID(user_id)
             company_id = getattr(g, "company_id", None)
             if not company_id:
-                return {"error": "company_id not found in JWT"}, 401
+                return {"error": ERROR_COMPANY_ID_NOT_FOUND}, 401
 
             # Parse pagination
             page = request.args.get("page", 1, type=int)
@@ -137,11 +144,11 @@ class UserRoleListResource(Resource):
             }, 200
 
         except (ValueError, AttributeError) as e:
-            logger.error("Invalid UUID in GET request", error=str(e))
-            return {"error": "Invalid UUID format"}, 400
+            logger.error(ERROR_INVALID_UUID_REQUEST, error=str(e))
+            return {"error": ERROR_INVALID_UUID_FORMAT}, 400
         except Exception as e:
             logger.exception("Error listing user roles", error=str(e))
-            return {"error": "Internal server error"}, 500
+            return {"error": ERROR_INTERNAL_SERVER}, 500
 
     def post(self, user_id: str) -> tuple:
         """Assign a role to a user.
@@ -208,11 +215,11 @@ class UserRoleListResource(Resource):
             return {"error": "User already has this active role assignment"}, 409
         except (ValueError, AttributeError) as e:
             logger.error("Invalid UUID in POST request", error=str(e))
-            return {"error": "Invalid UUID format"}, 400
+            return {"error": ERROR_INVALID_UUID_FORMAT}, 400
         except Exception as e:
             db.session.rollback()
             logger.exception("Error creating user role", error=str(e))
-            return {"error": "Internal server error"}, 500
+            return {"error": ERROR_INTERNAL_SERVER}, 500
 
 
 class UserRoleResource(Resource):
@@ -234,25 +241,25 @@ class UserRoleResource(Resource):
             company_id = getattr(g, "company_id", None)
 
             if not company_id:
-                return {"error": "company_id not found in JWT"}, 401
+                return {"error": ERROR_COMPANY_ID_NOT_FOUND}, 401
 
             # Get user role
             user_role = UserRole.get_by_id(
                 str(user_role_uuid), str(user_uuid), str(company_id)
             )
             if not user_role:
-                return {"error": "User role not found"}, 404
+                return {"error": ERROR_USER_ROLE_NOT_FOUND}, 404
 
             # Serialize and return
             schema = UserRoleSchema()
             return schema.dump(user_role), 200
 
         except (ValueError, AttributeError) as e:
-            logger.error("Invalid UUID in GET request", error=str(e))
-            return {"error": "Invalid UUID format"}, 400
+            logger.error(ERROR_INVALID_UUID_REQUEST, error=str(e))
+            return {"error": ERROR_INVALID_UUID_FORMAT}, 400
         except Exception as e:
             logger.exception("Error getting user role", error=str(e))
-            return {"error": "Internal server error"}, 500
+            return {"error": ERROR_INTERNAL_SERVER}, 500
 
     def patch(self, user_id: str, user_role_id: str) -> tuple:
         """Update a user role assignment.
@@ -273,14 +280,14 @@ class UserRoleResource(Resource):
             company_id = getattr(g, "company_id", None)
 
             if not company_id:
-                return {"error": "company_id not found in JWT"}, 401
+                return {"error": ERROR_COMPANY_ID_NOT_FOUND}, 401
 
             # Get user role
             user_role = UserRole.get_by_id(
                 str(user_role_uuid), str(user_uuid), str(company_id)
             )
             if not user_role:
-                return {"error": "User role not found"}, 404
+                return {"error": ERROR_USER_ROLE_NOT_FOUND}, 404
 
             # Parse and validate request
             schema = UserRoleUpdateSchema()
@@ -320,11 +327,11 @@ class UserRoleResource(Resource):
             return {"error": "Update would violate unique constraint"}, 409
         except (ValueError, AttributeError) as e:
             logger.error("Invalid UUID in PATCH request", error=str(e))
-            return {"error": "Invalid UUID format"}, 400
+            return {"error": ERROR_INVALID_UUID_FORMAT}, 400
         except Exception as e:
             db.session.rollback()
             logger.exception("Error updating user role", error=str(e))
-            return {"error": "Internal server error"}, 500
+            return {"error": ERROR_INTERNAL_SERVER}, 500
 
     def delete(self, user_id: str, user_role_id: str) -> tuple:
         """Delete a user role assignment.
@@ -344,14 +351,14 @@ class UserRoleResource(Resource):
             company_id = getattr(g, "company_id", None)
 
             if not company_id:
-                return {"error": "company_id not found in JWT"}, 401
+                return {"error": ERROR_COMPANY_ID_NOT_FOUND}, 401
 
             # Get user role
             user_role = UserRole.get_by_id(
                 str(user_role_uuid), str(user_uuid), str(company_id)
             )
             if not user_role:
-                return {"error": "User role not found"}, 404
+                return {"error": ERROR_USER_ROLE_NOT_FOUND}, 404
 
             # Delete
             db.session.delete(user_role)
@@ -368,11 +375,11 @@ class UserRoleResource(Resource):
 
         except (ValueError, AttributeError) as e:
             logger.error("Invalid UUID in DELETE request", error=str(e))
-            return {"error": "Invalid UUID format"}, 400
+            return {"error": ERROR_INVALID_UUID_FORMAT}, 400
         except Exception as e:
             db.session.rollback()
             logger.exception("Error deleting user role", error=str(e))
-            return {"error": "Internal server error"}, 500
+            return {"error": ERROR_INTERNAL_SERVER}, 500
 
 
 class RoleUsersResource(Resource):
@@ -392,7 +399,7 @@ class RoleUsersResource(Resource):
             company_id = getattr(g, "company_id", None)
 
             if not company_id:
-                return {"error": "company_id not found in JWT"}, 401
+                return {"error": ERROR_COMPANY_ID_NOT_FOUND}, 401
 
             # Verify role exists
             role = Role.get_by_id(str(role_uuid), str(company_id))
@@ -444,8 +451,8 @@ class RoleUsersResource(Resource):
             }, 200
 
         except (ValueError, AttributeError) as e:
-            logger.error("Invalid UUID in GET request", error=str(e))
-            return {"error": "Invalid UUID format"}, 400
+            logger.error(ERROR_INVALID_UUID_REQUEST, error=str(e))
+            return {"error": ERROR_INVALID_UUID_FORMAT}, 400
         except Exception as e:
             logger.exception("Error listing users with role", error=str(e))
-            return {"error": "Internal server error"}, 500
+            return {"error": ERROR_INTERNAL_SERVER}, 500

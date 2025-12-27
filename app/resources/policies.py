@@ -29,6 +29,9 @@ from app.utils.jwt_utils import get_company_id_from_jwt, require_jwt_auth
 from app.utils.limiter import limiter
 from app.utils.logger import logger
 
+# Error message constants
+ERROR_POLICY_NOT_FOUND = "Policy not found"
+
 
 class PolicyListResource(Resource):
     """Resource for listing and creating Policy entities.
@@ -280,7 +283,7 @@ class PolicyResource(Resource):
             logger.warning(f"Policy not found: {policy_id}")
             return {
                 "error": "not_found",
-                "message": "Policy not found",
+                "message": ERROR_POLICY_NOT_FOUND,
             }, 404
 
         logger.info(f"Policy retrieved: {policy.name}")
@@ -323,7 +326,7 @@ class PolicyResource(Resource):
             logger.warning(f"Policy not found: {policy_id}")
             return {
                 "error": "not_found",
-                "message": "Policy not found",
+                "message": ERROR_POLICY_NOT_FOUND,
             }, 404
 
         # Validate and deserialize request
@@ -377,11 +380,19 @@ class PolicyResource(Resource):
             logger.warning(f"Policy not found: {policy_id}")
             return {
                 "error": "not_found",
-                "message": "Policy not found",
+                "message": ERROR_POLICY_NOT_FOUND,
             }, 404
 
-        # TODO: Check if policy is referenced by any roles (RolePolicy)
-        # For now, we'll allow deletion
+        # Check if policy is referenced by any roles before deletion
+        if policy.roles:
+            role_names = [role.name for role in policy.roles]
+            logger.warning(
+                f"Cannot delete policy {policy_id}: referenced by roles {role_names}"
+            )
+            return {
+                "error": "conflict",
+                "message": f"Cannot delete policy: attached to roles {', '.join(role_names)}",
+            }, 409
 
         db.session.delete(policy)
         db.session.commit()
@@ -426,7 +437,7 @@ class PolicyPermissionListResource(Resource):
             logger.warning(f"Policy not found: {policy_id}")
             return {
                 "error": "not_found",
-                "message": "Policy not found",
+                "message": ERROR_POLICY_NOT_FOUND,
             }, 404
 
         # Parse pagination parameters
@@ -512,7 +523,7 @@ class PolicyPermissionListResource(Resource):
             logger.warning(f"Policy not found: {policy_id}")
             return {
                 "error": "not_found",
-                "message": "Policy not found",
+                "message": ERROR_POLICY_NOT_FOUND,
             }, 404
 
         # Get permission_id from request
@@ -570,7 +581,7 @@ class PolicyPermissionResource(Resource):
             logger.warning(f"Policy not found: {policy_id}")
             return {
                 "error": "not_found",
-                "message": "Policy not found",
+                "message": ERROR_POLICY_NOT_FOUND,
             }, 404
 
         # Detach permission

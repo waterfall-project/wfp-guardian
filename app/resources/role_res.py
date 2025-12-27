@@ -24,6 +24,11 @@ from app.models.role import Role
 from app.schemas.role_schema import RoleCreateSchema, RoleSchema, RoleUpdateSchema
 from app.utils.jwt_utils import require_jwt_auth
 
+# Error message constants
+ERROR_NOT_FOUND = "Not found"
+ERROR_ROLE_NOT_FOUND = "Role not found"
+ERROR_DATABASE_ERROR = "Database error"
+
 
 class RoleListResource(Resource):
     """Resource for listing and creating roles."""
@@ -118,7 +123,7 @@ class RoleListResource(Resource):
         except IntegrityError:
             db.session.rollback()
             return {
-                "error": "Database error",
+                "error": ERROR_DATABASE_ERROR,
                 "message": "Failed to create role",
             }, 500
 
@@ -142,7 +147,7 @@ class RoleResource(Resource):
         role = Role.get_by_id(role_id=role_id, company_id=company_id)
 
         if not role:
-            return {"error": "Not found", "message": "Role not found"}, 404
+            return {"error": ERROR_NOT_FOUND, "message": ERROR_ROLE_NOT_FOUND}, 404
 
         return RoleSchema().dump(role), 200
 
@@ -163,7 +168,7 @@ class RoleResource(Resource):
         role = Role.get_by_id(role_id=role_id, company_id=company_id)
 
         if not role:
-            return {"error": "Not found", "message": "Role not found"}, 404
+            return {"error": ERROR_NOT_FOUND, "message": ERROR_ROLE_NOT_FOUND}, 404
 
         schema = RoleUpdateSchema()
         try:
@@ -184,7 +189,7 @@ class RoleResource(Resource):
         except IntegrityError:
             db.session.rollback()
             return {
-                "error": "Database error",
+                "error": ERROR_DATABASE_ERROR,
                 "message": "Failed to update role",
             }, 500
 
@@ -204,7 +209,7 @@ class RoleResource(Resource):
         role = Role.get_by_id(role_id=role_id, company_id=company_id)
 
         if not role:
-            return {"error": "Not found", "message": "Role not found"}, 404
+            return {"error": ERROR_NOT_FOUND, "message": ERROR_ROLE_NOT_FOUND}, 404
 
         # In a real system, check for UserRole associations
         # For now, we'll just delete the role
@@ -243,7 +248,7 @@ class RolePoliciesResource(Resource):
         role = Role.get_by_id(role_id=role_id, company_id=company_id)
 
         if not role:
-            return {"error": "Not found", "message": "Role not found"}, 404
+            return {"error": ERROR_NOT_FOUND, "message": ERROR_ROLE_NOT_FOUND}, 404
 
         page = request.args.get("page", 1, type=int)
         page_size = min(request.args.get("page_size", 50, type=int), MAX_PAGE_LIMIT)
@@ -280,7 +285,7 @@ class RolePoliciesResource(Resource):
         role = Role.get_by_id(role_id=role_id, company_id=company_id)
 
         if not role:
-            return {"error": "Not found", "message": "Role not found"}, 404
+            return {"error": ERROR_NOT_FOUND, "message": ERROR_ROLE_NOT_FOUND}, 404
 
         data = request.json
         if not data or "policy_id" not in data:
@@ -293,7 +298,7 @@ class RolePoliciesResource(Resource):
         policy = Policy.get_by_id(policy_id=policy_id, company_id=company_id)
 
         if not policy:
-            return {"error": "Not found", "message": "Policy not found"}, 404
+            return {"error": ERROR_NOT_FOUND, "message": "Policy not found"}, 404
 
         # Attach policy (idempotent)
         role.attach_policy(policy_id)
@@ -303,7 +308,7 @@ class RolePoliciesResource(Resource):
         except IntegrityError:
             db.session.rollback()
             return {
-                "error": "Database error",
+                "error": ERROR_DATABASE_ERROR,
                 "message": "Failed to attach policy",
             }, 500
 
@@ -328,14 +333,14 @@ class RolePolicyResource(Resource):
         role = Role.get_by_id(role_id=role_id, company_id=company_id)
 
         if not role:
-            return {"error": "Not found", "message": "Role not found"}, 404
+            return {"error": ERROR_NOT_FOUND, "message": ERROR_ROLE_NOT_FOUND}, 404
 
         # Detach policy
         detached = role.detach_policy(policy_id)
 
         if not detached:
             return {
-                "error": "Not found",
+                "error": ERROR_NOT_FOUND,
                 "message": "Policy not attached to this role",
             }, 404
 
@@ -344,7 +349,7 @@ class RolePolicyResource(Resource):
         except IntegrityError:
             db.session.rollback()
             return {
-                "error": "Database error",
+                "error": ERROR_DATABASE_ERROR,
                 "message": "Failed to detach policy",
             }, 500
 
