@@ -62,6 +62,11 @@ class GUID(TypeDecorator):
     ) -> uuid.UUID | str | None:
         """Convert Python value to database format.
 
+        Handles both UUID objects and strings, converting them appropriately
+        for the target database. This ensures compatibility whether the value
+        comes from application code (UUID) or from external sources like
+        JSON payloads (string).
+
         Args:
             value: Python UUID object, string, or None.
             dialect: The SQLAlchemy dialect being used.
@@ -71,10 +76,16 @@ class GUID(TypeDecorator):
         """
         if value is None:
             return value
-        elif dialect.name == "postgresql":
-            return value if isinstance(value, uuid.UUID) else uuid.UUID(value)
+
+        # Convert to UUID first if it's a string
+        if isinstance(value, str):
+            value = uuid.UUID(value)
+
+        # Return appropriate format for dialect
+        if dialect.name == "postgresql":
+            return value  # PostgreSQL handles UUID natively
         else:
-            return str(value) if isinstance(value, uuid.UUID) else value
+            return str(value)  # SQLite and others need string
 
     def process_result_value(
         self, value: uuid.UUID | str | None, dialect

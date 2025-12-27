@@ -174,8 +174,9 @@ class TestDummyCreateSchema:
         with pytest.raises(ValidationError) as exc_info:
             schema.load(data, session=session)
 
-        assert "name" in exc_info.value.messages
-        assert DUMMY_NAME_TOO_LONG in exc_info.value.messages["name"]  # type: ignore[index]
+        messages = cast("dict[str, list[str]]", exc_info.value.messages)
+        assert "name" in messages
+        assert DUMMY_NAME_TOO_LONG in messages["name"]
 
     def test_name_exactly_max_length(self, app, session):
         """Test that name at exactly max length is valid."""

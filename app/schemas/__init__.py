@@ -13,9 +13,29 @@ used for data serialization and validation throughout the application.
 """
 
 from app.schemas.dummy_schema import DummyCreateSchema, DummySchema, DummyUpdateSchema
+from app.schemas.policy_schema import (
+    PolicyCreateSchema,
+    PolicySchema,
+    PolicyUpdateSchema,
+)
+from app.schemas.role_schema import RoleCreateSchema, RoleSchema, RoleUpdateSchema
+from app.schemas.user_role_schema import (
+    UserRoleCreateSchema,
+    UserRoleSchema,
+    UserRoleUpdateSchema,
+)
 
 __all__ = [
     "DummyCreateSchema",
     "DummySchema",
     "DummyUpdateSchema",
+    "PolicyCreateSchema",
+    "PolicySchema",
+    "PolicyUpdateSchema",
+    "RoleCreateSchema",
+    "RoleSchema",
+    "RoleUpdateSchema",
+    "UserRoleCreateSchema",
+    "UserRoleSchema",
+    "UserRoleUpdateSchema",
 ]

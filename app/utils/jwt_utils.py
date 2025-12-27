@@ -275,3 +275,59 @@ def require_jwt_auth(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
+
+def get_company_id_from_jwt() -> str:
+    """Extract company_id from the current request's JWT token.
+
+    This function retrieves the company_id from Flask's g.user_context,
+    which is populated by the @require_jwt_auth decorator.
+
+    Returns:
+        str: The company_id from the JWT token as a string.
+
+    Raises:
+        RuntimeError: If called outside a request context or before @require_jwt_auth.
+
+    Example:
+        @app.route('/my-resource')
+        @require_jwt_auth
+        def get_my_resource():
+            company_id = get_company_id_from_jwt()
+            # Use company_id to filter resources...
+    """
+    if not hasattr(g, "user_context") or "company_id" not in g.user_context:
+        raise RuntimeError(
+            "get_company_id_from_jwt() called before JWT authentication. "
+            "Ensure @require_jwt_auth decorator is applied to the route."
+        )
+
+    return str(g.user_context["company_id"])
+
+
+def get_user_id_from_jwt() -> str:
+    """Extract user_id from the current request's JWT token.
+
+    This function retrieves the user_id from Flask's g.user_context,
+    which is populated by the @require_jwt_auth decorator.
+
+    Returns:
+        str: The user_id from the JWT token as a string.
+
+    Raises:
+        RuntimeError: If called outside a request context or before @require_jwt_auth.
+
+    Example:
+        @app.route('/my-resource')
+        @require_jwt_auth
+        def get_my_resource():
+            user_id = get_user_id_from_jwt()
+            # Use user_id for audit trail...
+    """
+    if not hasattr(g, "user_context") or "user_id" not in g.user_context:
+        raise RuntimeError(
+            "get_user_id_from_jwt() called before JWT authentication. "
+            "Ensure @require_jwt_auth decorator is applied to the route."
+        )
+
+    return str(g.user_context["user_id"])

@@ -18,9 +18,27 @@ from flask_restful import Api
 
 from app.resources.check_access import CheckAccessResource
 from app.resources.config import ConfigResource
+from app.resources.dummy_res import DummyListResource, DummyResource
 from app.resources.health import HealthResource
 from app.resources.permissions import PermissionListResource, PermissionResource
+from app.resources.policies import (
+    PolicyListResource,
+    PolicyPermissionListResource,
+    PolicyPermissionResource,
+    PolicyResource,
+)
 from app.resources.ready import ReadyResource
+from app.resources.role_res import (
+    RoleListResource,
+    RolePoliciesResource,
+    RolePolicyResource,
+    RoleResource,
+)
+from app.resources.user_role_res import (
+    RoleUsersResource,
+    UserRoleListResource,
+    UserRoleResource,
+)
 from app.resources.version import VersionResource
 from app.utils.logger import logger
 
@@ -67,8 +85,8 @@ def register_routes(app):
     api.add_resource(ConfigResource, f"/{api_version}/configuration")
 
     # Dummy CRUD endpoints
-    # api.add_resource(DummyListResource, f"/{api_version}/dummies")
-    # api.add_resource(DummyResource, f"/{api_version}/dummies/<string:dummy_id>")
+    api.add_resource(DummyListResource, f"/{api_version}/dummies")
+    api.add_resource(DummyResource, f"/{api_version}/dummies/<string:dummy_id>")
 
     # Access Control endpoint
     api.add_resource(CheckAccessResource, f"/{api_version}/check-access")
@@ -77,6 +95,44 @@ def register_routes(app):
     api.add_resource(PermissionListResource, f"/{api_version}/permissions")
     api.add_resource(
         PermissionResource, f"/{api_version}/permissions/<string:permission_id>"
+    )
+
+    # Policy endpoints (CRUD + permission management)
+    api.add_resource(PolicyListResource, f"/{api_version}/policies")
+    api.add_resource(PolicyResource, f"/{api_version}/policies/<string:policy_id>")
+    api.add_resource(
+        PolicyPermissionListResource,
+        f"/{api_version}/policies/<string:policy_id>/permissions",
+    )
+    api.add_resource(
+        PolicyPermissionResource,
+        f"/{api_version}/policies/<string:policy_id>/permissions/<string:permission_id>",
+    )
+
+    # Role endpoints (CRUD + policy management)
+    api.add_resource(RoleListResource, f"/{api_version}/roles")
+    api.add_resource(RoleResource, f"/{api_version}/roles/<string:role_id>")
+    api.add_resource(
+        RolePoliciesResource,
+        f"/{api_version}/roles/<string:role_id>/policies",
+    )
+    api.add_resource(
+        RolePolicyResource,
+        f"/{api_version}/roles/<string:role_id>/policies/<string:policy_id>",
+    )
+
+    # User Role endpoints (user-role assignments)
+    api.add_resource(
+        UserRoleListResource,
+        f"/{api_version}/users/<string:user_id>/roles",
+    )
+    api.add_resource(
+        UserRoleResource,
+        f"/{api_version}/users/<string:user_id>/roles/<string:user_role_id>",
+    )
+    api.add_resource(
+        RoleUsersResource,
+        f"/{api_version}/roles/<string:role_id>/users",
     )
 
     logger.info("Routes registered successfully.")

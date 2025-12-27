@@ -348,9 +348,10 @@ class TestPermissionDetailEndpoint:
         """Test retrieving permission with invalid UUID format."""
         response = authenticated_client.get(api_url("permissions/invalid-uuid"))
 
-        # Flask-RESTful/SQLAlchemy will handle invalid UUID
-        # Typically returns 404 or 400
-        assert response.status_code in [400, 404]
+        assert response.status_code == 400
+        data = response.get_json()
+        assert data["error"] == "bad_request"
+        assert "Invalid UUID format" in data["message"]
 
     def test_get_permission_requires_authentication(self, client, api_url, app):
         """Test that endpoint requires JWT authentication."""
