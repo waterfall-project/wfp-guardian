@@ -12,7 +12,13 @@ This module centralizes all validation error messages used across
 Marshmallow schemas to ensure consistency and easier maintenance.
 """
 
-from app.models.constants import DUMMY_DESCRIPTION_MAX_LENGTH, DUMMY_NAME_MAX_LENGTH
+from app.models.constants import (
+    DUMMY_DESCRIPTION_MAX_LENGTH,
+    DUMMY_NAME_MAX_LENGTH,
+    POLICY_DESCRIPTION_MAX_LENGTH,
+    POLICY_DISPLAY_NAME_MAX_LENGTH,
+    POLICY_NAME_MAX_LENGTH,
+)
 
 # Dummy model validation messages
 DUMMY_NAME_EMPTY = "Name cannot be empty."
@@ -20,4 +26,19 @@ DUMMY_NAME_TOO_LONG = f"Name cannot exceed {DUMMY_NAME_MAX_LENGTH} characters."
 DUMMY_NAME_NOT_UNIQUE = "Name must be unique."
 DUMMY_DESCRIPTION_TOO_LONG = (
     f"Description cannot exceed {DUMMY_DESCRIPTION_MAX_LENGTH} characters."
+)
+
+# Policy model validation messages
+POLICY_NAME_EMPTY = "Name cannot be empty."
+POLICY_NAME_TOO_LONG = f"Name cannot exceed {POLICY_NAME_MAX_LENGTH} characters."
+POLICY_NAME_INVALID_FORMAT = (
+    "Name must contain only lowercase letters and underscores (a-z, _)."
+)
+POLICY_NAME_NOT_UNIQUE = "Policy name must be unique within the company."
+POLICY_DISPLAY_NAME_EMPTY = "Display name cannot be empty."
+POLICY_DISPLAY_NAME_TOO_LONG = (
+    f"Display name cannot exceed {POLICY_DISPLAY_NAME_MAX_LENGTH} characters."
+)
+POLICY_DESCRIPTION_TOO_LONG = (
+    f"Description cannot exceed {POLICY_DESCRIPTION_MAX_LENGTH} characters."
 )

@@ -20,6 +20,12 @@ from app.resources.check_access import CheckAccessResource
 from app.resources.config import ConfigResource
 from app.resources.health import HealthResource
 from app.resources.permissions import PermissionListResource, PermissionResource
+from app.resources.policies import (
+    PolicyListResource,
+    PolicyPermissionListResource,
+    PolicyPermissionResource,
+    PolicyResource,
+)
 from app.resources.ready import ReadyResource
 from app.resources.version import VersionResource
 from app.utils.logger import logger
@@ -77,6 +83,18 @@ def register_routes(app):
     api.add_resource(PermissionListResource, f"/{api_version}/permissions")
     api.add_resource(
         PermissionResource, f"/{api_version}/permissions/<string:permission_id>"
+    )
+
+    # Policy endpoints (CRUD + permission management)
+    api.add_resource(PolicyListResource, f"/{api_version}/policies")
+    api.add_resource(PolicyResource, f"/{api_version}/policies/<string:policy_id>")
+    api.add_resource(
+        PolicyPermissionListResource,
+        f"/{api_version}/policies/<string:policy_id>/permissions",
+    )
+    api.add_resource(
+        PolicyPermissionResource,
+        f"/{api_version}/policies/<string:policy_id>/permissions/<string:permission_id>",
     )
 
     logger.info("Routes registered successfully.")

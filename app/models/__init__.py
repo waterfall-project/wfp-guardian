@@ -9,5 +9,6 @@
 """Models package for the Flask application."""
 
 from app.models.permission import Permission
+from app.models.policy import Policy
 
-__all__ = ["Permission"]
+__all__ = ["Permission", "Policy"]
