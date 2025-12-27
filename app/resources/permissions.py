@@ -212,3 +212,82 @@ class PermissionResource(Resource):
 
         logger.info(f"Permission retrieved: {permission.name}")
         return permission.to_dict(), 200
+
+
+class PermissionsByServiceResource(Resource):
+    """Resource for listing permissions grouped by service.
+
+    Provides endpoint for:
+    - Listing all permissions grouped by service name (GET)
+
+    This is useful for building permission selection UIs.
+    """
+
+    @require_jwt_auth
+    @access_required(Operation.LIST)
+    @limiter.limit(lambda: current_app.config["RATE_LIMIT_CONFIGURATION"])
+    def get(self):
+        """Retrieve all permissions grouped by service.
+
+        Returns:
+            tuple: (dict, int). JSON response body with permissions grouped by service:
+                Key: service name (e.g., "storage", "diagram")
+                Value: list of Permission entities for that service
+
+        Example response:
+            {
+                "storage": [
+                    {
+                        "id": "uuid",
+                        "name": "storage:files:LIST",
+                        "service": "storage",
+                        "resource_name": "files",
+                        "operation": "LIST",
+                        "description": "List files",
+                        "created_at": "2025-01-01T00:00:00",
+                        "updated_at": "2025-01-01T00:00:00"
+                    },
+                    {
+                        "id": "uuid",
+                        "name": "storage:files:CREATE",
+                        "service": "storage",
+                        "resource_name": "files",
+                        "operation": "CREATE",
+                        "description": "Create/upload files",
+                        "created_at": "2025-01-01T00:00:00",
+                        "updated_at": "2025-01-01T00:00:00"
+                    }
+                ],
+                "diagram": [
+                    {
+                        "id": "uuid",
+                        "name": "diagram:diagrams:CREATE",
+                        "service": "diagram",
+                        "resource_name": "diagrams",
+                        "operation": "CREATE",
+                        "description": "Create diagrams",
+                        "created_at": "2025-01-01T00:00:00",
+                        "updated_at": "2025-01-01T00:00:00"
+                    }
+                ]
+            }
+        """
+        logger.info("Retrieving permissions grouped by service")
+
+        # Get all permissions
+        permissions = Permission.query.order_by(
+            Permission.service, Permission.resource_name, Permission.operation
+        ).all()
+
+        # Group by service
+        grouped: dict[str, list] = {}
+        for permission in permissions:
+            service = permission.service
+            if service not in grouped:
+                grouped[service] = []
+            grouped[service].append(permission.to_dict())
+
+        logger.info(
+            f"Retrieved {len(permissions)} permissions across {len(grouped)} services"
+        )
+        return grouped, 200

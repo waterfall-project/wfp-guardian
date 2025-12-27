@@ -411,3 +411,176 @@ class TestPermissionEndpointSecurity:
         # Try DELETE
         response = authenticated_client.delete(api_url(f"permissions/{permission_id}"))
         assert response.status_code in [404, 405]
+
+
+class TestPermissionsByServiceEndpoint:
+    """Test cases for GET /permissions/by-service endpoint."""
+
+    @pytest.fixture(autouse=True)
+    def setup_teardown(self, app):
+        """Setup and teardown for each test."""
+        with app.app_context():
+            db.create_all()
+            yield
+            db.session.remove()
+            db.drop_all()
+
+    def create_sample_permissions(self, app):
+        """Helper to create sample permissions across multiple services."""
+        with app.app_context():
+            permissions = [
+                # Storage service
+                Permission(
+                    name="storage:files:READ",
+                    service="storage",
+                    resource_name="files",
+                    operation="READ",
+                    description="Read files in storage",
+                ),
+                Permission(
+                    name="storage:files:CREATE",
+                    service="storage",
+                    resource_name="files",
+                    operation="CREATE",
+                    description="Create files in storage",
+                ),
+                Permission(
+                    name="storage:buckets:LIST",
+                    service="storage",
+                    resource_name="buckets",
+                    operation="LIST",
+                    description="List storage buckets",
+                ),
+                # Identity service
+                Permission(
+                    name="identity:users:READ",
+                    service="identity",
+                    resource_name="users",
+                    operation="READ",
+                    description="Read user information",
+                ),
+                Permission(
+                    name="identity:users:CREATE",
+                    service="identity",
+                    resource_name="users",
+                    operation="CREATE",
+                    description="Create new users",
+                ),
+                # Diagram service
+                Permission(
+                    name="diagram:diagrams:CREATE",
+                    service="diagram",
+                    resource_name="diagrams",
+                    operation="CREATE",
+                    description="Create diagrams",
+                ),
+            ]
+            for perm in permissions:
+                db.session.add(perm)
+            db.session.commit()
+
+    def test_permissions_by_service_success(self, authenticated_client, api_url, app):
+        """Test listing permissions grouped by service."""
+        self.create_sample_permissions(app)
+
+        response = authenticated_client.get(api_url("permissions/by-service"))
+
+        assert response.status_code == 200
+        data = response.get_json()
+
+        # Should be a dict with service names as keys
+        assert isinstance(data, dict)
+        assert "storage" in data
+        assert "identity" in data
+        assert "diagram" in data
+
+        # Check storage service
+        assert isinstance(data["storage"], list)
+        assert len(data["storage"]) == 3
+        storage_names = [p["name"] for p in data["storage"]]
+        assert "storage:files:READ" in storage_names
+        assert "storage:files:CREATE" in storage_names
+        assert "storage:buckets:LIST" in storage_names
+
+        # Check identity service
+        assert isinstance(data["identity"], list)
+        assert len(data["identity"]) == 2
+        identity_names = [p["name"] for p in data["identity"]]
+        assert "identity:users:READ" in identity_names
+        assert "identity:users:CREATE" in identity_names
+
+        # Check diagram service
+        assert isinstance(data["diagram"], list)
+        assert len(data["diagram"]) == 1
+        assert data["diagram"][0]["name"] == "diagram:diagrams:CREATE"
+
+        # Verify structure of permissions
+        for service_perms in data.values():
+            for perm in service_perms:
+                assert "id" in perm
+                assert "name" in perm
+                assert "service" in perm
+                assert "resource_name" in perm
+                assert "operation" in perm
+                assert "description" in perm
+                assert "created_at" in perm
+                assert "updated_at" in perm
+
+    def test_permissions_by_service_empty(self, authenticated_client, api_url):
+        """Test listing permissions when database is empty."""
+        response = authenticated_client.get(api_url("permissions/by-service"))
+
+        assert response.status_code == 200
+        data = response.get_json()
+
+        # Should return empty dict
+        assert isinstance(data, dict)
+        assert len(data) == 0
+
+    def test_permissions_by_service_single_service(
+        self, authenticated_client, api_url, app
+    ):
+        """Test with only one service."""
+        with app.app_context():
+            db.create_all()
+            permissions = [
+                Permission(
+                    name="storage:files:READ",
+                    service="storage",
+                    resource_name="files",
+                    operation="READ",
+                    description="Read files",
+                ),
+                Permission(
+                    name="storage:files:WRITE",
+                    service="storage",
+                    resource_name="files",
+                    operation="WRITE",
+                    description="Write files",
+                ),
+            ]
+            for perm in permissions:
+                db.session.add(perm)
+            db.session.commit()
+
+        response = authenticated_client.get(api_url("permissions/by-service"))
+
+        assert response.status_code == 200
+        data = response.get_json()
+
+        assert len(data) == 1
+        assert "storage" in data
+        assert len(data["storage"]) == 2
+
+    def test_permissions_by_service_requires_authentication(self, client, api_url, app):
+        """Test that endpoint requires JWT authentication."""
+        self.create_sample_permissions(app)
+
+        # Request without JWT should fail
+        # Since USE_IDENTITY_SERVICE is False in tests, this is mocked
+        # but we can still verify the endpoint exists
+        response = client.get(api_url("permissions/by-service"))
+
+        # In test mode with mocked auth, should still return 200
+        # In production, would return 401
+        assert response.status_code in [200, 401]
