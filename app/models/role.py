@@ -12,6 +12,7 @@ This module defines the Role model which groups policies for user assignment.
 Roles are company-scoped and can be assigned to users.
 """
 
+import uuid
 from typing import Any
 
 from sqlalchemy.orm import relationship
@@ -93,7 +94,7 @@ class Role(UUIDMixin, TimestampMixin, db.Model):
         self,
         name: str,
         display_name: str,
-        company_id: str,
+        company_id: uuid.UUID | str,
         description: str | None = None,
         is_active: bool = True,
         **kwargs: Any,
@@ -126,7 +127,7 @@ class Role(UUIDMixin, TimestampMixin, db.Model):
     @classmethod
     def get_all(
         cls,
-        company_id: str,
+        company_id: uuid.UUID | str,
         limit: int = 50,
         offset: int = 0,
         is_active: bool | None = None,
@@ -150,7 +151,9 @@ class Role(UUIDMixin, TimestampMixin, db.Model):
         return query.offset(offset).limit(limit).all()
 
     @classmethod
-    def get_by_id(cls, role_id: str, company_id: str) -> "Role | None":
+    def get_by_id(
+        cls, role_id: uuid.UUID | str, company_id: uuid.UUID | str
+    ) -> "Role | None":
         """Retrieve a role by ID within a company scope.
 
         Args:
@@ -163,7 +166,7 @@ class Role(UUIDMixin, TimestampMixin, db.Model):
         return cls.query.filter_by(id=role_id, company_id=company_id).first()
 
     @classmethod
-    def get_by_name(cls, name: str, company_id: str) -> "Role | None":
+    def get_by_name(cls, name: str, company_id: uuid.UUID | str) -> "Role | None":
         """Retrieve a role by name within a company scope.
 
         Args:
@@ -176,7 +179,9 @@ class Role(UUIDMixin, TimestampMixin, db.Model):
         return cls.query.filter_by(name=name, company_id=company_id).first()
 
     @classmethod
-    def count_by_company(cls, company_id: str, is_active: bool | None = None) -> int:
+    def count_by_company(
+        cls, company_id: uuid.UUID | str, is_active: bool | None = None
+    ) -> int:
         """Count roles for a company.
 
         Args:

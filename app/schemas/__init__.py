@@ -19,6 +19,11 @@ from app.schemas.policy_schema import (
     PolicyUpdateSchema,
 )
 from app.schemas.role_schema import RoleCreateSchema, RoleSchema, RoleUpdateSchema
+from app.schemas.user_role_schema import (
+    UserRoleCreateSchema,
+    UserRoleSchema,
+    UserRoleUpdateSchema,
+)
 
 __all__ = [
     "DummyCreateSchema",
@@ -30,4 +35,7 @@ __all__ = [
     "RoleCreateSchema",
     "RoleSchema",
     "RoleUpdateSchema",
+    "UserRoleCreateSchema",
+    "UserRoleSchema",
+    "UserRoleUpdateSchema",
 ]

@@ -33,6 +33,11 @@ from app.resources.role_res import (
     RolePolicyResource,
     RoleResource,
 )
+from app.resources.user_role_res import (
+    RoleUsersResource,
+    UserRoleListResource,
+    UserRoleResource,
+)
 from app.resources.version import VersionResource
 from app.utils.logger import logger
 
@@ -113,6 +118,20 @@ def register_routes(app):
     api.add_resource(
         RolePolicyResource,
         f"/{api_version}/roles/<string:role_id>/policies/<string:policy_id>",
+    )
+
+    # User Role endpoints (user-role assignments)
+    api.add_resource(
+        UserRoleListResource,
+        f"/{api_version}/users/<string:user_id>/roles",
+    )
+    api.add_resource(
+        UserRoleResource,
+        f"/{api_version}/users/<string:user_id>/roles/<string:user_role_id>",
+    )
+    api.add_resource(
+        RoleUsersResource,
+        f"/{api_version}/roles/<string:role_id>/users",
     )
 
     logger.info("Routes registered successfully.")

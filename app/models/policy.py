@@ -12,6 +12,7 @@ This module defines the Policy model which groups permissions into reusable sets
 Policies are company-scoped and can be attached to roles.
 """
 
+import uuid
 from typing import Any
 
 from sqlalchemy.orm import relationship
@@ -94,7 +95,7 @@ class Policy(UUIDMixin, TimestampMixin, db.Model):
         self,
         name: str,
         display_name: str,
-        company_id: str,
+        company_id: uuid.UUID | str,
         description: str | None = None,
         priority: int = 0,
         is_active: bool = True,
@@ -130,7 +131,7 @@ class Policy(UUIDMixin, TimestampMixin, db.Model):
     @classmethod
     def get_all(
         cls,
-        company_id: str,
+        company_id: uuid.UUID | str,
         limit: int = 50,
         offset: int = 0,
         is_active: bool | None = None,
@@ -154,7 +155,9 @@ class Policy(UUIDMixin, TimestampMixin, db.Model):
         return query.offset(offset).limit(limit).all()
 
     @classmethod
-    def get_by_id(cls, policy_id: str, company_id: str) -> "Policy | None":
+    def get_by_id(
+        cls, policy_id: uuid.UUID | str, company_id: uuid.UUID | str
+    ) -> "Policy | None":
         """Retrieve a policy by ID within a company scope.
 
         Args:
@@ -167,7 +170,7 @@ class Policy(UUIDMixin, TimestampMixin, db.Model):
         return cls.query.filter_by(id=policy_id, company_id=company_id).first()
 
     @classmethod
-    def get_by_name(cls, name: str, company_id: str) -> "Policy | None":
+    def get_by_name(cls, name: str, company_id: uuid.UUID | str) -> "Policy | None":
         """Retrieve a policy by name within a company scope.
 
         Args:
@@ -180,7 +183,9 @@ class Policy(UUIDMixin, TimestampMixin, db.Model):
         return cls.query.filter_by(name=name, company_id=company_id).first()
 
     @classmethod
-    def count_by_company(cls, company_id: str, is_active: bool | None = None) -> int:
+    def count_by_company(
+        cls, company_id: uuid.UUID | str, is_active: bool | None = None
+    ) -> int:
         """Count policies for a company.
 
         Args:
