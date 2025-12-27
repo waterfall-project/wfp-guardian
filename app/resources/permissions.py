@@ -40,20 +40,20 @@ class PermissionListResource(Resource):
 
         Query Parameters:
             service (str, optional): Filter by service name
-            resource_name (str, optional): Filter by resource name (requires service)
-            limit (int, optional): Maximum number of records to return.
-                Default from config (PAGE_LIMIT), Max from config (MAX_PAGE_LIMIT)
-            offset (int, optional): Number of records to skip. Default: 0
+            resource_name (str, optional): Filter by resource name
+            operation (str, optional): Filter by operation (LIST, CREATE, READ, etc.)
+            page (int, optional): Page number (1-indexed). Default: 1
+            page_size (int, optional): Items per page. Default from config (PAGE_LIMIT),
+                Max from config (MAX_PAGE_LIMIT)
 
         Returns:
             tuple: (dict, int). JSON response body with:
-                - permissions (list): List of Permission entities for this page.
-                - count (int): Number of permissions returned in this page.
-                - total (int): Total number of matching permissions.
+                - data (list): List of Permission entities for this page.
+                - pagination (dict): Pagination metadata (page, page_size, total_items, total_pages)
 
         Example response:
             {
-                "permissions": [
+                "data": [
                     {
                         "id": "uuid",
                         "name": "storage:files:DELETE",
@@ -65,58 +65,62 @@ class PermissionListResource(Resource):
                         "updated_at": "2025-01-01T00:00:00"
                     }
                 ],
-                "count": 1,
-                "total": 1
+                "pagination": {
+                    "page": 1,
+                    "page_size": 50,
+                    "total_items": 1,
+                    "total_pages": 1
+                }
             }
         """
         logger.info("Retrieving permissions")
 
         # Parse pagination and filter parameters
         try:
-            limit = int(
-                request.args.get("limit", default=current_app.config["PAGE_LIMIT"])
+            page = int(request.args.get("page", default=1))
+            page_size = int(
+                request.args.get("page_size", default=current_app.config["PAGE_LIMIT"])
             )
-            offset = int(request.args.get("offset", default=0))
-            max_limit = current_app.config["MAX_PAGE_LIMIT"]
+            max_page_size = current_app.config["MAX_PAGE_LIMIT"]
 
             # Validate pagination parameters
-            if limit < 1 or limit > max_limit:
+            if page < 1:
+                logger.warning(f"Invalid page parameter: {page}. Must be >= 1")
+                return {
+                    "error": "invalid_parameter",
+                    "message": "Page must be >= 1",
+                }, 400
+
+            if page_size < 1 or page_size > max_page_size:
                 logger.warning(
-                    f"Invalid limit parameter: {limit}. Must be between 1 and {max_limit}"
+                    f"Invalid page_size parameter: {page_size}. Must be between 1 and {max_page_size}"
                 )
                 return {
                     "error": "invalid_parameter",
-                    "message": f"Limit must be between 1 and {max_limit}",
+                    "message": f"Page size must be between 1 and {max_page_size}",
                 }, 400
 
-            if offset < 0:
-                logger.warning(f"Invalid offset parameter: {offset}. Must be >= 0")
-                return {
-                    "error": "invalid_parameter",
-                    "message": "Offset must be >= 0",
-                }, 400
+            # Calculate offset from page number
+            offset = (page - 1) * page_size
 
             # Parse filter parameters
             service = request.args.get("service", type=str)
             resource_name = request.args.get("resource_name", type=str)
+            operation = request.args.get("operation", type=str)
 
-            # Build query based on filters and paginate at DB level
-            if service and resource_name:
-                # Filter by both service and resource_name, paginate at DB level
-                query = Permission.query.filter_by(
-                    service=service, resource_name=resource_name
-                )
-                total = query.count()
-                permissions = query.offset(offset).limit(limit).all()
-            elif service:
-                # Filter by service only, paginate at DB level
-                query = Permission.query.filter_by(service=service)
-                total = query.count()
-                permissions = query.offset(offset).limit(limit).all()
-            else:
-                # No filters: paginate at DB level and include total count
-                permissions = Permission.get_all(limit=limit, offset=offset)
-                total = Permission.query.count()
+            # Build query based on filters
+            query = Permission.query
+
+            if service:
+                query = query.filter_by(service=service)
+            if resource_name:
+                query = query.filter_by(resource_name=resource_name)
+            if operation:
+                query = query.filter_by(operation=operation)
+
+            # Get total count and paginated results
+            total_items = query.count()
+            permissions = query.offset(offset).limit(page_size).all()
 
         except ValueError as e:
             logger.warning(f"Invalid query parameters: {e}")
@@ -126,16 +130,27 @@ class PermissionListResource(Resource):
             }, 400
 
         # Serialize permissions
-        result = [perm.to_dict() for perm in permissions]
+        data = [perm.to_dict() for perm in permissions]
+
+        # Calculate total pages
+        total_pages = (
+            (total_items + page_size - 1) // page_size if total_items > 0 else 0
+        )
 
         # Build response with pagination metadata
         response = {
-            "permissions": result,
-            "count": len(result),
-            "total": total,
+            "data": data,
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_items": total_items,
+                "total_pages": total_pages,
+            },
         }
 
-        logger.info(f"Retrieved {len(result)} permissions (total: {total})")
+        logger.info(
+            f"Retrieved {len(data)} permissions (page {page}/{total_pages}, total: {total_items})"
+        )
         return response, 200
 
 

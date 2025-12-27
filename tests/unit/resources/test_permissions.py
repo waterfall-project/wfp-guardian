@@ -81,13 +81,13 @@ class TestPermissionListEndpoint:
         assert response.status_code == 200
         data = response.get_json()
 
-        assert "permissions" in data
-        assert "count" in data
-        assert data["count"] == 5
-        assert len(data["permissions"]) == 5
+        assert "data" in data
+        assert "pagination" in data
+        assert data["pagination"]["total_items"] == 5
+        assert len(data["data"]) == 5
 
         # Check structure of first permission
-        perm = data["permissions"][0]
+        perm = data["data"][0]
         assert "id" in perm
         assert "name" in perm
         assert "service" in perm
@@ -104,36 +104,42 @@ class TestPermissionListEndpoint:
         assert response.status_code == 200
         data = response.get_json()
 
-        assert data["count"] == 0
-        assert len(data["permissions"]) == 0
+        assert data["pagination"]["total_items"] == 0
+        assert len(data["data"]) == 0
 
-    def test_list_permissions_with_limit(self, authenticated_client, api_url, app):
-        """Test listing permissions with limit parameter."""
+    def test_list_permissions_with_page_size(self, authenticated_client, api_url, app):
+        """Test listing permissions with page_size parameter."""
         self.create_sample_permissions(app)
 
-        response = authenticated_client.get(api_url("permissions") + "?limit=2")
+        response = authenticated_client.get(api_url("permissions") + "?page_size=2")
 
         assert response.status_code == 200
         data = response.get_json()
 
-        assert data["count"] == 2
-        assert len(data["permissions"]) == 2
+        assert len(data["data"]) == 2
+        assert data["pagination"]["page_size"] == 2
+        assert data["pagination"]["total_items"] == 5
+        assert data["pagination"]["total_pages"] == 3
 
-    def test_list_permissions_with_offset(self, authenticated_client, api_url, app):
-        """Test listing permissions with offset parameter."""
+    def test_list_permissions_with_pagination(self, authenticated_client, api_url, app):
+        """Test listing permissions with page parameter."""
         self.create_sample_permissions(app)
 
-        # Get first 2
-        response1 = authenticated_client.get(api_url("permissions") + "?limit=2")
+        # Get page 1
+        response1 = authenticated_client.get(
+            api_url("permissions") + "?page_size=2&page=1"
+        )
         data1 = response1.get_json()
-        first_names = [p["name"] for p in data1["permissions"]]
+        first_names = [p["name"] for p in data1["data"]]
+        assert data1["pagination"]["page"] == 1
 
-        # Get next 2 with offset
+        # Get page 2
         response2 = authenticated_client.get(
-            api_url("permissions") + "?limit=2&offset=2"
+            api_url("permissions") + "?page_size=2&page=2"
         )
         data2 = response2.get_json()
-        second_names = [p["name"] for p in data2["permissions"]]
+        second_names = [p["name"] for p in data2["data"]]
+        assert data2["pagination"]["page"] == 2
 
         # Should be different
         assert first_names != second_names
@@ -150,12 +156,11 @@ class TestPermissionListEndpoint:
         assert response.status_code == 200
         data = response.get_json()
 
-        assert data["count"] == 3  # 3 storage permissions
-        assert "total" in data
-        assert data["total"] == 3
+        assert len(data["data"]) == 3  # 3 storage permissions
+        assert data["pagination"]["total_items"] == 3
 
         # All should be storage service
-        services = [p["service"] for p in data["permissions"]]
+        services = [p["service"] for p in data["data"]]
         assert all(s == "storage" for s in services)
 
     def test_list_permissions_filter_by_service_and_resource(
@@ -171,11 +176,11 @@ class TestPermissionListEndpoint:
         assert response.status_code == 200
         data = response.get_json()
 
-        assert data["count"] == 2  # 2 storage:files permissions
-        assert data["total"] == 2
+        assert len(data["data"]) == 2  # 2 storage:files permissions
+        assert data["pagination"]["total_items"] == 2
 
         # All should be storage:files
-        for perm in data["permissions"]:
+        for perm in data["data"]:
             assert perm["service"] == "storage"
             assert perm["resource_name"] == "files"
 
@@ -192,49 +197,85 @@ class TestPermissionListEndpoint:
         assert response.status_code == 200
         data = response.get_json()
 
-        assert data["count"] == 0
-        assert data["total"] == 0
+        assert len(data["data"]) == 0
+        assert data["pagination"]["total_items"] == 0
 
-    def test_list_permissions_invalid_limit_too_high(
+    def test_list_permissions_filter_by_operation(
         self, authenticated_client, api_url, app
     ):
-        """Test that limit exceeding MAX_PAGE_LIMIT returns error."""
-        response = authenticated_client.get(api_url("permissions") + "?limit=1000")
+        """Test filtering permissions by operation."""
+        self.create_sample_permissions(app)
+
+        response = authenticated_client.get(api_url("permissions") + "?operation=READ")
+
+        assert response.status_code == 200
+        data = response.get_json()
+
+        assert len(data["data"]) == 2  # 2 READ permissions
+        assert data["pagination"]["total_items"] == 2
+
+        # All should have READ operation
+        operations = [p["operation"] for p in data["data"]]
+        assert all(op == "READ" for op in operations)
+
+    def test_list_permissions_filter_by_service_and_operation(
+        self, authenticated_client, api_url, app
+    ):
+        """Test filtering permissions by service and operation."""
+        self.create_sample_permissions(app)
+
+        response = authenticated_client.get(
+            api_url("permissions") + "?service=storage&operation=READ"
+        )
+
+        assert response.status_code == 200
+        data = response.get_json()
+
+        assert len(data["data"]) == 1  # 1 storage READ permission
+        assert data["pagination"]["total_items"] == 1
+        assert data["data"][0]["service"] == "storage"
+        assert data["data"][0]["operation"] == "READ"
+
+    def test_list_permissions_invalid_page_size_too_high(
+        self, authenticated_client, api_url, app
+    ):
+        """Test that page_size exceeding MAX_PAGE_LIMIT returns error."""
+        response = authenticated_client.get(api_url("permissions") + "?page_size=1000")
 
         assert response.status_code == 400
         data = response.get_json()
 
         assert "error" in data
-        assert "Limit must be between" in data["message"]
+        assert "Page size must be between" in data["message"]
 
-    def test_list_permissions_invalid_limit_zero(
+    def test_list_permissions_invalid_page_size_zero(
         self, authenticated_client, api_url, app
     ):
-        """Test that limit of 0 returns error."""
-        response = authenticated_client.get(api_url("permissions") + "?limit=0")
+        """Test that page_size of 0 returns error."""
+        response = authenticated_client.get(api_url("permissions") + "?page_size=0")
 
         assert response.status_code == 400
         data = response.get_json()
 
         assert "error" in data
 
-    def test_list_permissions_invalid_offset_negative(
+    def test_list_permissions_invalid_page_negative(
         self, authenticated_client, api_url, app
     ):
-        """Test that negative offset returns error."""
-        response = authenticated_client.get(api_url("permissions") + "?offset=-1")
+        """Test that negative page returns error."""
+        response = authenticated_client.get(api_url("permissions") + "?page=0")
 
         assert response.status_code == 400
         data = response.get_json()
 
         assert "error" in data
-        assert "Offset must be >= 0" in data["message"]
+        assert "Page must be >= 1" in data["message"]
 
-    def test_list_permissions_invalid_limit_non_numeric(
+    def test_list_permissions_invalid_page_size_non_numeric(
         self, authenticated_client, api_url, app
     ):
-        """Test that non-numeric limit returns error."""
-        response = authenticated_client.get(api_url("permissions") + "?limit=abc")
+        """Test that non-numeric page_size returns error."""
+        response = authenticated_client.get(api_url("permissions") + "?page_size=abc")
 
         assert response.status_code == 400
 
