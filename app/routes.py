@@ -20,7 +20,11 @@ from app.resources.check_access import CheckAccessResource
 from app.resources.config import ConfigResource
 from app.resources.dummy_res import DummyListResource, DummyResource
 from app.resources.health import HealthResource
-from app.resources.permissions import PermissionListResource, PermissionResource
+from app.resources.permissions import (
+    PermissionListResource,
+    PermissionResource,
+    PermissionsByServiceResource,
+)
 from app.resources.policies import (
     PolicyListResource,
     PolicyPermissionListResource,
@@ -93,6 +97,9 @@ def register_routes(app):
 
     # Permission endpoints (read-only)
     api.add_resource(PermissionListResource, f"/{api_version}/permissions")
+    api.add_resource(
+        PermissionsByServiceResource, f"/{api_version}/permissions/by-service"
+    )
     api.add_resource(
         PermissionResource, f"/{api_version}/permissions/<string:permission_id>"
     )
