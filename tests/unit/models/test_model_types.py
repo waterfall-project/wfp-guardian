@@ -18,6 +18,7 @@ from datetime import datetime
 from unittest.mock import MagicMock
 
 import pytest
+from sqlalchemy import Column, String
 
 from app.models.db import db
 from app.models.types import GUID, JSONB, TimestampMixin, UUIDMixin
@@ -35,7 +36,8 @@ class TestGUID:
 
         # Test load_dialect_impl returns String(36) for SQLite
         impl = guid.load_dialect_impl(dialect)
-        assert impl.length == 36  # type: ignore[attr-defined]
+        assert isinstance(impl, String)
+        assert impl.length == 36
 
     def test_guid_bind_param_sqlite_converts_uuid_to_string(self):
         """Test GUID converts UUID to string for SQLite."""
@@ -216,8 +218,8 @@ class TestModelWithMixins:
             {
                 "__tablename__": "test_model",
                 "__table_args__": {"extend_existing": True},
-                "name": db.Column(db.String(50), nullable=False),
-                "data": db.Column(JSONB(), nullable=True),
+                "name": Column(String(50), nullable=False),
+                "data": Column(JSONB(), nullable=True),
             },
         )
 

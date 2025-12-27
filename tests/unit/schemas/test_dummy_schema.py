@@ -150,8 +150,9 @@ class TestDummyCreateSchema:
         with pytest.raises(ValidationError) as exc_info:
             schema.load(data, session=session)
 
-        assert "name" in exc_info.value.messages
-        assert DUMMY_NAME_EMPTY in exc_info.value.messages["name"]  # type: ignore[index]
+        messages = cast("dict[str, list[str]]", exc_info.value.messages)
+        assert "name" in messages
+        assert DUMMY_NAME_EMPTY in messages["name"]
 
     def test_name_cannot_be_whitespace(self, app, session):
         """Test that name cannot be only whitespace."""
@@ -161,8 +162,9 @@ class TestDummyCreateSchema:
         with pytest.raises(ValidationError) as exc_info:
             schema.load(data, session=session)
 
-        assert "name" in exc_info.value.messages
-        assert DUMMY_NAME_EMPTY in exc_info.value.messages["name"]  # type: ignore[index]
+        messages = cast("dict[str, list[str]]", exc_info.value.messages)
+        assert "name" in messages
+        assert DUMMY_NAME_EMPTY in messages["name"]
 
     def test_name_max_length_validation(self, app, session):
         """Test name max length validation."""
