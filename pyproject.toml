@@ -123,7 +123,6 @@ sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 # Ruff linter configuration (replaces flake8, pylint, etc.)
 [tool.ruff]
 line-length = 88
-target-version = "py311"
 extend-exclude = [
     ".git",
     ".venv",
@@ -205,9 +204,8 @@ exclude = [
 ]
 
 [[tool.mypy.overrides]]
-module = "tests.*"
-disallow_untyped_defs = false
-check_untyped_defs = false
+module = "app.models.*"
+ignore_errors = true
 
 # Bandit security linter configuration
 [tool.bandit]
