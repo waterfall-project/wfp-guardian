@@ -28,6 +28,7 @@ from app.schemas.constants import (
     ROLE_DISPLAY_NAME_EMPTY,
     ROLE_DISPLAY_NAME_TOO_LONG,
     ROLE_NAME_EMPTY,
+    ROLE_NAME_IMMUTABLE,
     ROLE_NAME_INVALID_FORMAT,
     ROLE_NAME_TOO_LONG,
 )
@@ -136,7 +137,7 @@ class RoleCreateSchema(SQLAlchemyAutoSchema):
         return data
 
     @validates("name")
-    def validate_name(self, value: str) -> None:
+    def validate_name(self, value: str, **kwargs) -> None:
         """Validate role name format and uniqueness.
 
         Rules:
@@ -146,6 +147,7 @@ class RoleCreateSchema(SQLAlchemyAutoSchema):
 
         Args:
             value: Role name to validate.
+            **kwargs: Additional keyword arguments from Marshmallow.
 
         Raises:
             ValidationError: If name format is invalid or already exists.
@@ -160,7 +162,7 @@ class RoleCreateSchema(SQLAlchemyAutoSchema):
         # Check uniqueness will be done at the resource level with company_id
 
     @validates("display_name")
-    def validate_display_name(self, value: str) -> None:
+    def validate_display_name(self, value: str, **kwargs) -> None:
         """Validate role display name.
 
         Rules:
@@ -168,6 +170,7 @@ class RoleCreateSchema(SQLAlchemyAutoSchema):
 
         Args:
             value: Display name to validate.
+            **kwargs: Additional keyword arguments from Marshmallow.
 
         Raises:
             ValidationError: If display name is empty or whitespace.
@@ -180,19 +183,15 @@ class RoleUpdateSchema(SQLAlchemyAutoSchema):
     """Marshmallow schema for updating existing Role instances.
 
     All fields are optional for partial updates. Validates format when provided.
+    The technical name cannot be modified after creation.
 
     Attributes:
-        name: Technical name (optional, lowercase with underscores).
         display_name: Human-readable display name (optional).
         description: Optional detailed description.
         priority: Evaluation priority (optional).
         is_active: Whether the role is active (optional).
     """
 
-    name = fields.Str(
-        required=False,
-        validate=validate.Length(max=ROLE_NAME_MAX_LENGTH, error=ROLE_NAME_TOO_LONG),
-    )
     display_name = fields.Str(
         required=False,
         validate=validate.Length(
@@ -214,14 +213,29 @@ class RoleUpdateSchema(SQLAlchemyAutoSchema):
         model = Role
         load_instance = False
         include_fk = False
-        exclude = ("id", "company_id", "created_at", "updated_at")
+        exclude = ("id", "name", "company_id", "created_at", "updated_at")
         unknown = EXCLUDE
+
+    @pre_load
+    def validate_immutable_fields(self, data: dict, **kwargs) -> dict:
+        """Validate that immutable fields are not present in update data.
+
+        Args:
+            data: The input data dictionary.
+            **kwargs: Additional keyword arguments.
+
+        Raises:
+            ValidationError: If immutable field 'name' is present.
+        """
+        if "name" in data:
+            raise ValidationError({"name": [ROLE_NAME_IMMUTABLE]})
+        return data
 
     @pre_load
     def preprocess_fields(self, data: dict, **kwargs) -> dict:
         """Preprocess data before validation.
 
-        - Strips whitespace from name and display_name if present
+        - Strips whitespace from display_name if present
         - Strips whitespace from description if present and is a string
 
         Args:
@@ -231,9 +245,6 @@ class RoleUpdateSchema(SQLAlchemyAutoSchema):
         Returns:
             Preprocessed data dictionary.
         """
-        if "name" in data and isinstance(data["name"], str):
-            data["name"] = data["name"].strip()
-
         if "display_name" in data and isinstance(data["display_name"], str):
             data["display_name"] = data["display_name"].strip()
 
@@ -242,29 +253,8 @@ class RoleUpdateSchema(SQLAlchemyAutoSchema):
 
         return data
 
-    @validates("name")
-    def validate_name(self, value: str) -> None:
-        """Validate role name format.
-
-        Rules:
-        - Cannot be empty or whitespace
-        - Must be lowercase with underscores only
-
-        Args:
-            value: Role name to validate.
-
-        Raises:
-            ValidationError: If name format is invalid.
-        """
-        if not value or not value.strip():
-            raise ValidationError(ROLE_NAME_EMPTY)
-
-        # Validate format: lowercase letters, numbers, underscores
-        if not re.match(r"^[a-z0-9_]+$", value):
-            raise ValidationError(ROLE_NAME_INVALID_FORMAT)
-
     @validates("display_name")
-    def validate_display_name(self, value: str) -> None:
+    def validate_display_name(self, value: str, **kwargs) -> None:
         """Validate role display name.
 
         Rules:
@@ -272,6 +262,7 @@ class RoleUpdateSchema(SQLAlchemyAutoSchema):
 
         Args:
             value: Display name to validate.
+            **kwargs: Additional keyword arguments from Marshmallow.
 
         Raises:
             ValidationError: If display name is empty or whitespace.

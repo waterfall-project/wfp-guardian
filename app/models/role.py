@@ -73,7 +73,7 @@ class Role(UUIDMixin, TimestampMixin, db.Model):
     name = db.Column(db.String(ROLE_NAME_MAX_LENGTH), nullable=False, index=True)
     display_name = db.Column(db.String(ROLE_DISPLAY_NAME_MAX_LENGTH), nullable=False)
     description = db.Column(db.String(ROLE_DESCRIPTION_MAX_LENGTH), nullable=True)
-    company_id = db.Column(db.Uuid, nullable=False, index=True)
+    company_id = db.Column(GUID(), nullable=False, index=True)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     # Many-to-many relationship with Policy
@@ -246,6 +246,15 @@ class Role(UUIDMixin, TimestampMixin, db.Model):
             Number of policies.
         """
         return len(self.policies)
+
+    @property
+    def policies_count(self) -> int:
+        """Property for policies count (for schema serialization).
+
+        Returns:
+            Number of policies.
+        """
+        return self.get_policies_count()
 
     def to_dict(self, include_policies_count: bool = True) -> dict[str, Any]:
         """Convert role to dictionary representation.

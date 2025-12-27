@@ -166,3 +166,39 @@ def api_url(api_version):
         return f"/{api_version}/{path}"
 
     return _build_url
+
+
+@fixture
+def sample_company_id():
+    """Provide a sample company UUID for testing.
+
+    Returns the same UUID as MOCK_COMPANY_ID from environment to ensure consistency
+    between test data and authenticated requests.
+
+    Returns:
+        UUID: The company_id used by @require_jwt_auth decorator in test mode.
+    """
+    from uuid import UUID
+
+    mock_company_id = os.environ.get(
+        "MOCK_COMPANY_ID", "00000000-0000-0000-0000-000000000001"
+    )
+    return UUID(mock_company_id)
+
+
+@fixture
+def sample_user_id():
+    """Provide a sample user UUID for testing.
+
+    Returns the same UUID as MOCK_USER_ID from environment to ensure consistency
+    between test data and authenticated requests.
+
+    Returns:
+        UUID: The user_id used by @require_jwt_auth decorator in test mode.
+    """
+    from uuid import UUID
+
+    mock_user_id = os.environ.get(
+        "MOCK_USER_ID", "00000000-0000-0000-0000-000000000001"
+    )
+    return UUID(mock_user_id)

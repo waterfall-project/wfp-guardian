@@ -45,6 +45,7 @@ POLICY_DISPLAY_NAME_TOO_LONG = (
 POLICY_DESCRIPTION_TOO_LONG = (
     f"Description cannot exceed {POLICY_DESCRIPTION_MAX_LENGTH} characters."
 )
+POLICY_NAME_IMMUTABLE = "The technical 'name' field cannot be modified after creation."
 
 # Role model validation messages
 ROLE_NAME_EMPTY = "Name cannot be empty."
@@ -60,3 +61,4 @@ ROLE_DISPLAY_NAME_TOO_LONG = (
 ROLE_DESCRIPTION_TOO_LONG = (
     f"Description cannot exceed {ROLE_DESCRIPTION_MAX_LENGTH} characters."
 )
+ROLE_NAME_IMMUTABLE = "The technical 'name' field cannot be modified after creation."

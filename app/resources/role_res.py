@@ -23,11 +23,13 @@ from app.models.policy import Policy
 from app.models.role import Role
 from app.schemas.role_schema import RoleCreateSchema, RoleSchema, RoleUpdateSchema
 from app.utils.jwt_utils import require_jwt_auth
+from app.utils.logger import logger
 
 # Error message constants
 ERROR_NOT_FOUND = "Not found"
 ERROR_ROLE_NOT_FOUND = "Role not found"
 ERROR_DATABASE_ERROR = "Database error"
+ERROR_INVALID_UUID_FORMAT = "Invalid UUID format"
 
 
 class RoleListResource(Resource):
@@ -73,13 +75,19 @@ class RoleListResource(Resource):
         )
 
         total_count = Role.count_by_company(company_id=company_id, is_active=is_active)
+        total_pages = (
+            (total_count + page_size - 1) // page_size if total_count > 0 else 0
+        )
 
         schema = RoleSchema(many=True)
         return {
             "data": schema.dump(roles),
-            "page": page,
-            "page_size": page_size,
-            "total": total_count,
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_items": total_count,
+                "total_pages": total_pages,
+            },
         }, 200
 
     @require_jwt_auth
@@ -98,13 +106,14 @@ class RoleListResource(Resource):
         try:
             data = schema.load(request.json)
         except ValidationError as err:
-            return {"error": "Validation failed", "details": err.messages}, 422
+            logger.warning(f"Role creation validation failed: {err.messages}")
+            return {"error": "validation_error", "message": err.messages}, 422
 
         # Check name uniqueness
         existing = Role.get_by_name(name=data["name"], company_id=company_id)
         if existing:
             return {
-                "error": "Conflict",
+                "error": "conflict",
                 "message": f"Role with name '{data['name']}' already exists for this company",
             }, 409
 
@@ -143,11 +152,23 @@ class RoleResource(Resource):
         Returns:
             JSON response with role details or 404.
         """
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(role_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {role_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
+
         company_id = g.user_context.get("company_id")
         role = Role.get_by_id(role_id=role_id, company_id=company_id)
 
         if not role:
-            return {"error": ERROR_NOT_FOUND, "message": ERROR_ROLE_NOT_FOUND}, 404
+            return {"error": "not_found", "message": ERROR_ROLE_NOT_FOUND}, 404
 
         return RoleSchema().dump(role), 200
 
@@ -164,17 +185,30 @@ class RoleResource(Resource):
         Returns:
             JSON response with updated role or error.
         """
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(role_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {role_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
+
         company_id = g.user_context.get("company_id")
         role = Role.get_by_id(role_id=role_id, company_id=company_id)
 
         if not role:
-            return {"error": ERROR_NOT_FOUND, "message": ERROR_ROLE_NOT_FOUND}, 404
+            return {"error": "not_found", "message": ERROR_ROLE_NOT_FOUND}, 404
 
         schema = RoleUpdateSchema()
         try:
             data = schema.load(request.json)
         except ValidationError as err:
-            return {"error": "Validation failed", "details": err.messages}, 422
+            logger.warning(f"Role update validation failed: {err.messages}")
+            return {"error": "validation_error", "message": err.messages}, 422
 
         # Update fields if provided
         if "display_name" in data:
@@ -205,11 +239,23 @@ class RoleResource(Resource):
         Returns:
             204 on success, 404 if not found, 400 if has dependencies.
         """
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(role_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {role_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
+
         company_id = g.user_context.get("company_id")
         role = Role.get_by_id(role_id=role_id, company_id=company_id)
 
         if not role:
-            return {"error": ERROR_NOT_FOUND, "message": ERROR_ROLE_NOT_FOUND}, 404
+            return {"error": "not_found", "message": ERROR_ROLE_NOT_FOUND}, 404
 
         # In a real system, check for UserRole associations
         # For now, we'll just delete the role
@@ -244,11 +290,23 @@ class RolePoliciesResource(Resource):
         Returns:
             JSON response with paginated policy list.
         """
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(role_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {role_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
+
         company_id = g.user_context.get("company_id")
         role = Role.get_by_id(role_id=role_id, company_id=company_id)
 
         if not role:
-            return {"error": ERROR_NOT_FOUND, "message": ERROR_ROLE_NOT_FOUND}, 404
+            return {"error": "not_found", "message": ERROR_ROLE_NOT_FOUND}, 404
 
         page = request.args.get("page", 1, type=int)
         page_size = min(request.args.get("page_size", 50, type=int), MAX_PAGE_LIMIT)
@@ -257,15 +315,21 @@ class RolePoliciesResource(Resource):
         offset = (page - 1) * page_size
         policies = role.policies[offset : offset + page_size]
         total_count = len(role.policies)
+        total_pages = (
+            (total_count + page_size - 1) // page_size if total_count > 0 else 0
+        )
 
         from app.schemas.policy_schema import PolicySchema
 
         schema = PolicySchema(many=True)
         return {
             "data": schema.dump(policies),
-            "page": page,
-            "page_size": page_size,
-            "total": total_count,
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_items": total_count,
+                "total_pages": total_pages,
+            },
         }, 200
 
     @require_jwt_auth
@@ -281,16 +345,28 @@ class RolePoliciesResource(Resource):
         Returns:
             201 on success, 404 if not found.
         """
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(role_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {role_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
+
         company_id = g.user_context.get("company_id")
         role = Role.get_by_id(role_id=role_id, company_id=company_id)
 
         if not role:
-            return {"error": ERROR_NOT_FOUND, "message": ERROR_ROLE_NOT_FOUND}, 404
+            return {"error": "not_found", "message": ERROR_ROLE_NOT_FOUND}, 404
 
         data = request.json
         if not data or "policy_id" not in data:
             return {
-                "error": "Bad request",
+                "error": "bad_request",
                 "message": "policy_id is required",
             }, 400
 
@@ -298,9 +374,16 @@ class RolePoliciesResource(Resource):
         policy = Policy.get_by_id(policy_id=policy_id, company_id=company_id)
 
         if not policy:
-            return {"error": ERROR_NOT_FOUND, "message": "Policy not found"}, 404
+            return {"error": "not_found", "message": "Policy not found"}, 404
 
-        # Attach policy (idempotent)
+        # Check if already attached
+        if policy in role.policies:
+            return {
+                "error": "conflict",
+                "message": "Policy already attached to this role",
+            }, 409
+
+        # Attach policy
         role.attach_policy(policy_id)
 
         try:
@@ -329,18 +412,31 @@ class RolePolicyResource(Resource):
         Returns:
             204 on success, 404 if not found.
         """
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(role_id)
+            UUID(policy_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {role_id} or {policy_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
+
         company_id = g.user_context.get("company_id")
         role = Role.get_by_id(role_id=role_id, company_id=company_id)
 
         if not role:
-            return {"error": ERROR_NOT_FOUND, "message": ERROR_ROLE_NOT_FOUND}, 404
+            return {"error": "not_found", "message": ERROR_ROLE_NOT_FOUND}, 404
 
         # Detach policy
         detached = role.detach_policy(policy_id)
 
         if not detached:
             return {
-                "error": ERROR_NOT_FOUND,
+                "error": "not_found",
                 "message": "Policy not attached to this role",
             }, 404
 

@@ -14,7 +14,7 @@ Endpoints:
 from datetime import UTC, datetime
 from uuid import UUID
 
-from flask import g, request
+from flask import request
 from flask_restful import Resource
 from marshmallow import ValidationError
 from sqlalchemy.exc import IntegrityError
@@ -26,6 +26,11 @@ from app.schemas.user_role_schema import (
     UserRoleCreateSchema,
     UserRoleSchema,
     UserRoleUpdateSchema,
+)
+from app.utils.jwt_utils import (
+    get_company_id_from_jwt,
+    get_user_id_from_jwt,
+    require_jwt_auth,
 )
 from app.utils.logger import logger
 
@@ -40,6 +45,7 @@ ERROR_USER_ROLE_NOT_FOUND = "User role not found"
 class UserRoleListResource(Resource):
     """List and create user role assignments."""
 
+    @require_jwt_auth
     def head(self, user_id: str) -> tuple:
         """HEAD request to count user roles.
 
@@ -51,7 +57,7 @@ class UserRoleListResource(Resource):
         """
         try:
             user_uuid = UUID(user_id)
-            company_id = getattr(g, "company_id", None)
+            company_id = get_company_id_from_jwt()
             if not company_id:
                 return {
                     "error": "unauthorized",
@@ -83,6 +89,7 @@ class UserRoleListResource(Resource):
             logger.exception("Error in HEAD user roles", error=str(e))
             return {"error": "internal_error", "message": ERROR_INTERNAL_SERVER}, 500
 
+    @require_jwt_auth
     def get(self, user_id: str) -> tuple:
         """List all roles assigned to a user.
 
@@ -94,7 +101,7 @@ class UserRoleListResource(Resource):
         """
         try:
             user_uuid = UUID(user_id)
-            company_id = getattr(g, "company_id", None)
+            company_id = get_company_id_from_jwt()
             if not company_id:
                 return {
                     "error": "unauthorized",
@@ -144,7 +151,7 @@ class UserRoleListResource(Resource):
                 "pagination": {
                     "page": page,
                     "page_size": page_size,
-                    "total": total,
+                    "total_items": total,
                     "total_pages": (total + page_size - 1) // page_size,
                 },
             }, 200
@@ -156,6 +163,7 @@ class UserRoleListResource(Resource):
             logger.exception("Error listing user roles", error=str(e))
             return {"error": "internal_error", "message": ERROR_INTERNAL_SERVER}, 500
 
+    @require_jwt_auth
     def post(self, user_id: str) -> tuple:
         """Assign a role to a user.
 
@@ -167,8 +175,8 @@ class UserRoleListResource(Resource):
         """
         try:
             user_uuid = UUID(user_id)
-            company_id = getattr(g, "company_id", None)
-            granted_by = getattr(g, "user_id", None)
+            company_id = get_company_id_from_jwt()
+            granted_by = get_user_id_from_jwt()
 
             if not company_id or not granted_by:
                 return {
@@ -181,12 +189,32 @@ class UserRoleListResource(Resource):
             data = schema.load(request.get_json())
 
             # Verify role exists and belongs to company
-            role = Role.get_by_id(data["role_id"], company_id)
+            role = Role.get_by_id(UUID(data["role_id"]), UUID(company_id))
             if not role:
                 return {
                     "error": "not_found",
                     "message": "Role not found or not accessible",
                 }, 404
+
+            # Check if user already has this active role assignment
+            existing = UserRole.query.filter_by(
+                user_id=str(user_uuid),
+                role_id=data["role_id"],
+                company_id=company_id,
+                project_id=data.get("project_id"),
+                is_active=True,
+            ).first()
+
+            if existing:
+                logger.warning(
+                    "Role already assigned to user",
+                    user_id=str(user_uuid),
+                    role_id=data["role_id"],
+                )
+                return {
+                    "error": "conflict",
+                    "message": "Role already assigned to this user",
+                }, 409
 
             # Create user role assignment
             user_role = UserRole(
@@ -230,7 +258,7 @@ class UserRoleListResource(Resource):
             logger.warning("Integrity error creating user role", error=str(e))
             return {
                 "error": "conflict",
-                "message": "User already has this active role assignment",
+                "message": "Role already assigned to this user",
             }, 409
         except (ValueError, AttributeError) as e:
             logger.error("Invalid UUID in POST request", error=str(e))
@@ -244,6 +272,7 @@ class UserRoleListResource(Resource):
 class UserRoleResource(Resource):
     """Get, update, and delete user role assignments."""
 
+    @require_jwt_auth
     def get(self, user_id: str, user_role_id: str) -> tuple:
         """Get a specific user role assignment.
 
@@ -254,10 +283,23 @@ class UserRoleResource(Resource):
         Returns:
             tuple: (user role data, status code)
         """
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(user_id)
+            UUID(user_role_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {user_id} or {user_role_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
+
         try:
             user_uuid = UUID(user_id)
             user_role_uuid = UUID(user_role_id)
-            company_id = getattr(g, "company_id", None)
+            company_id = get_company_id_from_jwt()
 
             if not company_id:
                 return {
@@ -283,6 +325,7 @@ class UserRoleResource(Resource):
             logger.exception("Error getting user role", error=str(e))
             return {"error": "internal_error", "message": ERROR_INTERNAL_SERVER}, 500
 
+    @require_jwt_auth
     def patch(self, user_id: str, user_role_id: str) -> tuple:
         """Update a user role assignment.
 
@@ -296,10 +339,23 @@ class UserRoleResource(Resource):
         Returns:
             tuple: (updated user role, status code)
         """
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(user_id)
+            UUID(user_role_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {user_id} or {user_role_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
+
         try:
             user_uuid = UUID(user_id)
             user_role_uuid = UUID(user_role_id)
-            company_id = getattr(g, "company_id", None)
+            company_id = get_company_id_from_jwt()
 
             if not company_id:
                 return {
@@ -365,6 +421,7 @@ class UserRoleResource(Resource):
             logger.exception("Error updating user role", error=str(e))
             return {"error": "internal_error", "message": ERROR_INTERNAL_SERVER}, 500
 
+    @require_jwt_auth
     def delete(self, user_id: str, user_role_id: str) -> tuple:
         """Delete a user role assignment.
 
@@ -377,10 +434,23 @@ class UserRoleResource(Resource):
         Returns:
             tuple: (empty dict, status code)
         """
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(user_id)
+            UUID(user_role_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {user_id} or {user_role_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
+
         try:
             user_uuid = UUID(user_id)
             user_role_uuid = UUID(user_role_id)
-            company_id = getattr(g, "company_id", None)
+            company_id = get_company_id_from_jwt()
 
             if not company_id:
                 return {
@@ -420,6 +490,7 @@ class UserRoleResource(Resource):
 class RoleUsersResource(Resource):
     """List users with a specific role."""
 
+    @require_jwt_auth
     def get(self, role_id: str) -> tuple:
         """List all users assigned to a role.
 
@@ -429,9 +500,21 @@ class RoleUsersResource(Resource):
         Returns:
             tuple: (data dict, status code)
         """
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(role_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {role_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
+
         try:
             role_uuid = UUID(role_id)
-            company_id = getattr(g, "company_id", None)
+            company_id = get_company_id_from_jwt()
 
             if not company_id:
                 return {
@@ -440,7 +523,7 @@ class RoleUsersResource(Resource):
                 }, 401
 
             # Verify role exists
-            role = Role.get_by_id(str(role_uuid), str(company_id))
+            role = Role.get_by_id(role_uuid, UUID(company_id))
             if not role:
                 return {
                     "error": "not_found",
@@ -486,7 +569,7 @@ class RoleUsersResource(Resource):
                 "pagination": {
                     "page": page,
                     "page_size": page_size,
-                    "total": total,
+                    "total_items": total,
                     "total_pages": (total + page_size - 1) // page_size,
                 },
             }, 200

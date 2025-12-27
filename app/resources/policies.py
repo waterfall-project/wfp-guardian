@@ -31,6 +31,7 @@ from app.utils.logger import logger
 
 # Error message constants
 ERROR_POLICY_NOT_FOUND = "Policy not found"
+ERROR_INVALID_UUID_FORMAT = "Invalid UUID format"
 
 
 class PolicyListResource(Resource):
@@ -273,6 +274,18 @@ class PolicyResource(Resource):
         """
         logger.info(f"Retrieving policy with ID: {policy_id}")
 
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(policy_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {policy_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
+
         # Extract company_id from JWT
         company_id = get_company_id_from_jwt()
 
@@ -315,6 +328,18 @@ class PolicyResource(Resource):
             422: Validation error
         """
         logger.info(f"Updating policy with ID: {policy_id}")
+
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(policy_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {policy_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
 
         # Extract company_id from JWT
         company_id = get_company_id_from_jwt()
@@ -369,6 +394,18 @@ class PolicyResource(Resource):
             Recommendation is to disable (is_active=false) instead of deleting.
         """
         logger.info(f"Deleting policy with ID: {policy_id}")
+
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(policy_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {policy_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
 
         # Extract company_id from JWT
         company_id = get_company_id_from_jwt()
@@ -426,6 +463,18 @@ class PolicyPermissionListResource(Resource):
             tuple: JSON response with paginated permissions list and HTTP 200.
         """
         logger.info(f"Retrieving permissions for policy {policy_id}")
+
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(policy_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {policy_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
 
         # Extract company_id from JWT
         company_id = get_company_id_from_jwt()
@@ -513,6 +562,18 @@ class PolicyPermissionListResource(Resource):
         """
         logger.info(f"Attaching permission to policy {policy_id}")
 
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(policy_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {policy_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
+
         # Extract company_id from JWT
         company_id = get_company_id_from_jwt()
 
@@ -545,7 +606,17 @@ class PolicyPermissionListResource(Resource):
                 "message": "Permission not found",
             }, 404
 
-        # Attach permission (idempotent)
+        # Check if already attached
+        if permission in policy.permissions:
+            logger.warning(
+                f"Permission {permission.name} already attached to policy {policy.name}"
+            )
+            return {
+                "error": "conflict",
+                "message": "Permission already attached to this policy",
+            }, 409
+
+        # Attach permission
         policy.attach_permission(permission_id)
         db.session.commit()
 
@@ -570,6 +641,19 @@ class PolicyPermissionResource(Resource):
             tuple: Empty response and HTTP 204, or error.
         """
         logger.info(f"Removing permission {permission_id} from policy {policy_id}")
+
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(policy_id)
+            UUID(permission_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {policy_id} or {permission_id}")
+            return {
+                "error": "bad_request",
+                "message": ERROR_INVALID_UUID_FORMAT,
+            }, 400
 
         # Extract company_id from JWT
         company_id = get_company_id_from_jwt()

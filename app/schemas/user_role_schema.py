@@ -99,11 +99,12 @@ class UserRoleCreateSchema(SQLAlchemyAutoSchema):
         unknown = EXCLUDE
 
     @validates("scope_type")
-    def validate_scope_type(self, value: str) -> None:
+    def validate_scope_type(self, value: str, **kwargs) -> None:
         """Validate scope_type is either 'direct' or 'hierarchical'.
 
         Args:
             value: Scope type to validate.
+            **kwargs: Additional keyword arguments from Marshmallow.
 
         Raises:
             ValidationError: If scope_type is invalid.
@@ -114,11 +115,12 @@ class UserRoleCreateSchema(SQLAlchemyAutoSchema):
             )
 
     @validates("expires_at")
-    def validate_expires_at(self, value: datetime) -> None:
+    def validate_expires_at(self, value: datetime, **kwargs) -> None:
         """Validate expiration date is in the future.
 
         Args:
             value: Expiration datetime to validate.
+            **kwargs: Additional keyword arguments from Marshmallow.
 
         Raises:
             ValidationError: If expires_at is in the past.
@@ -184,11 +186,12 @@ class UserRoleUpdateSchema(SQLAlchemyAutoSchema):
         unknown = EXCLUDE
 
     @validates("scope_type")
-    def validate_scope_type(self, value: str) -> None:
+    def validate_scope_type(self, value: str, **kwargs) -> None:
         """Validate scope_type is either 'direct' or 'hierarchical'.
 
         Args:
             value: Scope type to validate.
+            **kwargs: Additional keyword arguments from Marshmallow.
 
         Raises:
             ValidationError: If scope_type is invalid.
@@ -199,11 +202,12 @@ class UserRoleUpdateSchema(SQLAlchemyAutoSchema):
             )
 
     @validates("expires_at")
-    def validate_expires_at(self, value: datetime) -> None:
+    def validate_expires_at(self, value: datetime, **kwargs) -> None:
         """Validate expiration date is in the future if being set.
 
         Args:
             value: Expiration datetime to validate.
+            **kwargs: Additional keyword arguments from Marshmallow.
 
         Raises:
             ValidationError: If expires_at is in the past.

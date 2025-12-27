@@ -28,6 +28,7 @@ from app.schemas.constants import (
     POLICY_DISPLAY_NAME_EMPTY,
     POLICY_DISPLAY_NAME_TOO_LONG,
     POLICY_NAME_EMPTY,
+    POLICY_NAME_IMMUTABLE,
     POLICY_NAME_INVALID_FORMAT,
     POLICY_NAME_TOO_LONG,
 )
@@ -209,6 +210,21 @@ class PolicyUpdateSchema(SQLAlchemyAutoSchema):
         include_fk = False
         exclude = ("id", "name", "company_id", "created_at", "updated_at")
         unknown = EXCLUDE
+
+    @pre_load
+    def validate_immutable_fields(self, data, **kwargs):
+        """Validate that immutable fields are not present in update data.
+
+        Args:
+            data: The input data dictionary.
+            **kwargs: Additional keyword arguments.
+
+        Raises:
+            ValidationError: If immutable field 'name' is present.
+        """
+        if "name" in data:
+            raise ValidationError({"name": [POLICY_NAME_IMMUTABLE]})
+        return data
 
     @pre_load
     def strip_strings(self, data, **kwargs):

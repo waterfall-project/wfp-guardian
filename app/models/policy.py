@@ -73,7 +73,7 @@ class Policy(UUIDMixin, TimestampMixin, db.Model):
     name = db.Column(db.String(POLICY_NAME_MAX_LENGTH), nullable=False, index=True)
     display_name = db.Column(db.String(POLICY_DISPLAY_NAME_MAX_LENGTH), nullable=False)
     description = db.Column(db.String(POLICY_DESCRIPTION_MAX_LENGTH), nullable=True)
-    company_id = db.Column(db.Uuid, nullable=False, index=True)
+    company_id = db.Column(GUID(), nullable=False, index=True)
     priority = db.Column(db.Integer, nullable=False, default=0)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
@@ -251,6 +251,15 @@ class Policy(UUIDMixin, TimestampMixin, db.Model):
             Number of permissions.
         """
         return len(self.permissions)
+
+    @property
+    def permissions_count(self) -> int:
+        """Property for permissions count (for schema serialization).
+
+        Returns:
+            Number of permissions.
+        """
+        return self.get_permissions_count()
 
     def to_dict(self, include_permissions_count: bool = True) -> dict[str, Any]:
         """Convert policy to dictionary representation.

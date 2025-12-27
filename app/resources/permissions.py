@@ -173,7 +173,7 @@ class PermissionResource(Resource):
             permission_id: UUID of the permission to retrieve
 
         Returns:
-            tuple: JSON response with Permission data and HTTP 200, or error and HTTP 404.
+            tuple: JSON response with Permission data and HTTP 200, or error and HTTP 404/400.
 
         Example response:
             {
@@ -188,6 +188,18 @@ class PermissionResource(Resource):
             }
         """
         logger.info(f"Retrieving permission with ID: {permission_id}")
+
+        # Validate UUID format
+        try:
+            from uuid import UUID
+
+            UUID(permission_id)
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid UUID format: {permission_id}")
+            return {
+                "error": "bad_request",
+                "message": "Invalid UUID format",
+            }, 400
 
         permission = db.session.get(Permission, permission_id)
 
