@@ -476,7 +476,7 @@ def create_app(config_class):
 
     # Seed permissions at startup (only after extensions are registered)
     with app.app_context():
-        _seed_permissions_at_startup(app)
+        _seed_permissions_at_startup()
 
     # Log environment variables (with sensitive values masked)
     _log_environment_variables(app)
@@ -485,11 +485,11 @@ def create_app(config_class):
     return app
 
 
-def _seed_permissions_at_startup(app: Flask) -> None:
+def _seed_permissions_at_startup() -> None:
     """Seed permissions from permissions.json at application startup.
 
-    Args:
-        app: The Flask application instance with app_context active.
+    Must be called within an active app_context.
+    Uses local import to avoid circular dependencies.
     """
     try:
         from app.services.permission_seeder import seed_permissions_on_startup
