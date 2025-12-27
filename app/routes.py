@@ -27,6 +27,12 @@ from app.resources.policies import (
     PolicyResource,
 )
 from app.resources.ready import ReadyResource
+from app.resources.role_res import (
+    RoleListResource,
+    RolePoliciesResource,
+    RolePolicyResource,
+    RoleResource,
+)
 from app.resources.version import VersionResource
 from app.utils.logger import logger
 
@@ -95,6 +101,18 @@ def register_routes(app):
     api.add_resource(
         PolicyPermissionResource,
         f"/{api_version}/policies/<string:policy_id>/permissions/<string:permission_id>",
+    )
+
+    # Role endpoints (CRUD + policy management)
+    api.add_resource(RoleListResource, f"/{api_version}/roles")
+    api.add_resource(RoleResource, f"/{api_version}/roles/<string:role_id>")
+    api.add_resource(
+        RolePoliciesResource,
+        f"/{api_version}/roles/<string:role_id>/policies",
+    )
+    api.add_resource(
+        RolePolicyResource,
+        f"/{api_version}/roles/<string:role_id>/policies/<string:policy_id>",
     )
 
     logger.info("Routes registered successfully.")

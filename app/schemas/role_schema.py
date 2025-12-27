@@ -100,7 +100,6 @@ class RoleCreateSchema(SQLAlchemyAutoSchema):
             max=ROLE_DESCRIPTION_MAX_LENGTH, error=ROLE_DESCRIPTION_TOO_LONG
         ),
     )
-    priority = fields.Int(required=False, load_default=0)
 
     class Meta:
         """Marshmallow schema configuration options."""
@@ -207,7 +206,6 @@ class RoleUpdateSchema(SQLAlchemyAutoSchema):
             max=ROLE_DESCRIPTION_MAX_LENGTH, error=ROLE_DESCRIPTION_TOO_LONG
         ),
     )
-    priority = fields.Int(required=False)
     is_active = fields.Bool(required=False)
 
     class Meta:

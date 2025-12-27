@@ -70,7 +70,6 @@ class TestRoleModel:
                 display_name="Developer Access",
                 description="Standard developer policies",
                 company_id=sample_company_id,
-                priority=10,
                 is_active=True,
             )
             db.session.add(role)
@@ -80,7 +79,6 @@ class TestRoleModel:
             assert role.display_name == "Developer Access"
             assert role.description == "Standard developer policies"
             assert role.company_id == sample_company_id
-            assert role.priority == 10
             assert role.is_active is True
             assert isinstance(role.created_at, datetime)
             assert isinstance(role.updated_at, datetime)
@@ -98,7 +96,6 @@ class TestRoleModel:
 
             assert role.name == "basic_role"
             assert role.description is None
-            assert role.priority == 0
             assert role.is_active is True
 
     def test_role_name_uniqueness_per_company(self, app, sample_company_id):
@@ -495,7 +492,6 @@ class TestRoleModel:
                 display_name="Test Role",
                 description="Test description",
                 company_id=sample_company_id,
-                priority=5,
                 is_active=True,
             )
             db.session.add(role)
@@ -508,7 +504,6 @@ class TestRoleModel:
             assert result["display_name"] == "Test Role"
             assert result["description"] == "Test description"
             assert result["company_id"] == str(sample_company_id)
-            assert result["priority"] == 5
             assert result["is_active"] is True
             assert "created_at" in result
             assert "updated_at" in result

@@ -73,7 +73,6 @@ class Role(UUIDMixin, TimestampMixin, db.Model):
     display_name = db.Column(db.String(ROLE_DISPLAY_NAME_MAX_LENGTH), nullable=False)
     description = db.Column(db.String(ROLE_DESCRIPTION_MAX_LENGTH), nullable=True)
     company_id = db.Column(db.Uuid, nullable=False, index=True)
-    priority = db.Column(db.Integer, nullable=False, default=0)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     # Many-to-many relationship with Policy
@@ -96,7 +95,6 @@ class Role(UUIDMixin, TimestampMixin, db.Model):
         display_name: str,
         company_id: str,
         description: str | None = None,
-        priority: int = 0,
         is_active: bool = True,
         **kwargs: Any,
     ) -> None:
@@ -107,7 +105,6 @@ class Role(UUIDMixin, TimestampMixin, db.Model):
             display_name: Human-readable display name.
             company_id: UUID of the owning company.
             description: Optional detailed description.
-            priority: Evaluation priority (default 0).
             is_active: Whether the role is active (default True).
             **kwargs: Additional keyword arguments passed to parent classes.
         """
@@ -116,7 +113,6 @@ class Role(UUIDMixin, TimestampMixin, db.Model):
         self.display_name = display_name
         self.company_id = company_id
         self.description = description
-        self.priority = priority
         self.is_active = is_active
 
     def __repr__(self) -> str:
@@ -261,7 +257,6 @@ class Role(UUIDMixin, TimestampMixin, db.Model):
             "display_name": self.display_name,
             "description": self.description,
             "company_id": str(self.company_id),
-            "priority": self.priority,
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
