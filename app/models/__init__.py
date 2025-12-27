@@ -7,3 +7,7 @@
 # See LICENSE and LICENSE.md files in the root directory for full license text.
 # For commercial licensing inquiries, contact: contact@waterfall-project.pro
 """Models package for the Flask application."""
+
+from app.models.permission import Permission
+
+__all__ = ["Permission"]

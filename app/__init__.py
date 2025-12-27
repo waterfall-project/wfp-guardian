@@ -474,8 +474,27 @@ def create_app(config_class):
     if app.config.get("TESTING"):
         register_test_routes(app)
 
+    # Seed permissions at startup (only after extensions are registered)
+    with app.app_context():
+        _seed_permissions_at_startup(app)
+
     # Log environment variables (with sensitive values masked)
     _log_environment_variables(app)
 
     logger.info("App created successfully.")
     return app
+
+
+def _seed_permissions_at_startup(app: Flask) -> None:
+    """Seed permissions from permissions.json at application startup.
+
+    Args:
+        app: The Flask application instance with app_context active.
+    """
+    try:
+        from app.services.permission_seeder import seed_permissions_on_startup
+
+        seed_permissions_on_startup()
+    except Exception as e:
+        logger.error(f"Failed to seed permissions: {e}")
+        # Don't fail app startup if permission seeding fails

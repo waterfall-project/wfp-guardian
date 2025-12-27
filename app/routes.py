@@ -19,6 +19,7 @@ from flask_restful import Api
 from app.resources.check_access import CheckAccessResource
 from app.resources.config import ConfigResource
 from app.resources.health import HealthResource
+from app.resources.permissions import PermissionListResource, PermissionResource
 from app.resources.ready import ReadyResource
 from app.resources.version import VersionResource
 from app.utils.logger import logger
@@ -71,5 +72,11 @@ def register_routes(app):
 
     # Access Control endpoint
     api.add_resource(CheckAccessResource, f"/{api_version}/check-access")
+
+    # Permission endpoints (read-only)
+    api.add_resource(PermissionListResource, f"/{api_version}/permissions")
+    api.add_resource(
+        PermissionResource, f"/{api_version}/permissions/<string:permission_id>"
+    )
 
     logger.info("Routes registered successfully.")
