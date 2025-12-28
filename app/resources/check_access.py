@@ -14,15 +14,12 @@ against the Guardian service policies using RBAC.
 
 import time
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, cast
+from typing import cast
 from uuid import UUID
 
 from flask import request
 from flask_restful import Resource
 from marshmallow import ValidationError
-
-if TYPE_CHECKING:
-    from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from app.models.permission import Permission
 from app.models.role import Role
@@ -60,17 +57,42 @@ def _get_active_user_roles(
 
     # Filter by project if provided
     if project_id:
-        project_id_column = cast("InstrumentedAttribute", UserRole.project_id)
         query = query.filter(
-            (project_id_column == project_id) | (project_id_column.is_(None))
+            (UserRole.project_id == project_id) | (UserRole.project_id.is_(None))
         )
 
     # Check expiration
     now = datetime.now(UTC)
-    expires_at_column = cast("InstrumentedAttribute", UserRole.expires_at)
-    query = query.filter((expires_at_column.is_(None)) | (expires_at_column > now))
+    query = query.filter((UserRole.expires_at.is_(None)) | (UserRole.expires_at > now))
 
-    return cast("list[UserRole]", query.all())
+    return cast("list", query.all())
+
+
+def _check_policies_for_permission(role, user_role, permission):
+    """Check if a role's policies contain a permission.
+
+    Args:
+        role: Role object to check.
+        user_role: UserRole association.
+        permission: Permission to look for.
+
+    Returns:
+        Matched role dict if found, None otherwise.
+    """
+    for policy in role.policies:
+        if not policy.is_active:
+            continue
+
+        if permission in policy.permissions:
+            return {
+                "role_id": str(role.id),
+                "role_name": role.name,
+                "scope_type": user_role.scope_type,
+                "project_id": (
+                    str(user_role.project_id) if user_role.project_id else None
+                ),
+            }
+    return None
 
 
 def _check_permission_in_roles(
@@ -86,30 +108,27 @@ def _check_permission_in_roles(
     Returns:
         Tuple of (access_granted, matched_role_info).
     """
-    for user_role in user_roles:
-        role = Role.query.filter_by(
-            id=user_role.role_id,
-            company_id=company_id,
-            is_active=True,
-        ).first()
+    # Collect all role IDs and fetch roles in a single query to avoid N+1
+    role_ids = {user_role.role_id for user_role in user_roles}
+    if not role_ids:
+        return False, None
 
+    roles = Role.query.filter(
+        Role.id.in_(role_ids),
+        Role.company_id == company_id,
+        Role.is_active == True,  # noqa: E712
+    ).all()
+
+    roles_by_id = {role.id: role for role in roles}
+
+    for user_role in user_roles:
+        role = roles_by_id.get(user_role.role_id)
         if not role:
             continue
 
-        for policy in role.policies:
-            if not policy.is_active:
-                continue
-
-            if permission in policy.permissions:
-                matched_role = {
-                    "role_id": str(role.id),
-                    "role_name": role.name,
-                    "scope_type": user_role.scope_type,
-                    "project_id": (
-                        str(user_role.project_id) if user_role.project_id else None
-                    ),
-                }
-                return True, matched_role
+        matched_role = _check_policies_for_permission(role, user_role, permission)
+        if matched_role:
+            return True, matched_role
 
     return False, None
 
@@ -401,12 +420,15 @@ def _build_permission_info(permission) -> dict:
     }
 
 
-def _process_role_policies(role, policies_data, permissions_set, permissions_list):
+def _process_role_policies(
+    role, policies_data, policies_set, permissions_set, permissions_list
+):
     """Process policies and permissions for a role.
 
     Args:
         role: Role object to process.
         policies_data: List to append policy info to.
+        policies_set: Set to track processed policy IDs.
         permissions_set: Set to track processed permissions.
         permissions_list: List to append permission info to.
     """
@@ -414,9 +436,10 @@ def _process_role_policies(role, policies_data, permissions_set, permissions_lis
         if not policy.is_active:
             continue
 
-        policy_info = _build_policy_info(policy)
-        if policy_info not in policies_data:
-            policies_data.append(policy_info)
+        # Use set for O(1) lookup instead of list comparison
+        if policy.id not in policies_set:
+            policies_set.add(policy.id)
+            policies_data.append(_build_policy_info(policy))
 
         # Process permissions
         for permission in policy.permissions:
@@ -439,16 +462,25 @@ def _collect_user_permissions(
     """
     roles_data: list[dict] = []
     policies_data: list[dict] = []
+    policies_set: set = set()
     permissions_set: set = set()
     permissions_list: list[dict] = []
 
-    for user_role in user_roles:
-        role = Role.query.filter_by(
-            id=user_role.role_id,
-            company_id=company_id,
-            is_active=True,
-        ).first()
+    # Collect all role IDs and fetch roles in a single query to avoid N+1
+    role_ids = {user_role.role_id for user_role in user_roles}
+    if not role_ids:
+        return roles_data, policies_data, permissions_list
 
+    roles = Role.query.filter(
+        Role.id.in_(role_ids),
+        Role.company_id == company_id,
+        Role.is_active == True,  # noqa: E712
+    ).all()
+
+    roles_by_id = {role.id: role for role in roles}
+
+    for user_role in user_roles:
+        role = roles_by_id.get(user_role.role_id)
         if not role:
             continue
 
@@ -456,7 +488,9 @@ def _collect_user_permissions(
         roles_data.append(_build_role_info(user_role, role))
 
         # Process policies and permissions
-        _process_role_policies(role, policies_data, permissions_set, permissions_list)
+        _process_role_policies(
+            role, policies_data, policies_set, permissions_set, permissions_list
+        )
 
     return roles_data, policies_data, permissions_list
 
