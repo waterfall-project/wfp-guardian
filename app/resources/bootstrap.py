@@ -105,8 +105,10 @@ class BootstrapResource(Resource):
         internal_token = request.headers.get("X-Internal-Token")
         expected_token = current_app.config.get("INTERNAL_SERVICE_TOKEN")
 
-        if not internal_token or not secrets.compare_digest(
-            internal_token, expected_token
+        if (
+            not internal_token
+            or not expected_token
+            or not secrets.compare_digest(internal_token, expected_token)
         ):
             logger.warning("Invalid or missing X-Internal-Token")
             return {
@@ -219,8 +221,10 @@ class InitCompanyRolesResource(Resource):
         internal_token = request.headers.get("X-Internal-Token")
         expected_token = current_app.config.get("INTERNAL_SERVICE_TOKEN")
 
-        if not internal_token or not secrets.compare_digest(
-            internal_token, expected_token
+        if (
+            not internal_token
+            or not expected_token
+            or not secrets.compare_digest(internal_token, expected_token)
         ):
             logger.warning("Invalid or missing X-Internal-Token")
             return {

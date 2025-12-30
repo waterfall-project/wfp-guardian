@@ -8,9 +8,10 @@
 # For commercial licensing inquiries, contact: contact@waterfall-project.pro
 """Models package for the Flask application."""
 
+from app.models.audit_log import AccessLog
 from app.models.permission import Permission
 from app.models.policy import Policy
 from app.models.role import Role
 from app.models.user_role import UserRole
 
-__all__ = ["Permission", "Policy", "Role", "UserRole"]
+__all__ = ["AccessLog", "Permission", "Policy", "Role", "UserRole"]
