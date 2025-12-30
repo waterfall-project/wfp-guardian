@@ -42,6 +42,7 @@ os.environ["LOG_LEVEL"] = "DEBUG"
 os.environ["PAGE_LIMIT"] = "20"
 os.environ["MAX_PAGE_LIMIT"] = "100"
 os.environ["JWT_ALGORITHM"] = "HS256"
+os.environ["INTERNAL_SERVICE_TOKEN"] = "test-internal-token-for-bootstrap-endpoints"  # nosec B105
 
 # Now load .env.testing which will override any remaining defaults
 dotenv_path = Path(__file__).parent.parent.parent / ".env.testing"
