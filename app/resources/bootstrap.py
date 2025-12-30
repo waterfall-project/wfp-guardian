@@ -105,10 +105,6 @@ class BootstrapResource(Resource):
         internal_token = request.headers.get("X-Internal-Token")
         expected_token = current_app.config.get("INTERNAL_SERVICE_TOKEN")
 
-        if not expected_token:
-            logger.error("INTERNAL_SERVICE_TOKEN not configured")
-            return {"error": "Internal service authentication not configured"}, 500
-
         if not internal_token or internal_token != expected_token:
             logger.warning("Invalid or missing X-Internal-Token")
             return {
@@ -220,10 +216,6 @@ class InitCompanyRolesResource(Resource):
         # 1. Validate X-Internal-Token
         internal_token = request.headers.get("X-Internal-Token")
         expected_token = current_app.config.get("INTERNAL_SERVICE_TOKEN")
-
-        if not expected_token:
-            logger.error("INTERNAL_SERVICE_TOKEN not configured")
-            return {"error": "Internal service authentication not configured"}, 500
 
         if not internal_token or not secrets.compare_digest(
             internal_token, expected_token

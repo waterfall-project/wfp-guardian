@@ -116,3 +116,46 @@ def test_metrics_endpoint_with_missing_version_file(monkeypatch, caplog):
     with app.test_client() as client:
         response = client.get("/v0/metrics")
         assert response.status_code == 200
+
+
+def test_startup_validation_fails_without_internal_service_token(monkeypatch):
+    """Test that app fails to start when INTERNAL_SERVICE_TOKEN is not configured."""
+    import pytest
+
+    from app import create_app
+    from app.config import TestingConfig
+
+    # Create a test config class without INTERNAL_SERVICE_TOKEN
+    class InvalidConfig(TestingConfig):
+        INTERNAL_SERVICE_TOKEN = None
+
+    # Attempt to create app should raise ValueError
+    with pytest.raises(
+        ValueError,
+        match="INTERNAL_SERVICE_TOKEN must be configured for service-to-service authentication",
+    ):
+        create_app(InvalidConfig)
+
+
+def test_startup_validation_warns_for_short_internal_service_token(caplog):
+    """Test that app warns when INTERNAL_SERVICE_TOKEN is too short."""
+    import logging
+
+    from app import create_app
+    from app.config import TestingConfig
+
+    # Create a test config class with a short token
+    class ShortTokenConfig(TestingConfig):
+        INTERNAL_SERVICE_TOKEN = "short"  # nosec B105
+
+    caplog.set_level(logging.WARNING)
+
+    # Create app - should warn but not fail
+    app = create_app(ShortTokenConfig)
+
+    # Check that warning was logged
+    assert any(
+        "INTERNAL_SERVICE_TOKEN is too short" in record.message
+        for record in caplog.records
+    )
+    assert app is not None
