@@ -17,6 +17,7 @@ Implements the audit API endpoints per OpenAPI specification:
 """
 
 from datetime import datetime
+from typing import Any, cast
 
 from flask import g, request
 from flask_restful import Resource
@@ -33,7 +34,11 @@ from app.utils.jwt_utils import require_jwt_auth
 from app.utils.limiter import limiter
 from app.utils.logger import logger
 
+DictStrAny = dict[str, Any]
+
 BAD_REQUEST_ERROR = "Bad request"
+VALIDATION_ERROR_MESSAGE = "Validation error"
+INTERNAL_SERVER_ERROR = "Internal server error"
 
 
 class AccessLogsResource(Resource):
@@ -58,9 +63,9 @@ class AccessLogsResource(Resource):
         # Parse query parameters
         schema = AccessLogQuerySchema()
         try:
-            filters = schema.load(request.args)
+            filters: dict[str, Any] = cast("DictStrAny", schema.load(request.args))
         except ValidationError as err:
-            return {"error": "Validation error", "details": err.messages}, 422
+            return {"error": VALIDATION_ERROR_MESSAGE, "details": err.messages}, 422
 
         # Override company_id from JWT (unless super-admin)
         # For now, always use JWT company_id
@@ -97,10 +102,10 @@ class AccessLogsResource(Resource):
         # Parse and validate query parameters
         schema = AccessLogQuerySchema()
         try:
-            filters = schema.load(request.args)
+            filters: dict[str, Any] = cast("DictStrAny", schema.load(request.args))
         except ValidationError as err:
             logger.warning(f"Access logs query validation failed: {err.messages}")
-            return {"error": "Validation error", "details": err.messages}, 422
+            return {"error": VALIDATION_ERROR_MESSAGE, "details": err.messages}, 422
 
         # Override company_id from JWT (security: users can only see their company's logs)
         filters["company_id"] = company_id
@@ -130,7 +135,7 @@ class AccessLogsResource(Resource):
         except Exception as e:
             logger.error(f"Failed to query access logs: {e}", exc_info=True)
             return {
-                "error": "Internal server error",
+                "error": INTERNAL_SERVER_ERROR,
                 "message": "Failed to retrieve access logs",
             }, 500
 
@@ -152,12 +157,18 @@ class AccessLogsResource(Resource):
         # Parse and validate parameters
         schema = PurgeLogsSchema()
         try:
-            data = schema.load(request.args)
+            data = cast("DictStrAny", schema.load(request.args))
         except ValidationError as err:
             logger.warning(f"Purge logs validation failed: {err.messages}")
-            return {"error": "Validation error", "details": err.messages}, 422
+            return {"error": VALIDATION_ERROR_MESSAGE, "details": err.messages}, 422
 
-        before_date = data["before"]
+        before_date = data.get("before")
+        if before_date is None:
+            return {
+                "error": BAD_REQUEST_ERROR,
+                "message": "Missing 'before' parameter",
+            }, 400
+
         target_company_id = data.get("company_id")
 
         # Security: override company_id from JWT (unless super-admin)
@@ -187,7 +198,7 @@ class AccessLogsResource(Resource):
         except Exception as e:
             logger.error(f"Failed to purge access logs: {e}", exc_info=True)
             return {
-                "error": "Internal server error",
+                "error": INTERNAL_SERVER_ERROR,
                 "message": "Failed to purge access logs",
             }, 500
 
@@ -310,6 +321,6 @@ class AccessLogsStatisticsResource(Resource):
         except Exception as e:
             logger.error(f"Failed to get statistics: {e}", exc_info=True)
             return {
-                "error": "Internal server error",
+                "error": INTERNAL_SERVER_ERROR,
                 "message": "Failed to retrieve statistics",
             }, 500
