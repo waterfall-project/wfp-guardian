@@ -4,6 +4,10 @@ This module contains unit tests for app/__init__.py functionality including
 extension registration, rate limiter configuration, and helper functions.
 """
 
+import logging
+
+import pytest
+
 
 def test_register_extensions_with_redis(app):
     """Test that rate limiter is configured with Redis when REDIS_URL is set."""
@@ -40,8 +44,6 @@ def test_register_test_routes_creates_error_routes(app):
 
 def test_log_environment_variables_masks_sensitive_data(app, caplog):
     """Test that _log_environment_variables masks sensitive configuration values."""
-    import logging
-
     from app import _log_environment_variables
 
     # Set caplog to capture INFO level
@@ -87,7 +89,6 @@ def test_cors_configuration(app):
 
 def test_metrics_endpoint_with_missing_version_file(monkeypatch, caplog):
     """Test that app handles missing VERSION file gracefully for metrics endpoint."""
-    import logging
     from pathlib import Path
 
     from app import create_app
@@ -120,8 +121,6 @@ def test_metrics_endpoint_with_missing_version_file(monkeypatch, caplog):
 
 def test_startup_validation_fails_without_internal_service_token(monkeypatch):
     """Test that app fails to start when INTERNAL_SERVICE_TOKEN is not configured."""
-    import pytest
-
     from app import create_app
     from app.config import TestingConfig
 
@@ -139,8 +138,6 @@ def test_startup_validation_fails_without_internal_service_token(monkeypatch):
 
 def test_startup_validation_warns_for_short_internal_service_token(caplog):
     """Test that app warns when INTERNAL_SERVICE_TOKEN is too short."""
-    import logging
-
     from app import create_app
     from app.config import TestingConfig
 
