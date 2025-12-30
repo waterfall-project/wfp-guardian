@@ -95,6 +95,9 @@ class Config:
         os.environ.get("EXTERNAL_SERVICES_TIMEOUT", DEFAULT_EXTERNAL_SERVICES_TIMEOUT)
     )
 
+    # Internal Service Authentication (for service-to-service calls)
+    INTERNAL_SERVICE_TOKEN = os.environ.get("INTERNAL_SERVICE_TOKEN")
+
     # Mock User Configuration (used when USE_IDENTITY_SERVICE is false)
     MOCK_USER_ID = os.environ.get("MOCK_USER_ID", DEFAULT_MOCK_USER_ID)
     MOCK_COMPANY_ID = os.environ.get("MOCK_COMPANY_ID", DEFAULT_MOCK_COMPANY_ID)
@@ -436,6 +439,9 @@ class TestingConfig(Config):
     # Rate limiting disabled in testing to avoid interference with tests
     RATE_LIMIT_ENABLED = False
 
+    # Internal service token for testing
+    INTERNAL_SERVICE_TOKEN = "test-internal-token-for-bootstrap-endpoints"  # nosec B105
+
     TESTING = True
     LOG_LEVEL = "DEBUG"
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
@@ -449,6 +455,9 @@ class IntegrationConfig(Config):
 
     # Rate limiting disabled in integration tests
     RATE_LIMIT_ENABLED = False
+
+    # Internal service token for integration testing
+    INTERNAL_SERVICE_TOKEN = "test-internal-token-for-bootstrap-endpoints"  # nosec B105
 
     TESTING = True
     LOG_LEVEL = "DEBUG"

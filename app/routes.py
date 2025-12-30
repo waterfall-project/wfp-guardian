@@ -16,6 +16,7 @@ from pathlib import Path
 
 from flask_restful import Api
 
+from app.resources.bootstrap import BootstrapResource, InitCompanyRolesResource
 from app.resources.check_access import (
     BatchCheckAccessResource,
     CheckAccessResource,
@@ -148,6 +149,13 @@ def register_routes(app):
     api.add_resource(
         RoleUsersResource,
         f"/{api_version}/roles/<string:role_id>/users",
+    )
+
+    # Bootstrap endpoints (service-to-service, requires X-Internal-Token)
+    api.add_resource(BootstrapResource, f"/{api_version}/bootstrap")
+    api.add_resource(
+        InitCompanyRolesResource,
+        f"/{api_version}/companies/<string:company_id>/init-roles",
     )
 
     logger.info("Routes registered successfully.")
