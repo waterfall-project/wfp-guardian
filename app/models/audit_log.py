@@ -14,7 +14,7 @@ security auditing, and debugging purposes.
 """
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, String, Text
 
@@ -43,7 +43,7 @@ class AccessLog(db.Model):
     operation = db.Column(String(20), nullable=False)
     access_granted = db.Column(Boolean, nullable=False, index=True)
     created_at = db.Column(
-        DateTime, nullable=False, default=datetime.utcnow, index=True
+        DateTime, nullable=False, default=lambda: datetime.now(UTC), index=True
     )
 
     # Optional fields per OpenAPI spec

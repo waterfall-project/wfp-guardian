@@ -14,7 +14,7 @@ compliance and security auditing. Implements dual-write pattern:
 2. Structured logs for Loki/ELK (long-term retention)
 """
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 import structlog
@@ -104,7 +104,7 @@ class AuditService:
             audit_logger.info(
                 "access_log",
                 log_id=str(access_log.id),
-                timestamp=datetime.utcnow().isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
                 user_id=str(user_id),
                 company_id=str(company_id),
                 service=service,
@@ -336,7 +336,7 @@ class AuditService:
             ValueError: If before_date is less than 30 days ago
         """
         # Enforce minimum retention of 30 days
-        min_date = datetime.utcnow() - timedelta(days=30)
+        min_date = datetime.now(UTC) - timedelta(days=30)
         if before_date > min_date:
             raise ValueError("Cannot delete logs less than 30 days old")
 

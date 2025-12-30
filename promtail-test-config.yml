@@ -1,0 +1,106 @@
+# Copyright (c) 2025 Waterfall
+#
+# This source code is dual-licensed under:
+# - GNU Affero General Public License v3.0 (AGPLv3) for open source use
+# - Commercial License for proprietary use
+#
+# See LICENSE and LICENSE.md files in the root directory for full license text.
+# For commercial licensing inquiries, contact: contact@waterfall-project.pro
+
+# Promtail configuration for test environment
+# Collects Guardian JSON logs and ships them to Loki
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki-test:3100/loki/api/v1/push
+
+scrape_configs:
+  # Guardian application logs
+  - job_name: guardian
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: guardian
+          app: wfp-guardian
+          env: test
+          __path__: /var/log/guardian/*.log
+
+    # Parse JSON logs from structlog
+    pipeline_stages:
+      # Parse JSON log entries
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            logger: logger_name
+            event: event
+            user_id: user_id
+            company_id: company_id
+            service: service
+            resource_name: resource_name
+            operation: operation
+            access_granted: access_granted
+            project_id: project_id
+            resource_id: resource_id
+            reason: reason
+            ip_address: ip_address
+            user_agent: user_agent
+
+      # Extract timestamp
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+
+      # Add labels from parsed fields
+      - labels:
+          level:
+          logger:
+          service:
+          operation:
+          access_granted:
+
+      # Output stage for debugging (optional)
+      - output:
+          source: event
+
+  # Guardian audit trail logs (specific logger)
+  - job_name: guardian-audit
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: guardian-audit
+          app: wfp-guardian
+          env: test
+          log_type: audit
+          __path__: /var/log/guardian/audit-*.log
+
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            event: event
+            user_id: user_id
+            company_id: company_id
+            service: service
+            resource_name: resource_name
+            operation: operation
+            access_granted: access_granted
+
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+
+      - labels:
+          level:
+          service:
+          operation:
+          access_granted:
