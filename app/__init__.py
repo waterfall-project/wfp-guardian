@@ -474,6 +474,9 @@ def create_app(config_class):
     if app.config.get("TESTING"):
         register_test_routes(app)
 
+    # Validate critical configuration at startup
+    _validate_startup_config(app)
+
     # Seed permissions at startup (only after extensions are registered)
     with app.app_context():
         _seed_permissions_at_startup()
@@ -498,3 +501,32 @@ def _seed_permissions_at_startup() -> None:
     except Exception as e:
         logger.error(f"Failed to seed permissions: {e}")
         # Don't fail app startup if permission seeding fails
+
+
+def _validate_startup_config(app: Flask) -> None:
+    """Validate critical configuration values at application startup.
+
+    Args:
+        app: Flask application instance.
+
+    Raises:
+        ValueError: If critical configuration is missing or invalid.
+    """
+    # Validate INTERNAL_SERVICE_TOKEN is configured
+    internal_token = app.config.get("INTERNAL_SERVICE_TOKEN")
+    if not internal_token:
+        logger.error(
+            "INTERNAL_SERVICE_TOKEN is not configured. "
+            "Bootstrap endpoints will not function."
+        )
+        raise ValueError(
+            "INTERNAL_SERVICE_TOKEN must be configured for service-to-service authentication"
+        )
+
+    if len(internal_token) < 32:
+        logger.warning(
+            f"INTERNAL_SERVICE_TOKEN is too short ({len(internal_token)} chars). "
+            "Minimum 32 characters recommended for security."
+        )
+
+    logger.info("Startup configuration validated successfully.")

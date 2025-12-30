@@ -12,7 +12,9 @@ This module defines the Flask-RESTful resources for RBAC initialization
 during system bootstrap and new company creation.
 """
 
+import secrets
 from typing import Any
+from uuid import UUID
 
 from flask import current_app, request
 from flask_restful import Resource
@@ -193,7 +195,7 @@ class InitCompanyRolesResource(Resource):
                 - roles (list[str]): List of role names created
 
             Status codes:
-                - 200: Created successfully
+                - 201: Created successfully
                 - 400: Invalid company_id format
                 - 401: Missing or invalid X-Internal-Token
                 - 409: Company already has roles
@@ -223,7 +225,9 @@ class InitCompanyRolesResource(Resource):
             logger.error("INTERNAL_SERVICE_TOKEN not configured")
             return {"error": "Internal service authentication not configured"}, 500
 
-        if not internal_token or internal_token != expected_token:
+        if not internal_token or not secrets.compare_digest(
+            internal_token, expected_token
+        ):
             logger.warning("Invalid or missing X-Internal-Token")
             return {
                 "error": "Unauthorized",
@@ -232,8 +236,6 @@ class InitCompanyRolesResource(Resource):
 
         # 2. Validate company_id format
         try:
-            from uuid import UUID
-
             company_uuid = UUID(company_id)
         except ValueError:
             logger.warning(f"Invalid company_id format: {company_id}")
@@ -249,7 +251,7 @@ class InitCompanyRolesResource(Resource):
 
             # 4. Serialize response
             response_schema = InitRolesResponseSchema()
-            return response_schema.dump(result), 200
+            return response_schema.dump(result), 201
 
         except ValueError as e:
             logger.warning(f"Init roles validation error: {e}")

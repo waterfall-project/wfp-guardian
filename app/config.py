@@ -439,6 +439,9 @@ class TestingConfig(Config):
     # Rate limiting disabled in testing to avoid interference with tests
     RATE_LIMIT_ENABLED = False
 
+    # Internal service token for testing
+    INTERNAL_SERVICE_TOKEN = "test-internal-token-for-bootstrap-endpoints"  # nosec B105
+
     TESTING = True
     LOG_LEVEL = "DEBUG"
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
@@ -452,6 +455,9 @@ class IntegrationConfig(Config):
 
     # Rate limiting disabled in integration tests
     RATE_LIMIT_ENABLED = False
+
+    # Internal service token for integration testing
+    INTERNAL_SERVICE_TOKEN = "test-internal-token-for-bootstrap-endpoints"  # nosec B105
 
     TESTING = True
     LOG_LEVEL = "DEBUG"

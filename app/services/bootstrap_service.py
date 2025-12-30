@@ -79,7 +79,11 @@ class BootstrapService:
             "display_name": "Member Policy",
             "description": "Basic participation and resource access",
             "permission_filter": lambda p: p.operation in ["READ", "UPDATE", "LIST"]
-            and p.resource_name not in ["config", "dummy"],
+            and p.resource_name
+            not in [
+                "config",  # Cannot modify system configuration
+                "dummy",  # Exclude test/placeholder resources
+            ],
         },
         {
             "name": "viewer_policy",
@@ -96,10 +100,6 @@ class BootstrapService:
         "member": ["member_policy"],
         "viewer": ["viewer_policy"],
     }
-
-    def __init__(self):
-        """Initialize the bootstrap service."""
-        pass
 
     def bootstrap_system(self, company_id: UUID, user_id: UUID) -> dict:
         """Initialize RBAC for the first company and assign admin role.
@@ -125,7 +125,6 @@ class BootstrapService:
 
         Raises:
             ValueError: If company or user already has roles initialized.
-            IntegrityError: If database constraints are violated.
         """
         logger.info(
             f"Starting RBAC bootstrap for company_id={company_id}, user_id={user_id}"
@@ -192,7 +191,6 @@ class BootstrapService:
 
         Raises:
             ValueError: If company already has roles.
-            IntegrityError: If database constraints are violated.
         """
         logger.info(f"Initializing roles for new company_id={company_id}")
 
@@ -258,14 +256,17 @@ class BootstrapService:
         db.session.flush()  # Get role IDs
 
         # 2. Create policies and assign permissions
+        # Note: Loads all permissions in memory. This is acceptable for bootstrap
+        # as the permission set is expected to remain manageable (<1000 items).
+        # If this becomes a bottleneck, consider using yield_per() for streaming.
         all_permissions = Permission.query.all()
 
         for policy_config in self.STANDARD_POLICIES:
             policy = Policy(
                 company_id=company_id,
-                name=str(policy_config["name"]),
-                display_name=str(policy_config["display_name"]),
-                description=str(policy_config["description"]),
+                name=policy_config["name"],
+                display_name=policy_config["display_name"],
+                description=policy_config["description"],
                 is_active=True,
             )
 
