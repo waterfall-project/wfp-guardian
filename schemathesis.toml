@@ -1,0 +1,11 @@
+# Core settings from our previous commands
+continue-on-failure = true
+
+[output.sanitization]
+enabled = false
+
+[generation]
+max-examples = 500
+
+[reports.junit]
+enabled = true
