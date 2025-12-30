@@ -95,6 +95,9 @@ class Config:
         os.environ.get("EXTERNAL_SERVICES_TIMEOUT", DEFAULT_EXTERNAL_SERVICES_TIMEOUT)
     )
 
+    # Internal Service Authentication (for service-to-service calls)
+    INTERNAL_SERVICE_TOKEN = os.environ.get("INTERNAL_SERVICE_TOKEN")
+
     # Mock User Configuration (used when USE_IDENTITY_SERVICE is false)
     MOCK_USER_ID = os.environ.get("MOCK_USER_ID", DEFAULT_MOCK_USER_ID)
     MOCK_COMPANY_ID = os.environ.get("MOCK_COMPANY_ID", DEFAULT_MOCK_COMPANY_ID)
