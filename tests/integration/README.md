@@ -901,19 +901,32 @@ Access logs are written to two destinations:
 ### Test Flow (`test_audit_trail.py`)
 
 ```python
-# 1. Make API requests to generate audit logs
-response = client.post("/v0/check-access", json={...})
+# 1. Insert audit logs directly into PostgreSQL
+access_log = AccessLog(
+    user_id=user_id,
+    company_id=company_id,
+    service="test-service",
+    resource_name="test-resource",
+    operation="READ",
+    access_granted=True,
+)
+session.add(access_log)
+session.commit()
 
 # 2. Verify logs in PostgreSQL
-logs = session.query(AccessLog).filter_by(user_id=user_id).all()
+postgres_logs = session.query(AccessLog).filter_by(user_id=user_id).all()
 
 # 3. Wait for Promtail to ship logs (buffer time)
 time.sleep(3)
 
 # 4. Query Loki API
-response = requests.get("http://localhost:3100/loki/api/v1/query_range", params={
-    "query": '{app="wfp-guardian"} |~ "user_id.*{uuid}"'
-})
+loki_response = requests.get(
+    "http://localhost:3100/loki/api/v1/query_range",
+    params={
+        "query": '{app="wfp-guardian"} |~ "user_id.*{uuid}"'
+    },
+)
+loki_logs = loki_response.json().get("data", {}).get("result", [])
 
 # 5. Verify data consistency
 assert len(postgres_logs) > 0
