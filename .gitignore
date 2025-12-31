@@ -224,3 +224,6 @@ __marimo__/
 
 # Schemathesis
 schemathesis-report
+
+#  Local log files
+logs/*.log

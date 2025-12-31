@@ -17,6 +17,7 @@ import json
 import uuid
 
 from sqlalchemy import String, Text, TypeDecorator
+from sqlalchemy.dialects.postgresql import INET as PostgreSQLINET  # noqa: N811
 from sqlalchemy.dialects.postgresql import JSONB as PostgreSQLJSONB  # noqa: N811
 from sqlalchemy.dialects.postgresql import UUID as PostgreSQLUUID  # noqa: N811
 
@@ -180,6 +181,64 @@ class JSONB(TypeDecorator):
             return value  # type: ignore[return-value]
         else:
             return json.loads(value) if isinstance(value, str) else value
+
+
+class INET(TypeDecorator):
+    """Platform-independent INET type for IP addresses.
+
+    Uses PostgreSQL's native INET type when available, otherwise uses
+    VARCHAR(45) for maximum compatibility (supports both IPv4 and IPv6).
+    Stores IP addresses as strings.
+
+    Attributes:
+        impl: Base SQLAlchemy type (String).
+        cache_ok: Enables caching for improved performance.
+
+    Example:
+        >>> class AccessLog(db.Model):
+        ...     ip_address = db.Column(INET(), nullable=True)
+    """
+
+    impl = String
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        """Load the appropriate type for the current database dialect.
+
+        Args:
+            dialect: The SQLAlchemy dialect being used.
+
+        Returns:
+            Native INET type for PostgreSQL, VARCHAR(45) for other databases.
+        """
+        if dialect.name == "postgresql":
+            return dialect.type_descriptor(PostgreSQLINET())
+        else:
+            return dialect.type_descriptor(String(45))  # Max length for IPv6
+
+    def process_bind_param(self, value: str | None, dialect) -> str | None:
+        """Convert Python value to database format.
+
+        Args:
+            value: IP address string or None.
+            dialect: The SQLAlchemy dialect being used.
+
+        Returns:
+            IP address string or None.
+        """
+        return value
+
+    def process_result_value(self, value: str | None, dialect) -> str | None:
+        """Convert database value to Python string.
+
+        Args:
+            value: Database value (IP address string).
+            dialect: The SQLAlchemy dialect being used.
+
+        Returns:
+            IP address string or None.
+        """
+        return value
 
 
 class UUIDMixin:

@@ -87,6 +87,8 @@ Understanding where each component runs:
   - **Redis**: `localhost:6380` - Real cache and session storage
   - **Identity Service**: `localhost:5001` - User authentication microservice
   - **Guardian Service**: `localhost:5002` - Authorization/permissions microservice
+  - **Loki**: `localhost:3100` - Log aggregation and storage for audit trail
+  - **Promtail**: Log collector that ships logs to Loki
 
 **Key Differences from Unit Tests:**
 - Unit tests mock external services → Integration tests use real services
@@ -877,3 +879,109 @@ Integration tests help achieve the 95% coverage target by testing:
 - [tests/unit/README.md](../unit/README.md) - Unit tests
 - [docker-compose.test.yml](../../docker-compose.test.yml) - Service definitions
 - [.env.integration](../../.env.integration) - Integration test configuration
+
+---
+
+## Audit Trail Testing with Loki
+
+The test environment includes **Loki** and **Promtail** for testing the dual-write audit trail pattern:
+
+### Services
+
+- **Loki** (port 3100): Log aggregation and storage
+- **Promtail**: Log collector that ships logs from files to Loki
+
+### Dual-Write Pattern
+
+Access logs are written to two destinations:
+
+1. **PostgreSQL** (hot data, 7-day retention, fast queries)
+2. **Loki** (cold data, long-term retention, via structured logs)
+
+### Test Flow (`test_audit_trail.py`)
+
+```python
+# 1. Insert audit logs directly into PostgreSQL
+access_log = AccessLog(
+    user_id=user_id,
+    company_id=company_id,
+    service="test-service",
+    resource_name="test-resource",
+    operation="READ",
+    access_granted=True,
+)
+session.add(access_log)
+session.commit()
+
+# 2. Verify logs in PostgreSQL
+postgres_logs = session.query(AccessLog).filter_by(user_id=user_id).all()
+
+# 3. Wait for Promtail to ship logs (buffer time)
+time.sleep(3)
+
+# 4. Query Loki API
+loki_response = requests.get(
+    "http://localhost:3100/loki/api/v1/query_range",
+    params={
+        "query": '{app="wfp-guardian"} |~ "user_id.*{uuid}"'
+    },
+)
+loki_logs = loki_response.json().get("data", {}).get("result", [])
+
+# 5. Verify data consistency
+assert len(postgres_logs) > 0
+assert len(loki_logs) > 0
+```
+
+### Troubleshooting Loki
+
+**Check Loki health:**
+```bash
+curl http://localhost:3100/ready
+```
+
+**View Loki logs:**
+```bash
+docker logs wfp-loki-test
+docker logs wfp-promtail-test
+```
+
+**Check log files:**
+```bash
+ls -la logs/
+cat logs/guardian.log | jq .
+```
+
+**Manual Loki query:**
+```bash
+curl -G 'http://localhost:3100/loki/api/v1/query_range' \
+  --data-urlencode 'query={app="wfp-guardian"}' \
+  --data-urlencode 'start=1609459200000000000' \
+  --data-urlencode 'end=9999999999000000000'
+```
+
+**Reset Loki data:**
+```bash
+docker-compose -f docker-compose.test.yml down -v
+docker volume rm wfp-guardian_loki-test-data
+```
+
+### Log Format
+
+Guardian writes JSON logs to `logs/guardian.log`:
+
+```json
+{
+  "event": "access_log",
+  "timestamp": "2025-12-30T20:00:00.000000",
+  "level": "info",
+  "user_id": "uuid",
+  "company_id": "uuid",
+  "service": "test-service",
+  "resource_name": "test-resource",
+  "operation": "READ",
+  "access_granted": true
+}
+```
+
+Promtail scrapes these logs and ships them to Loki with labels for filtering.

@@ -20,6 +20,8 @@ Usage:
 
 import logging
 import os
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
 import colorlog
 import structlog
@@ -27,9 +29,16 @@ import structlog
 # Detect environment
 env = os.environ.get("FLASK_ENV", "development").lower()
 
-# Configure the root logger with colorlog for human-readable output
-handler = colorlog.StreamHandler()
-handler.setFormatter(
+# Create logs directory if it doesn't exist
+log_dir = Path(__file__).parent.parent.parent / "logs"
+log_dir.mkdir(exist_ok=True)
+
+# Configure handlers
+handlers: list[logging.Handler] = []
+
+# Console handler with color
+console_handler = colorlog.StreamHandler()
+console_handler.setFormatter(
     colorlog.ColoredFormatter(
         "%(log_color)s[%(asctime)s] %(levelname)s %(filename)s:%(lineno)d "
         "%(funcName)s: %(message)s",
@@ -43,27 +52,45 @@ handler.setFormatter(
         },
     )
 )
+handlers.append(console_handler)
+
+# File handler for JSON logs (always enabled for Loki/Promtail)
+file_handler = RotatingFileHandler(
+    log_dir / "guardian.log",
+    maxBytes=10 * 1024 * 1024,  # 10MB
+    backupCount=5,
+)
+# Simple format for file - structlog will handle JSON rendering
+file_handler.setFormatter(logging.Formatter("%(message)s"))
+handlers.append(file_handler)
 
 # Set log level from LOG_LEVEL env var, default to INFO
 log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
 if log_level not in ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"):
     log_level = "INFO"
-logging.basicConfig(level=getattr(logging, log_level), handlers=[handler])
+logging.basicConfig(level=getattr(logging, log_level), handlers=handlers)
 
 # Choose renderer based on environment
+# For file logs, always use JSON for Loki/ELK
+# For console, use colored output in dev/test
 renderer: structlog.types.Processor
 if env in ("development", "testing"):
     renderer = structlog.dev.ConsoleRenderer(colors=True)
 else:
     renderer = structlog.processors.JSONRenderer()
 
-# Configure structlog
+# Configure structlog with dual processors for file (JSON) and console (colored)
 structlog.configure(
     processors=[
-        structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M:%S"),
+        structlog.stdlib.filter_by_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,
         structlog.processors.StackInfoRenderer(),
-        renderer,
+        structlog.processors.format_exc_info,
+        structlog.processors.UnicodeDecoder(),
+        # Use JSONRenderer for all environments to ensure file logs are JSON
+        structlog.processors.JSONRenderer(),
     ],
     logger_factory=structlog.stdlib.LoggerFactory(),
     wrapper_class=structlog.stdlib.BoundLogger,
