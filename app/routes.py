@@ -166,9 +166,9 @@ def register_routes(app):
     )
 
     api.add_resource(AccessLogsResource, f"/{api_version}/access-logs")
-    api.add_resource(AccessLogResource, f"/{api_version}/access-logs/<string:log_id>")
     api.add_resource(
         AccessLogsStatisticsResource, f"/{api_version}/access-logs/statistics"
     )
+    api.add_resource(AccessLogResource, f"/{api_version}/access-logs/<string:log_id>")
 
     logger.info("Routes registered successfully.")
