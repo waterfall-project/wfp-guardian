@@ -305,8 +305,6 @@ class AccessLogsStatisticsResource(Resource):
         # Get statistics
         service = AuditService()
         try:
-            from uuid import UUID
-
             stats = service.get_statistics(
                 company_id=UUID(company_id),
                 project_id=project_id,
