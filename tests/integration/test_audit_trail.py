@@ -165,7 +165,7 @@ class TestAuditTrailDualWrite:
             .filter(
                 AccessLog.company_id == self.company_id,
                 AccessLog.service == "test-service",
-                AccessLog.access_granted == True,  # noqa: E712
+                AccessLog.access_granted.is_(True),
             )
             .all()
         )
