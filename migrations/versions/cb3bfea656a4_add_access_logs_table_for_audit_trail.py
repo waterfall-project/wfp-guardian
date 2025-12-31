@@ -9,6 +9,8 @@ Create Date: 2025-12-30 21:31:33.273499
 import sqlalchemy as sa
 from alembic import op
 
+from app.models.types import GUID, JSONB
+
 # revision identifiers, used by Alembic.
 revision = "cb3bfea656a4"
 down_revision = "d255df3d9647"
@@ -19,21 +21,21 @@ depends_on = None
 def upgrade():
     op.create_table(
         "access_logs",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("user_id", sa.Integer(), nullable=False),
-        sa.Column("company_id", sa.Integer(), nullable=False),
-        sa.Column("service", sa.String(length=100), nullable=False),
-        sa.Column("resource_name", sa.String(length=200), nullable=False),
-        sa.Column("operation", sa.String(length=50), nullable=False),
+        sa.Column("id", GUID(), nullable=False),
+        sa.Column("user_id", GUID(), nullable=False),
+        sa.Column("company_id", GUID(), nullable=False),
+        sa.Column("service", sa.String(length=50), nullable=False),
+        sa.Column("resource_name", sa.String(length=50), nullable=False),
+        sa.Column("operation", sa.String(length=20), nullable=False),
         sa.Column("access_granted", sa.Boolean(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         # Optional fields
-        sa.Column("project_id", sa.Integer(), nullable=True),
-        sa.Column("resource_id", sa.String(length=200), nullable=True),
-        sa.Column("reason", sa.String(length=200), nullable=True),
+        sa.Column("project_id", GUID(), nullable=True),
+        sa.Column("resource_id", sa.String(length=255), nullable=True),
+        sa.Column("reason", sa.String(length=50), nullable=True),
         sa.Column("ip_address", sa.String(length=45), nullable=True),  # IPv6 max length
-        sa.Column("user_agent", sa.String(length=500), nullable=True),
-        sa.Column("context", sa.JSON(), nullable=True),
+        sa.Column("user_agent", sa.Text(), nullable=True),
+        sa.Column("context", JSONB(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
 
